@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Record — Arbitara</title>
+<meta name="description" content="A one-page decision record: context, governance, options & criteria, assumptions & outcomes. Print it or fill it in.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231C2340'/%3E%3Cpath d='M20 6 L32 19 L8 19 Z' fill='%23EFEAE0'/%3E%3Cpath d='M20 10.6 L27.4 18 L12.6 18 Z' fill='%23BE9A3B'/%3E%3Cpath d='M8 21 L32 21 L20 34 Z' fill='%23BE9A3B'/%3E%3Cpath d='M12.6 22 L27.4 22 L20 29.4 Z' fill='%23EFEAE0'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#FAF7F1; --ink:#191712; --muted:#6C6558; --faint:#928B7C;
+    --line:#E4DCCC; --line-2:#D8CFBB; --accent:#B0862B; --accent-ink:#836417; --card:#fff;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--paper:#14130F;--ink:#F2ECE0;--muted:#A79F8E;--faint:#7E7767;--line:#302D25;
+      --line-2:#3B372D;--accent:#CBA343;--accent-ink:#D8B255;--card:#1E1C17;}
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .sheet{max-width:900px;margin:0 auto;padding:40px 30px 70px;}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;
+    margin-bottom:28px;flex-wrap:wrap;}
+  .back{font-size:14px;color:var(--muted);text-decoration:none;font-weight:600;}
+  .back:hover{color:var(--ink);}
+  .btns{display:flex;gap:10px;}
+  button{font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;
+    border:1px solid var(--line-2);background:var(--card);color:var(--ink);
+    padding:9px 16px;border-radius:9px;transition:border-color .2s,background .2s;}
+  button:hover{border-color:var(--accent);}
+  button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .doc{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 12px 40px -18px rgba(0,0,0,.28);overflow:hidden;}
+  .doc-head{padding:26px 32px;border-bottom:2px solid var(--ink);
+    display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);
+    font-size:20px;font-weight:600;}
+  .brand svg{width:24px;height:24px;}
+  .doc-head .t{font-family:var(--serif);font-size:15px;color:var(--muted);}
+  .doc-head .meta{font-size:12px;color:var(--faint);text-align:right;}
+  .doc-head .meta b{color:var(--ink);}
+  h1{font-family:var(--serif);font-size:26px;margin:0;letter-spacing:-.01em;}
+  .grp{padding:22px 32px;border-bottom:1px solid var(--line);}
+  .grp:last-child{border-bottom:none;}
+  .grp-title{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;}
+  .grp-title .no{font-family:var(--serif);font-size:15px;color:var(--accent);font-weight:700;}
+  .grp-title h2{font-family:var(--serif);font-size:19px;margin:0;}
+  .grp-title .hint{font-size:12.5px;color:var(--faint);margin-left:auto;font-style:italic;}
+  .row{display:grid;grid-template-columns:170px 1fr;gap:14px;margin-bottom:12px;align-items:start;}
+  .row:last-child{margin-bottom:0;}
+  .lab{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em;padding-top:9px;}
+  .lab small{display:block;font-weight:400;text-transform:none;letter-spacing:0;
+    color:var(--faint);font-size:11.5px;margin-top:3px;}
+  .fill{border:1px solid var(--line-2);border-radius:8px;min-height:40px;
+    background:transparent;padding:9px 12px;font-family:var(--sans);font-size:14px;
+    color:var(--ink);width:100%;resize:vertical;line-height:1.5;}
+  .fill:focus{outline:none;border-color:var(--accent);}
+  textarea.fill{min-height:58px;}
+  .opt-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .opt-table th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--faint);padding:6px 8px;border-bottom:1px solid var(--line-2);font-weight:700;}
+  .opt-table td{padding:5px 6px;border-bottom:1px solid var(--line);}
+  .opt-table input{width:100%;border:none;background:transparent;font-family:var(--sans);
+    font-size:13px;color:var(--ink);padding:6px 4px;}
+  .opt-table input:focus{outline:none;background:color-mix(in srgb,var(--accent) 8%,transparent);}
+  .opt-table tr.donothing td{background:color-mix(in srgb,var(--accent) 6%,transparent);}
+  .opt-table td.donothing-lab{font-weight:600;color:var(--accent-ink);white-space:nowrap;}
+  .note{font-size:12.5px;color:var(--faint);margin-top:10px;font-style:italic;}
+  @media (max-width:640px){
+    .row{grid-template-columns:1fr;gap:6px;} .lab{padding-top:0;}
+    .doc-head{flex-direction:column;align-items:flex-start;}
+    .opt-table{display:block;overflow-x:auto;}
+  }
+  @media print{
+    .toolbar{display:none;}
+    body{background:#fff;color:#000;}
+    .sheet{padding:0;max-width:100%;}
+    .doc{border:none;box-shadow:none;border-radius:0;}
+    .fill,.opt-table input{color:#000;}
+    .grp{break-inside:avoid;}
+    @page{margin:14mm;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="toolbar no-print">
+    <a href="index.html" class="back">← Back to the field guide</a>
+    <div class="btns">
+      <button onclick="document.querySelectorAll('.fill, .opt-table input').forEach(function(f){f.value='';f.textContent='';});">Clear</button>
+      <button class="primary" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="doc">
+    <div class="doc-head">
+      <div>
+        <div class="brand">
+          <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="9" fill="#1C2340"/><path d="M20 6 L32 19 L8 19 Z" fill="#EFEAE0"/><path d="M20 10.6 L27.4 18 L12.6 18 Z" fill="#BE9A3B"/><path d="M8 21 L32 21 L20 34 Z" fill="#BE9A3B"/><path d="M12.6 22 L27.4 22 L20 29.4 Z" fill="#EFEAE0"/></svg>
+          Arbitara
+        </div>
+        <h1 style="margin-top:12px">Decision Record</h1>
+        <div class="t">The smallest way to treat a decision as an object.</div>
+      </div>
+      <div class="meta">
+        <div>Decision ID <b><input class="fill" style="min-height:0;padding:3px 6px;width:120px;display:inline-block" placeholder="D-2026-000"></b></div>
+        <div style="margin-top:6px">Date <b><input class="fill" style="min-height:0;padding:3px 6px;width:120px;display:inline-block" placeholder="YYYY-MM-DD"></b></div>
+      </div>
+    </div>
+
+    <!-- 1. CONTEXT -->
+    <div class="grp">
+      <div class="grp-title"><span class="no">01</span><h2>Context</h2><span class="hint">Frame the right question first.</span></div>
+      <div class="row"><div class="lab">The question<small>Phrase it to open the option space, not close it.</small></div><textarea class="fill" placeholder="How should we…? (not: Should we do X, yes or no?)"></textarea></div>
+      <div class="row"><div class="lab">Strategic domain</div><input class="fill" placeholder="e.g. Market expansion · People & organization · Capital allocation"></div>
+      <div class="row"><div class="lab">Tier</div><input class="fill" placeholder="Strategic / Tactical / Operational — and why (reversibility, constraint, asymmetry)"></input></div>
+      <div class="row"><div class="lab">Nature</div><input class="fill" placeholder="Complicated (analyze → commit) or Complex (probe → sense → adapt)"></div>
+    </div>
+
+    <!-- 2. GOVERNANCE -->
+    <div class="grp">
+      <div class="grp-title"><span class="no">02</span><h2>Governance</h2><span class="hint">One named owner. Always.</span></div>
+      <div class="row"><div class="lab">Decider<small>One person accountable for the outcome.</small></div><input class="fill" placeholder="Name & role"></div>
+      <div class="row"><div class="lab">Consulted</div><input class="fill" placeholder="Whose input is sought before the choice"></div>
+      <div class="row"><div class="lab">Informed</div><input class="fill" placeholder="Who must understand the reasoning to execute"></div>
+    </div>
+
+    <!-- 3. OPTIONS & CRITERIA -->
+    <div class="grp">
+      <div class="grp-title"><span class="no">03</span><h2>Options &amp; Criteria</h2><span class="hint">Do-nothing is never skipped.</span></div>
+      <div class="row" style="margin-bottom:16px"><div class="lab">Weighted criteria<small>Set them before the evidence.</small></div><textarea class="fill" placeholder="e.g. Strategic fit (40%) · Downside risk (30%) · Speed (20%) · Cost (10%)"></textarea></div>
+      <table class="opt-table">
+        <thead><tr><th style="width:26%">Option</th><th>How it scores against the criteria</th><th style="width:20%">Verdict</th></tr></thead>
+        <tbody>
+          <tr><td><input placeholder="Option A"></td><td><input placeholder="…"></td><td><input placeholder="Keep / drop"></td></tr>
+          <tr><td><input placeholder="Option B"></td><td><input placeholder="…"></td><td><input placeholder="Keep / drop"></td></tr>
+          <tr><td><input placeholder="Option C"></td><td><input placeholder="…"></td><td><input placeholder="Keep / drop"></td></tr>
+          <tr class="donothing"><td class="donothing-lab">Do nothing</td><td><input placeholder="What does inaction cost — its risks, its opportunity cost?"></td><td><input placeholder="Priced?"></td></tr>
+        </tbody>
+      </table>
+      <div class="row" style="margin-top:16px"><div class="lab">Chosen option &amp; rationale</div><textarea class="fill" placeholder="What was chosen, which criteria it outperformed on, which tradeoffs were accepted."></textarea></div>
+    </div>
+
+    <!-- 4. ASSUMPTIONS & OUTCOMES -->
+    <div class="grp">
+      <div class="grp-title"><span class="no">04</span><h2>Assumptions &amp; Outcomes</h2><span class="hint">Assumptions expire; the decision does not.</span></div>
+      <table class="opt-table">
+        <thead><tr><th style="width:46%">Key assumption (a claim about the world)</th><th style="width:27%">If it fails…</th><th style="width:27%">Review date</th></tr></thead>
+        <tbody>
+          <tr><td><input placeholder="e.g. This segment grows ~8%/yr"></td><td><input placeholder="…reopen the decision"></td><td><input placeholder="YYYY-MM-DD"></td></tr>
+          <tr><td><input placeholder="e.g. Our lead-time advantage holds through 2027"></td><td><input placeholder="…"></td><td><input placeholder="YYYY-MM-DD"></td></tr>
+          <tr><td><input placeholder="e.g. Regulatory framework stays stable"></td><td><input placeholder="…"></td><td><input placeholder="YYYY-MM-DD"></td></tr>
+        </tbody>
+      </table>
+      <div class="row" style="margin-top:16px"><div class="lab">Expected outcome<small>Precise enough to be tested later.</small></div><textarea class="fill" placeholder="What we predict will be true by when — the yardstick for monitoring."></textarea></div>
+      <div class="row"><div class="lab">Decision review date</div><input class="fill" placeholder="The moment this commitment must justify itself again."></div>
+      <p class="note">Monitoring means comparing actual outcomes to these predictions — not just tracking KPIs against plan. When an assumption's date arrives, check it. If it holds, reaffirm. If it doesn't, reopen.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
