@@ -23,7 +23,7 @@
     "text": "Arbitara is in early access — join the waitlist for the practitioner tools."
   },
   "comingSoon": {
-    "enabled": false,
+    "enabled": true,
     "heading": "Something is being built here.",
     "text": "Arbitara is in stealth. Add your email and we'll be in touch as membership opens."
   },
