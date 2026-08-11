@@ -1,93 +1,48 @@
-# Arbitara — deploying updates & the content admin
+# Arbitara — the content admin
 
-## What's new in this change
+## Using the admin
 
-- **Access gate** on the practitioner tools (pre-decision checklist, tier diagnostic,
-  one-page decision record). Locked visitors see a "join the waitlist" card + modal;
-  submitting an email unlocks the tools on that device.
-- **`config.json`** drives content switches read at page load: page sections, the gate,
-  each tool, an announcement banner, and a full coming-soon mode.
-- **`/admin/`** — a [Decap CMS](https://decapcms.org) panel to flip those switches with
-  a GitHub login. Saving commits `config.json`; the site reflects it ~1 min later.
-- Front-end files now live under **`assets/`** (`style.css`, `app.js`, `config.js`).
+Go to **https://arbitara.com/admin/** (unlisted, `noindex`). It edits `config.json`
+directly on GitHub — no server, no OAuth proxy, no third-party accounts.
 
----
+**First time — connect once:**
+1. Create a fine-grained GitHub token: https://github.com/settings/personal-access-tokens/new
+   - Repository access → **Only select repositories** → `ssatanovsky/arbitara.com`
+   - Permissions → **Contents** → **Read and write**
+2. Copy the token (`github_pat_…`) and paste it into the admin's **Connect** box.
 
-## 1 · Put the code live (one-time git auth, then push)
+The token is stored **only in your browser** (localStorage). "Disconnect" clears it.
 
-The live site is the GitHub repo `ssatanovsky/arbitara.com`. Authenticate this machine
-once, then push:
+**Then:** flip switches, click **Save changes**. GitHub rebuilds the site and the change is
+live on arbitara.com in about a minute.
 
-**Option A — GitHub CLI (recommended):**
-```bash
-brew install gh        # skip if already installed
-gh auth login          # GitHub.com → HTTPS → "Login with a web browser"
-```
+## What you can switch
 
-**Option B — Personal Access Token:** create a fine-grained token with
-`Contents: Read and write` on `ssatanovsky/arbitara.com`. `git push` will prompt for a
-password — paste the token there.
+- **Password protection** — require a password to view the whole site. You can change the
+  password right in the admin (it's hashed in your browser before saving — the plain
+  password is never stored).
+- **Coming-soon mode** — hide everything behind a holding page with a waitlist form.
+- **Announcement banner** — a bar across the top of every page.
+- **Practitioner tools** — the access gate on/off, and the checklist / tier diagnostic /
+  one-page record individually.
+- **Page sections** — show/hide each of the nine sections.
 
-Then push (I can run this for you once you're authenticated):
-```bash
-cd "Arbitara Code/website"
-git push -u origin main --force
-```
-This replaces the old root-level files with the `assets/` layout — intended, and the
-`CNAME` file keeps the custom domain. GitHub Pages redeploys in ~1 min. The gate and the
-config engine work immediately; `config.json` defaults keep everything visible.
+## About the security model
 
----
+This is a stealth-appropriate **soft** setup, not hard security:
+- The password check runs in the browser, so a determined technical visitor could bypass
+  it by reading the page source. It keeps casual visitors out — good enough for stealth,
+  not a vault.
+- The admin's real protection is the GitHub token: without a valid one, the admin page
+  can't read or change anything.
 
-## 2 · Turn on admin login (GitHub OAuth — one time)
+## Waitlist emails (Formspree)
 
-Decap logs in with GitHub, which needs a tiny OAuth helper (a static site can't hold the
-client secret).
+The waitlist / coming-soon forms currently **unlock** the tools but don't **store** the
+email anywhere. To collect them, set `WAITLIST_ENDPOINT` near the top of `app.js` to your
+Formspree form URL (`https://formspree.io/f/xxxxxxxx`).
 
-**a. Register a GitHub OAuth App** — GitHub → Settings → Developer settings → OAuth Apps →
-New OAuth App:
-- Homepage URL: `https://arbitara.com`
-- Authorization callback URL: `https://<your-proxy-domain>/callback`
-- Save the **Client ID** and **Client secret**.
+## Deploying code changes
 
-**b. Deploy a free OAuth proxy.** Easiest is a Cloudflare Worker — search "Decap CMS
-GitHub OAuth Cloudflare Worker" for a ready template (e.g. `sterlingwes/decap-proxy`).
-Set its `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`, deploy, and note the URL, e.g.
-`https://arbitara-cms-auth.<you>.workers.dev`.
-
-**c. Point Decap at it** — in `admin/config.yml`, uncomment `base_url` under `backend`:
-```yaml
-backend:
-  name: github
-  repo: ssatanovsky/arbitara.com
-  branch: main
-  base_url: https://arbitara-cms-auth.<you>.workers.dev
-```
-Commit/push that change.
-
-**d. Use it** — visit `https://arbitara.com/admin/`, "Login with GitHub", flip switches,
-Save.
-
-> Prefer no proxy at all? Hosting the site on **Netlify** (Identity + Git Gateway) removes
-> this whole step, but means moving hosting off GitHub Pages and re-pointing DNS. Say the
-> word and I'll lay that out.
-
----
-
-## Local editing without any OAuth (for testing)
-
-```bash
-cd "Arbitara Code/website"
-npx decap-server          # runs a local git proxy on :8081
-python3 -m http.server 8000
-# open http://localhost:8000/admin/  → edits write straight to config.json
-```
-`local_backend: true` is already set in `admin/config.yml`.
-
----
-
-## 3 · Waitlist emails (Formspree)
-
-The gate and the coming-soon form already **unlock** the tools, but to actually **collect**
-the emails, set `WAITLIST_ENDPOINT` near the top of `app.js` to your Formspree form
-URL (`https://formspree.io/f/xxxxxxxx`). Until then, signups aren't stored anywhere.
+The site is the repo `ssatanovsky/arbitara.com` (GitHub Pages, files at repo root). Content
+switches go through the admin above; code changes are ordinary commits to `main`.
