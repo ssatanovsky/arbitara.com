@@ -1,6 +1,6 @@
 {
   "sections": {
-    "disappear": false,
+    "disappear": true,
     "anatomy": true,
     "process": true,
     "tiers": true,
@@ -19,7 +19,7 @@
     "record": true
   },
   "banner": {
-    "enabled": true,
+    "enabled": false,
     "text": "Arbitara is in early access — join the waitlist for the practitioner tools."
   },
   "comingSoon": {
