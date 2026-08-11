@@ -12,6 +12,10 @@
 <meta name="theme-color" content="#14130F" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231C2340'/%3E%3Cpath d='M20 6 L32 19 L8 19 Z' fill='%23EFEAE0'/%3E%3Cpath d='M20 10.6 L27.4 18 L12.6 18 Z' fill='%23BE9A3B'/%3E%3Cpath d='M8 21 L32 21 L20 34 Z' fill='%23BE9A3B'/%3E%3Cpath d='M12.6 22 L27.4 22 L20 29.4 Z' fill='%23EFEAE0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
+<script>document.documentElement.className+=' arb-cloak';setTimeout(function(){document.documentElement.classList.remove('arb-cloak');},2000);</script>
+<style>html.arb-cloak{visibility:hidden}.arb-locked #checklist,.arb-locked .diag{display:none!important}</style>
+<script>(function(){try{var g=localStorage.getItem('arb-access')==='granted';document.documentElement.className+=(g?' arb-unlocked':' arb-locked');}catch(e){document.documentElement.className+=' arb-locked';}})();</script>
+<script src="config.js"></script>
 </head>
 <body>
 
@@ -481,11 +485,13 @@
       </div>
 
       <div class="reveal">
+        <div id="recordPromo">
         <h3 style="font-size:24px;margin:0 0 14px">The one-page decision record</h3>
         <p style="color:var(--muted)">A single sheet with every field group — context, governance, options &amp; criteria, assumptions &amp; outcomes — ready to print or fill in a document. It's the smallest possible version of treating a decision as an object.</p>
         <div class="hero-cta" style="margin-top:22px">
           <a href="decision-record.html" class="btn btn-primary" target="_blank" rel="noopener">Open the printable one-pager
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
         </div>
 
         <h3 style="font-size:20px;margin:40px 0 16px">Where the ideas come from</h3>
@@ -541,7 +547,7 @@
           <li><a href="#object">The Decision Object</a></li>
           <li><a href="#principles">Seven principles</a></li>
           <li><a href="#toolkit">Pre-decision checklist</a></li>
-          <li><a href="decision-record.html" target="_blank" rel="noopener">One-page record ↗</a></li>
+          <li class="arb-record-li"><a href="decision-record.html" target="_blank" rel="noopener">One-page record ↗</a></li>
         </ul>
       </div>
     </div>

@@ -1,0 +1,36 @@
+{
+  "sections": {
+    "disappear": true,
+    "anatomy": true,
+    "process": true,
+    "tiers": true,
+    "bias": true,
+    "ai": true,
+    "object": true,
+    "principles": true,
+    "toolkit": true
+  },
+  "gate": {
+    "enabled": true
+  },
+  "tools": {
+    "checklist": true,
+    "diagnostic": true,
+    "record": true
+  },
+  "banner": {
+    "enabled": false,
+    "text": "Arbitara is in early access — join the waitlist for the practitioner tools."
+  },
+  "comingSoon": {
+    "enabled": false,
+    "heading": "Something is being built here.",
+    "text": "Arbitara is in stealth. Add your email and we'll be in touch as membership opens."
+  },
+  "password": {
+    "enabled": true,
+    "heading": "This site is private",
+    "text": "Arbitara is in stealth. Enter the password to continue.",
+    "hash": "1c33f31ccca915b05624c05f084b3ee40735547a57d95c4df8e09c3e2850312b"
+  }
+}

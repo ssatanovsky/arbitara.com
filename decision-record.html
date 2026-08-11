@@ -3,6 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function(){
+  var d=document.documentElement; d.style.visibility="hidden";
+  function home(){ location.replace("index.html"); }
+  function gate(){ location.replace("index.html#unlock"); }
+  function show(){ d.style.visibility=""; }
+  var access=false; try{ access=localStorage.getItem("arb-access")==="granted"; }catch(e){}
+  var to=setTimeout(function(){ decide(null); },1500);
+  function decide(cfg){
+    clearTimeout(to); cfg=cfg||{};
+    if(cfg.password&&cfg.password.enabled){                         // whole-site password on
+      var okpw=false; try{okpw=localStorage.getItem("arb-pw")===cfg.password.hash&&!!cfg.password.hash;}catch(e){}
+      if(!okpw) return home();
+    }
+    if(cfg.comingSoon&&cfg.comingSoon.enabled) return home();      // site in coming-soon mode
+    if(cfg.tools&&cfg.tools.record===false) return home();          // record switched off
+    if(cfg.gate&&cfg.gate.enabled===false) return show();           // gate off — open to all
+    if(access) return show();                                       // member / already unlocked
+    return gate();                                                  // locked → send to the gate
+  }
+  try{ fetch("config.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():{};}).then(decide).catch(function(){decide(null);}); }
+  catch(e){ decide(null); }
+})();
+</script>
 <title>Decision Record — Arbitara</title>
 <meta name="description" content="A one-page decision record: context, governance, options & criteria, assumptions & outcomes. Print it or fill it in.">
 <meta name="robots" content="noindex">
