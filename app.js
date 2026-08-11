@@ -112,13 +112,15 @@
     var lastPhase = null;
     STEPS.forEach(function (s, i) {
       if (s.phase !== lastPhase) {
-        html += '<div class="phase-label">' + s.phase + '</div>';
+        if (lastPhase !== null) html += '</div></div>';
+        html += '<div class="phase-col"><div class="phase-label">' + s.phase + '</div><div class="phase-steps">';
         lastPhase = s.phase;
       }
       html += '<button class="step-btn" data-i="' + i + '">' +
         '<span class="sn">' + s.n + '</span>' +
         '<span class="stext">' + s.title + '</span></button>';
     });
+    if (lastPhase !== null) html += '</div></div>';
     phasesEl.innerHTML = html;
     phasesEl.addEventListener("click", function (e) {
       var btn = e.target.closest(".step-btn");
