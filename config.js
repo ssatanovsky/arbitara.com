@@ -233,9 +233,9 @@
       var head = sec.querySelector(".head");
       if (!head) return;
       var t = st[id] || {};
-      var eb = head.querySelector(".eyebrow"); if (eb && t.eyebrow) eb.textContent = t.eyebrow;
-      var h2 = head.querySelector("h2");       if (h2 && t.title)   h2.textContent = t.title;
-      var p  = head.querySelector("p");        if (p  && t.intro)   p.innerHTML   = t.intro;
+      var eb = head.querySelector(".eyebrow");     if (eb && t.eyebrow) eb.textContent = t.eyebrow;
+      var h2 = head.querySelector("h2");           if (h2 && t.title)   h2.textContent = t.title;
+      var p  = head.querySelector("p:not(.eyebrow)"); if (p && t.intro) p.innerHTML     = t.intro;
     });
   }
 
