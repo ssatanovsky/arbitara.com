@@ -123,7 +123,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .brand .mark { width: 26px; height: 26px; flex: none; }
 .brand small { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing:.22em; text-transform: uppercase; color: var(--faint); align-self: center; margin-left: 2px; }
 .nav-links { display: flex; align-items: center; gap: 28px; }
-.nav-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; }
+.nav-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
 .nav-links a:hover { color: var(--ink); text-decoration: none; }
 .nav-tools { display: flex; align-items: center; gap: 8px; }
 .icon-btn {
@@ -390,6 +390,15 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 
 /* ---------- Responsive ---------- */
+/* Nav-only tightening for the gap between mobile (hamburger, <=940px) and full
+   desktop spacing — prevents link labels from wrapping mid-word at in-between
+   widths (~941–1220px), independent of the grid/card breakpoint below. */
+@media (max-width: 1220px) and (min-width: 941px) {
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 13px; }
+  .brand small { display: none; }
+}
+
 @media (max-width: 940px) {
   body { font-size: 17px; }
   .hero-grid { grid-template-columns: 1fr; }

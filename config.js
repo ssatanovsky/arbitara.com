@@ -221,6 +221,59 @@
       var s = document.getElementById(id);
       if (s && s.parentNode === main) main.insertBefore(s, closing);
     });
+    syncNavAndFooter(cfg, order);
+  }
+
+  // Default nav/footer labels — used until a section has a navLabel override.
+  var DEFAULT_NAV_LABELS = {
+    disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
+    bias: "Bias & Noise", ai: "AI & Ownership", object: "The Object",
+    principles: "Principles", toolkit: "Toolkit"
+  };
+
+  function navLabelFor(cfg, id) {
+    var t = (cfg.sectionText || {})[id] || {};
+    return t.navLabel || DEFAULT_NAV_LABELS[id] || id;
+  }
+
+  // Reorder nav links + footer links to match sectionOrder, and apply any
+  // navLabel override to both (keeps the nav, footer, and actual page order
+  // — and their labels — in sync after an admin reorder/rename).
+  function syncNavAndFooter(cfg, order) {
+    var rank = {}; order.forEach(function (id, i) { rank[id] = i; });
+
+    var navHost = document.getElementById("navLinks");
+    if (navHost) {
+      var navLinks = [].slice.call(navHost.querySelectorAll("a[href^='#']"));
+      navLinks.forEach(function (a) {
+        var id = a.getAttribute("href").slice(1);
+        if (rank.hasOwnProperty(id)) a.textContent = navLabelFor(cfg, id);
+      });
+      navLinks.sort(function (a, b) {
+        var ra = rank[a.getAttribute("href").slice(1)], rb = rank[b.getAttribute("href").slice(1)];
+        if (ra == null) ra = 999; if (rb == null) rb = 999;
+        return ra - rb;
+      }).forEach(function (a) { navHost.appendChild(a); });
+    }
+
+    // Footer keeps its existing two-column grouping — only the relative order
+    // within each column, and the label text, are kept in sync.
+    document.querySelectorAll(".footer ul").forEach(function (ul) {
+      var items = [].slice.call(ul.querySelectorAll("li"));
+      items.forEach(function (li) {
+        var a = li.querySelector("a[href^='#']");
+        if (!a) return;
+        var id = a.getAttribute("href").slice(1);
+        if (rank.hasOwnProperty(id)) a.textContent = navLabelFor(cfg, id);
+      });
+      items.sort(function (la, lb) {
+        var aA = la.querySelector("a[href^='#']"), aB = lb.querySelector("a[href^='#']");
+        var ra = aA ? rank[aA.getAttribute("href").slice(1)] : null;
+        var rb = aB ? rank[aB.getAttribute("href").slice(1)] : null;
+        if (ra == null) ra = 999; if (rb == null) rb = 999;
+        return ra - rb;
+      }).forEach(function (li) { ul.appendChild(li); });
+    });
   }
 
   // Override each section's eyebrow / title / intro from config.sectionText.
