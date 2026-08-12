@@ -43,7 +43,6 @@
   .row:first-child{border-top:none;}
   .row .lab{font-size:15px;}
   .row .lab small{display:block;color:var(--faint);font-size:12.5px;font-weight:400;}
-  /* toggle */
   .sw{position:relative;width:46px;height:26px;flex:none;}
   .sw input{opacity:0;width:0;height:0;position:absolute;}
   .sw span{position:absolute;inset:0;background:var(--line-2);border-radius:20px;transition:background .18s;cursor:pointer;}
@@ -53,10 +52,6 @@
   .bar{position:sticky;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:14px 0;margin-top:8px;display:flex;align-items:center;gap:14px;justify-content:flex-end;}
   .msg{font-size:13.5px;margin-right:auto;}
   .msg.ok{color:var(--good);} .msg.err{color:var(--danger);}
-  .hint{font-size:13px;color:var(--faint);}
-  .steps{font-size:13.5px;color:var(--muted);padding-left:18px;margin:8px 0 0;}
-  .steps li{margin:5px 0;}
-  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:color-mix(in srgb,var(--accent) 12%,transparent);padding:1px 6px;border-radius:5px;}
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .who{font-size:13px;color:var(--faint);}
   .hidden{display:none!important;}
@@ -84,25 +79,16 @@
     <div class="who" id="who"></div>
   </div>
 
-  <!-- CONNECT -->
+  <!-- SIGN IN -->
   <div id="connect">
-    <h1>Connect to your site</h1>
-    <p class="sub">This admin edits <code id="repoName"></code> directly on GitHub. Paste a personal access token once — it is stored only in this browser.</p>
+    <h1>Sign in</h1>
+    <p class="sub">Enter the admin password to edit arbitara.com.</p>
     <div class="card">
-      <h2>GitHub access token</h2>
-      <p class="desc">Create a fine-grained token limited to this one repository.</p>
-      <ol class="steps">
-        <li>Open <a id="patLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
-        <li>Token name: <code>arbitara-admin</code> · Expiration: your choice</li>
-        <li>Repository access → <b>Only select repositories</b> → <code>ssatanovsky/arbitara.com</code></li>
-        <li>Permissions → Repository permissions → <b>Contents</b> → <b>Read and write</b></li>
-        <li>Generate, copy the token (<code>github_pat_…</code>), and paste it below.</li>
-      </ol>
-      <label class="fld" for="pat">Personal access token</label>
-      <input type="password" id="pat" placeholder="github_pat_…" autocomplete="off">
+      <label class="fld" for="pw">Admin password</label>
+      <input type="password" id="pw" autocomplete="current-password" placeholder="Password">
       <div class="bar" style="position:static;border:none;padding-top:16px;">
         <span class="msg" id="connectMsg"></span>
-        <button class="btn primary" id="connectBtn">Connect</button>
+        <button class="btn primary" id="loginBtn">Log in</button>
       </div>
     </div>
   </div>
@@ -113,12 +99,12 @@
     <p class="sub">Flip a switch, then <b>Save</b>. Changes go live on arbitara.com about a minute later.</p>
 
     <div class="card">
-      <h2>Password protection</h2>
-      <p class="desc">Require a password to view the whole site.</p>
-      <div class="row"><div class="lab">Password required <small>Visitors must enter the password</small></div>
+      <h2>Site password protection</h2>
+      <p class="desc">Require a password to view the whole public site. (This is separate from your admin password above.)</p>
+      <div class="row"><div class="lab">Password required <small>Visitors must enter the site password</small></div>
         <label class="sw"><input type="checkbox" data-k="password.enabled"><span></span></label></div>
-      <label class="fld" for="pwNew">Change password <span style="text-transform:none;font-weight:400;color:var(--faint)">(leave blank to keep current)</span></label>
-      <input type="password" id="pwNew" placeholder="New password" autocomplete="new-password">
+      <label class="fld" for="pwNew">Change site password <span style="text-transform:none;font-weight:400;color:var(--faint)">(leave blank to keep current)</span></label>
+      <input type="password" id="pwNew" placeholder="New site password" autocomplete="new-password">
       <label class="fld" for="pwHeading">Heading</label>
       <input type="text" id="pwHeading" data-k="password.heading">
       <label class="fld" for="pwText">Message</label>
@@ -157,8 +143,8 @@
     </div>
 
     <div style="display:flex;gap:12px;margin-top:20px;">
-      <button class="btn" id="disconnectBtn">Disconnect</button>
-      <button class="btn" id="reloadBtn">Reload from GitHub</button>
+      <button class="btn" id="disconnectBtn">Sign out</button>
+      <button class="btn" id="reloadBtn">Reload</button>
     </div>
   </div>
 </div>
@@ -173,50 +159,45 @@
 <script>
 (function(){
   "use strict";
-  var OWNER="ssatanovsky", REPO="arbitara.com", PATH="config.json", BRANCH="main";
-  var TOKEN_KEY="arb-admin-token";
-  var api="https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+PATH;
-  var token=null, sha=null, cfg=null;
 
+  /* ===================================================================
+     The Cloudflare Worker URL — set this to your deployed worker, e.g.
+     "https://arbitara-admin.<your-subdomain>.workers.dev"
+     =================================================================== */
+  var API_BASE = "https://arbitara-admin.slava-satanovsky.workers.dev";
+
+  var SESSION_KEY="arb-admin-session";
+  var session=null, sha=null, cfg=null;
   var $=function(s){return document.querySelector(s);};
-  document.getElementById("repoName").textContent=OWNER+"/"+REPO;
 
-  function b64decode(b64){return decodeURIComponent(escape(atob(b64.replace(/\n/g,""))));}
-  function b64encode(str){return btoa(unescape(encodeURIComponent(str)));}
   function get(o,path){return path.split(".").reduce(function(a,k){return a&&a[k];},o);}
   function set(o,path,v){var ks=path.split("."),last=ks.pop();var t=ks.reduce(function(a,k){if(a[k]==null)a[k]={};return a[k];},o);t[last]=v;}
-
-  function sha256Hex(str){
-    return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){
-      return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");
-    });
-  }
-
-  function ghHeaders(){return {"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
+  function sha256Hex(str){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");});}
+  function configured(){ return API_BASE && API_BASE.indexOf("REPLACE-WITH")<0; }
 
   function showConnect(m,isErr){
     $("#connect").classList.remove("hidden"); $("#editor").classList.add("hidden"); $("#saveBar").classList.add("hidden");
     $("#who").textContent="";
-    if(m){var e=$("#connectMsg");e.textContent=m;e.className="msg "+(isErr?"err":"ok");}
+    if(m!==undefined){var e=$("#connectMsg"); e.textContent=m; e.className="msg "+(isErr?"err":"ok");}
   }
-  function showEditor(){
-    $("#connect").classList.add("hidden"); $("#editor").classList.remove("hidden"); $("#saveBar").classList.remove("hidden");
+  function showEditor(){ $("#connect").classList.add("hidden"); $("#editor").classList.remove("hidden"); $("#saveBar").classList.remove("hidden"); }
+  function saveMsg(m,cls){var e=$("#saveMsg");e.textContent=m||"";e.className="msg "+(cls||"");}
+
+  function login(){
+    var pw=$("#pw").value;
+    if(!pw){ showConnect("Enter the password.",true); return; }
+    $("#connectMsg").textContent="Signing in…"; $("#connectMsg").className="msg";
+    fetch(API_BASE+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})})
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Sign-in failed."); return j; }); })
+      .then(function(j){ session=j.token; try{sessionStorage.setItem(SESSION_KEY,session);}catch(e){} $("#pw").value=""; return loadConfig(); })
+      .catch(function(err){ showConnect(err.message,true); });
   }
 
   function loadConfig(){
-    return fetch(api+"?ref="+BRANCH,{headers:ghHeaders(),cache:"no-store"}).then(function(r){
-      if(r.status===401) throw new Error("Token not accepted — it looks expired, revoked, or regenerated. Create a fresh token and paste it below.");
-      if(r.status===403) throw new Error("Token lacks permission — it needs Contents: Read and write on "+OWNER+"/"+REPO+".");
-      if(!r.ok) throw new Error("GitHub error "+r.status);
-      return r.json();
-    }).then(function(j){
-      sha=j.sha; cfg=JSON.parse(b64decode(j.content));
-      // who am I
-      fetch("https://api.github.com/user",{headers:ghHeaders()}).then(function(r){return r.ok?r.json():null;}).then(function(u){
-        $("#who").textContent=u?("Signed in as "+u.login):"";
-      }).catch(function(){});
-      buildSections(); render(); showEditor();
-    });
+    return fetch(API_BASE+"/config",{headers:{"Authorization":"Bearer "+session},cache:"no-store"})
+      .then(function(r){ if(r.status===401) throw new Error("Session expired — sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
+      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); render(); showEditor(); })
+      .catch(function(err){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect(err.message,true); });
   }
 
   function render(){
@@ -272,8 +253,6 @@
     };
   }
 
-  function saveMsg(m,cls){var e=$("#saveMsg");e.textContent=m||"";e.className="msg "+(cls||"");}
-
   function collect(){
     document.querySelectorAll("[data-k]").forEach(function(el){
       var k=el.getAttribute("data-k");
@@ -290,43 +269,34 @@
     var newPw=$("#pwNew").value.trim();
     var chain=newPw ? sha256Hex(newPw.toLowerCase()).then(function(h){ set(cfg,"password.hash",h); }) : Promise.resolve();
     chain.then(function(){
-      var body={message:"Update content switches via admin",content:b64encode(JSON.stringify(cfg,null,2)+"\n"),sha:sha,branch:BRANCH};
-      return fetch(api,{method:"PUT",headers:ghHeaders(),body:JSON.stringify(body)});
+      return fetch(API_BASE+"/config",{method:"PUT",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session},body:JSON.stringify({config:cfg,sha:sha})});
     }).then(function(r){
-      if(!r.ok) return r.json().then(function(e){throw new Error(e.message||("GitHub error "+r.status));});
-      return r.json();
+      return r.json().then(function(j){ if(!r.ok){ var err=new Error(j.error||"Save failed."); err.status=r.status; throw err; } return j; });
     }).then(function(j){
-      sha=j.content.sha; $("#pwNew").value="";
+      sha=j.sha; $("#pwNew").value="";
       saveMsg(newPw
-        ? "Saved. New password goes live in ~1 min — everyone (including you) will be asked to sign in again."
+        ? "Saved. New site password goes live in ~1 min — visitors will be asked to sign in again."
         : "Saved. Live on arbitara.com in ~1 minute.","ok");
     }).catch(function(err){
-      saveMsg(err.message||"Save failed.","err");
+      if(err.status===401){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect("Session expired — sign in again.",true); }
+      else saveMsg(err.message||"Save failed.","err");
     }).finally(function(){ $("#saveBtn").disabled=false; });
   }
 
   // events
-  $("#connectBtn").addEventListener("click",function(){
-    var t=$("#pat").value.trim();
-    if(!t){ showConnect("Paste a token first.",true); return; }
-    token=t; $("#connectMsg").textContent="Connecting…"; $("#connectMsg").className="msg";
-    loadConfig().then(function(){
-      try{ localStorage.setItem(TOKEN_KEY,token); }catch(e){}
-    }).catch(function(err){ token=null; showConnect(err.message,true); });
-  });
-  $("#pat").addEventListener("keydown",function(e){ if(e.key==="Enter") $("#connectBtn").click(); });
+  $("#loginBtn").addEventListener("click",login);
+  $("#pw").addEventListener("keydown",function(e){ if(e.key==="Enter") login(); });
   $("#saveBtn").addEventListener("click",save);
-  $("#reloadBtn").addEventListener("click",function(){ loadConfig().catch(function(err){ saveMsg(err.message,"err"); }); });
+  $("#reloadBtn").addEventListener("click",function(){ loadConfig(); });
   $("#disconnectBtn").addEventListener("click",function(){
-    try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
-    token=null; sha=null; cfg=null; $("#pat").value="";
-    showConnect("Disconnected.",false);
+    session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
+    $("#pw").value=""; showConnect("Signed out.",false);
   });
 
-  // boot: auto-connect if a token is remembered
-  try{ token=localStorage.getItem(TOKEN_KEY); }catch(e){}
-  if(token){ loadConfig().catch(function(err){ token=null; try{localStorage.removeItem(TOKEN_KEY);}catch(e){} showConnect(err.message,true); }); }
-  else showConnect();
+  // boot
+  if(!configured()){ showConnect("Admin not configured yet — the Worker URL still needs to be set in this page.",true); return; }
+  try{ session=sessionStorage.getItem(SESSION_KEY); }catch(e){}
+  if(session){ loadConfig(); } else showConnect("");
 })();
 </script>
 </body>
