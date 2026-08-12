@@ -36,7 +36,7 @@
   "sectionText": {
     "disappear": {
       "eyebrow": "The visibility gap",
-      "title": "A decision is communicated. Its reasoning is not.",
+      "title": "A decisions are made, but are they reasoned and communicated systematically?",
       "intro": "Walk through what happens when a significant choice is made. A recommendation is presented. Alternatives are discussed — sometimes cursorily. A direction is chosen; a follow-up goes out. What almost never survives the meeting is the <em>reasoning</em>: the options weighed, the criteria that decided it, the assumptions it rests on, and the owner who committed. The outcome becomes visible. The logic that produced it evaporates."
     },
     "anatomy": {
@@ -81,13 +81,13 @@
     }
   },
   "sectionOrder": [
+    "process",
+    "ai",
     "disappear",
     "anatomy",
-    "process",
     "tiers",
-    "bias",
-    "ai",
     "object",
+    "bias",
     "principles",
     "toolkit"
   ]
