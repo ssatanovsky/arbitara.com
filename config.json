@@ -79,5 +79,16 @@
       "title": "",
       "intro": ""
     }
-  }
+  },
+  "sectionOrder": [
+    "disappear",
+    "anatomy",
+    "process",
+    "tiers",
+    "bias",
+    "ai",
+    "object",
+    "principles",
+    "toolkit"
+  ]
 }
