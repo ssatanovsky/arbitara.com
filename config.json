@@ -32,5 +32,52 @@
     "heading": "This site is private",
     "text": "Arbitara is in stealth. Enter the password to continue.",
     "hash": "b6c45863875e34487ca3c155ed145efe12a74581e27befec5aa661b8ee8ca6dd"
+  },
+  "sectionText": {
+    "disappear": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "anatomy": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "process": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "tiers": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "bias": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "ai": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "object": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "principles": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    },
+    "toolkit": {
+      "eyebrow": "",
+      "title": "",
+      "intro": ""
+    }
   }
 }
