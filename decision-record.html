@@ -14,7 +14,7 @@
   function decide(cfg){
     clearTimeout(to); cfg=cfg||{};
     if(cfg.password&&cfg.password.enabled){                         // whole-site password on
-      var okpw=false; try{okpw=localStorage.getItem("arb-pw")===cfg.password.hash&&!!cfg.password.hash;}catch(e){}
+      var okpw=false; try{okpw=sessionStorage.getItem("arb-pw")===cfg.password.hash&&!!cfg.password.hash;}catch(e){}
       if(!okpw) return home();
     }
     if(cfg.comingSoon&&cfg.comingSoon.enabled) return home();      // site in coming-soon mode

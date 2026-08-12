@@ -60,6 +60,18 @@
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .who{font-size:13px;color:var(--faint);}
   .hidden{display:none!important;}
+  .srow{border-top:1px solid var(--line);}
+  .srow:first-child{border-top:none;}
+  .srow-head{display:flex;align-items:center;gap:12px;padding:10px 0;}
+  .srow-head .lab{flex:1;font-size:15px;}
+  .ord{display:flex;flex-direction:column;gap:2px;}
+  .mv{width:26px;height:18px;line-height:1;padding:0;border:1px solid var(--line-2);background:var(--card);color:var(--muted);border-radius:6px;cursor:pointer;font-size:11px;}
+  .mv:hover{border-color:var(--accent);color:var(--ink);}
+  .btn-txt{font-size:12.5px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--line-2);border-radius:8px;padding:5px 11px;cursor:pointer;}
+  .btn-txt:hover{border-color:var(--accent);color:var(--ink);}
+  .btn-txt.on{border-color:var(--accent);color:var(--accent-ink);}
+  .srow-text{padding:4px 0 16px 38px;}
+  .srow-text .fld{margin-top:10px;}
 </style>
 </head>
 <body>
@@ -140,15 +152,8 @@
 
     <div class="card">
       <h2>Page sections</h2>
-      <div class="row"><div class="lab">The Gap</div><label class="sw"><input type="checkbox" data-k="sections.disappear"><span></span></label></div>
-      <div class="row"><div class="lab">Anatomy of a decision</div><label class="sw"><input type="checkbox" data-k="sections.anatomy"><span></span></label></div>
-      <div class="row"><div class="lab">The Process (12 steps)</div><label class="sw"><input type="checkbox" data-k="sections.process"><span></span></label></div>
-      <div class="row"><div class="lab">The three Tiers</div><label class="sw"><input type="checkbox" data-k="sections.tiers"><span></span></label></div>
-      <div class="row"><div class="lab">Bias &amp; Noise</div><label class="sw"><input type="checkbox" data-k="sections.bias"><span></span></label></div>
-      <div class="row"><div class="lab">AI &amp; Ownership</div><label class="sw"><input type="checkbox" data-k="sections.ai"><span></span></label></div>
-      <div class="row"><div class="lab">The Decision Object</div><label class="sw"><input type="checkbox" data-k="sections.object"><span></span></label></div>
-      <div class="row"><div class="lab">Seven Principles</div><label class="sw"><input type="checkbox" data-k="sections.principles"><span></span></label></div>
-      <div class="row"><div class="lab">Toolkit</div><label class="sw"><input type="checkbox" data-k="sections.toolkit"><span></span></label></div>
+      <p class="desc">Reorder with ↑ ↓ · toggle visibility · “Text” edits the section’s eyebrow, title &amp; intro.</p>
+      <div id="sectionList"></div>
     </div>
 
     <div style="display:flex;gap:12px;margin-top:20px;">
@@ -209,7 +214,7 @@
       fetch("https://api.github.com/user",{headers:ghHeaders()}).then(function(r){return r.ok?r.json():null;}).then(function(u){
         $("#who").textContent=u?("Signed in as "+u.login):"";
       }).catch(function(){});
-      render(); showEditor();
+      buildSections(); render(); showEditor();
     });
   }
 
@@ -223,6 +228,49 @@
     saveMsg("");
   }
 
+  var SECTION_META=[
+    {id:"disappear",label:"The Gap"},
+    {id:"anatomy",label:"Anatomy of a decision"},
+    {id:"process",label:"The Process (12 steps)"},
+    {id:"tiers",label:"The three Tiers"},
+    {id:"bias",label:"Bias & Noise"},
+    {id:"ai",label:"AI & Ownership"},
+    {id:"object",label:"The Decision Object"},
+    {id:"principles",label:"Seven Principles"},
+    {id:"toolkit",label:"Toolkit"}
+  ];
+  function buildSections(){
+    var host=document.getElementById("sectionList");
+    var byId={}; SECTION_META.forEach(function(m){byId[m.id]=m;});
+    var order=(cfg.sectionOrder&&cfg.sectionOrder.length)?cfg.sectionOrder.slice():SECTION_META.map(function(m){return m.id;});
+    SECTION_META.forEach(function(m){ if(order.indexOf(m.id)<0) order.push(m.id); });
+    host.innerHTML="";
+    order.forEach(function(id){
+      var m=byId[id]; if(!m) return;
+      var row=document.createElement("div");
+      row.className="srow"; row.setAttribute("data-id",id);
+      row.innerHTML=
+        '<div class="srow-head">'+
+          '<div class="ord"><button type="button" class="mv up" aria-label="Move up">↑</button><button type="button" class="mv down" aria-label="Move down">↓</button></div>'+
+          '<div class="lab">'+m.label+'</div>'+
+          '<button type="button" class="btn-txt">Text</button>'+
+          '<label class="sw"><input type="checkbox" data-k="sections.'+id+'"><span></span></label>'+
+        '</div>'+
+        '<div class="srow-text hidden">'+
+          '<label class="fld">Eyebrow</label><input type="text" data-k="sectionText.'+id+'.eyebrow">'+
+          '<label class="fld">Title</label><input type="text" data-k="sectionText.'+id+'.title">'+
+          '<label class="fld">Intro (HTML allowed)</label><textarea data-k="sectionText.'+id+'.intro"></textarea>'+
+        '</div>';
+      host.appendChild(row);
+    });
+    host.onclick=function(e){
+      var row=e.target.closest(".srow"); if(!row) return;
+      if(e.target.classList.contains("up")){ var pv=row.previousElementSibling; if(pv) host.insertBefore(row,pv); }
+      else if(e.target.classList.contains("down")){ var nx=row.nextElementSibling; if(nx) host.insertBefore(nx,row); }
+      else if(e.target.classList.contains("btn-txt")){ row.querySelector(".srow-text").classList.toggle("hidden"); e.target.classList.toggle("on"); }
+    };
+  }
+
   function saveMsg(m,cls){var e=$("#saveMsg");e.textContent=m||"";e.className="msg "+(cls||"");}
 
   function collect(){
@@ -231,6 +279,8 @@
       if(el.type==="checkbox") set(cfg,k,el.checked);
       else set(cfg,k,el.value);
     });
+    var order=[].map.call(document.querySelectorAll("#sectionList .srow"),function(r){return r.getAttribute("data-id");});
+    if(order.length) cfg.sectionOrder=order;
   }
 
   function save(){
@@ -246,7 +296,9 @@
       return r.json();
     }).then(function(j){
       sha=j.content.sha; $("#pwNew").value="";
-      saveMsg("Saved. Live on arbitara.com in ~1 minute.","ok");
+      saveMsg(newPw
+        ? "Saved. New password goes live in ~1 min — everyone (including you) will be asked to sign in again."
+        : "Saved. Live on arbitara.com in ~1 minute.","ok");
     }).catch(function(err){
       saveMsg(err.message||"Save failed.","err");
     }).finally(function(){ $("#saveBtn").disabled=false; });

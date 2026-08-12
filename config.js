@@ -155,7 +155,9 @@
   }
 
   function passwordCleared(pw) {
-    try { return !!pw.hash && localStorage.getItem("arb-pw") === pw.hash; } catch (e) { return false; }
+    // sessionStorage → the unlock lasts only for this browser session (re-prompts
+    // after the tab is closed / the visitor leaves and comes back).
+    try { return !!pw.hash && sessionStorage.getItem("arb-pw") === pw.hash; } catch (e) { return false; }
   }
 
   function buildPasswordGate(pw) {
@@ -185,7 +187,7 @@
         btn.disabled = true;
         sha256Hex(val).then(function (h) {
           if (h === pw.hash) {
-            try { localStorage.setItem("arb-pw", pw.hash); } catch (e2) {}
+            try { sessionStorage.setItem("arb-pw", pw.hash); } catch (e2) {}
             location.reload();
           } else {
             btn.disabled = false; msg.textContent = "Incorrect password."; input.select();
@@ -202,6 +204,41 @@
 
   function uncloak() { docEl.classList.remove("arb-cloak"); }
 
+  // Run DOM work only once the document is parsed (so sections exist to reorder).
+  function whenBody(fn) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn, { once: true });
+    else fn();
+  }
+
+  // Reorder the managed <section> elements to match config.sectionOrder.
+  function applySectionOrder(cfg) {
+    var order = cfg.sectionOrder;
+    if (!order || !order.length) return;
+    var main = document.querySelector("main");
+    if (!main) return;
+    var closing = document.getElementById("closing");
+    order.forEach(function (id) {
+      var s = document.getElementById(id);
+      if (s && s.parentNode === main) main.insertBefore(s, closing);
+    });
+  }
+
+  // Override each section's eyebrow / title / intro from config.sectionText.
+  function applySectionText(cfg) {
+    var st = cfg.sectionText;
+    if (!st) return;
+    Object.keys(st).forEach(function (id) {
+      var sec = document.getElementById(id);
+      if (!sec) return;
+      var head = sec.querySelector(".head");
+      if (!head) return;
+      var t = st[id] || {};
+      var eb = head.querySelector(".eyebrow"); if (eb && t.eyebrow) eb.textContent = t.eyebrow;
+      var h2 = head.querySelector("h2");       if (h2 && t.title)   h2.textContent = t.title;
+      var p  = head.querySelector("p");        if (p  && t.intro)   p.innerHTML   = t.intro;
+    });
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -215,8 +252,7 @@
     var pw = cfg.password || {};
     if (pw.enabled === true && !passwordCleared(pw)) {
       docEl.classList.add("arb-pw-lock");
-      buildPasswordGate(pw);
-      uncloak();
+      whenBody(function () { buildPasswordGate(pw); uncloak(); });
       resolveReady(cfg);
       return;
     }
@@ -238,14 +274,17 @@
       docEl.classList.add("arb-unlocked");
     }
 
-    if (get(cfg, "comingSoon.enabled", false) === true) {
-      docEl.classList.add("arb-coming-soon");
-      buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);
-    } else if (get(cfg, "banner.enabled", false) === true) {
-      buildBanner(get(cfg, "banner.text", ""));
-    }
-
-    uncloak();
+    whenBody(function () {
+      applySectionOrder(cfg);
+      applySectionText(cfg);
+      if (get(cfg, "comingSoon.enabled", false) === true) {
+        docEl.classList.add("arb-coming-soon");
+        buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);
+      } else if (get(cfg, "banner.enabled", false) === true) {
+        buildBanner(get(cfg, "banner.text", ""));
+      }
+      uncloak();
+    });
     resolveReady(cfg);
   }
 
