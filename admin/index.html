@@ -67,6 +67,16 @@
   .btn-txt.on{border-color:var(--accent);color:var(--accent-ink);}
   .srow-text{padding:4px 0 16px 38px;}
   .srow-text .fld{margin-top:10px;}
+  .img-upload{display:flex;flex-direction:column;gap:10px;}
+  .img-preview{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--paper-2);
+    min-height:90px;display:flex;align-items:center;justify-content:center;}
+  .img-preview.empty{color:var(--faint);font-size:13px;border-style:dashed;}
+  .img-preview img{display:block;width:100%;max-height:220px;object-fit:cover;}
+  .img-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .btn-file{position:relative;overflow:hidden;}
+  .img-msg{font-size:12.5px;color:var(--faint);}
+  .img-msg.ok{color:var(--good);}
+  .img-msg.err{color:var(--danger);}
 </style>
 </head>
 <body>
@@ -215,6 +225,7 @@
     {id:"anatomy",label:"Anatomy of a decision"},
     {id:"process",label:"The Process (12 steps)"},
     {id:"tiers",label:"The three Tiers"},
+    {id:"assessment",label:"Self-Assessment (5 questions)"},
     {id:"bias",label:"Bias & Noise"},
     {id:"ai",label:"AI & Ownership"},
     {id:"object",label:"The Decision Object"},
@@ -243,6 +254,16 @@
           '<label class="fld">Eyebrow</label><input type="text" data-k="sectionText.'+id+'.eyebrow">'+
           '<label class="fld">Title</label><input type="text" data-k="sectionText.'+id+'.title">'+
           '<label class="fld">Intro (HTML allowed)</label><textarea data-k="sectionText.'+id+'.intro"></textarea>'+
+          '<label class="fld">Illustration <span style="text-transform:none;font-weight:400;color:var(--faint)">(optional — shown as a framed image below the intro · PNG/JPG/WebP/GIF/SVG, max 4MB)</span></label>'+
+          '<div class="img-upload" data-img-for="'+id+'">'+
+            '<div class="img-preview empty">No image</div>'+
+            '<div class="img-actions">'+
+              '<label class="btn btn-file">Upload image<input type="file" class="img-file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden></label>'+
+              '<button type="button" class="btn img-remove hidden">Remove</button>'+
+              '<span class="img-msg"></span>'+
+            '</div>'+
+            '<input type="hidden" data-k="sectionText.'+id+'.image">'+
+          '</div>'+
         '</div>';
       host.appendChild(row);
     });
@@ -251,7 +272,62 @@
       if(e.target.classList.contains("up")){ var pv=row.previousElementSibling; if(pv) host.insertBefore(row,pv); }
       else if(e.target.classList.contains("down")){ var nx=row.nextElementSibling; if(nx) host.insertBefore(nx,row); }
       else if(e.target.classList.contains("btn-txt")){ row.querySelector(".srow-text").classList.toggle("hidden"); e.target.classList.toggle("on"); }
+      else if(e.target.classList.contains("img-remove")){
+        var up=e.target.closest(".img-upload");
+        up.querySelector("input[type=hidden]").value="";
+        setImagePreview(up, "");
+      }
     };
+    host.addEventListener("change", function(e){
+      if(!e.target.classList.contains("img-file")) return;
+      var up=e.target.closest(".img-upload");
+      var id=up.getAttribute("data-img-for");
+      var file=e.target.files[0];
+      e.target.value=""; // allow re-selecting the same file later
+      if(file) uploadImage(id, file, up);
+    });
+    // Populate previews for any images already in the loaded config.
+    document.querySelectorAll(".img-upload").forEach(function(up){
+      var id=up.getAttribute("data-img-for");
+      var path=get(cfg,"sectionText."+id+".image");
+      if(path) setImagePreview(up, "../"+path);
+    });
+  }
+
+  var MAX_IMAGE_BYTES = 4*1024*1024;
+  function setImagePreview(up, src){
+    var box=up.querySelector(".img-preview");
+    var removeBtn=up.querySelector(".img-remove");
+    if(src){
+      box.classList.remove("empty");
+      box.innerHTML='<img src="'+src+'" alt="">';
+      removeBtn.classList.remove("hidden");
+    } else {
+      box.classList.add("empty");
+      box.innerHTML="No image";
+      removeBtn.classList.add("hidden");
+    }
+  }
+  function uploadImage(id, file, up){
+    var allowed=["image/png","image/jpeg","image/webp","image/gif","image/svg+xml"];
+    var msg=up.querySelector(".img-msg");
+    msg.textContent=""; msg.className="img-msg";
+    if(allowed.indexOf(file.type)<0){ msg.textContent="Unsupported file type."; msg.className="img-msg err"; return; }
+    if(file.size>MAX_IMAGE_BYTES){ msg.textContent="Image is over 4MB."; msg.className="img-msg err"; return; }
+    msg.textContent="Uploading…";
+    var reader=new FileReader();
+    reader.onload=function(){
+      fetch(API_BASE+"/upload",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session},
+        body:JSON.stringify({id:id,contentType:file.type,contentBase64:reader.result})})
+        .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Upload failed."); return j; }); })
+        .then(function(j){
+          up.querySelector("input[type=hidden]").value=j.path;
+          setImagePreview(up, reader.result); // instant local preview — no wait on GitHub Pages
+          msg.textContent="Uploaded — click Save to publish."; msg.className="img-msg ok";
+        })
+        .catch(function(err){ msg.textContent=err.message||"Upload failed."; msg.className="img-msg err"; });
+    };
+    reader.readAsDataURL(file);
   }
 
   function collect(){

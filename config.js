@@ -227,7 +227,7 @@
   // Default nav/footer labels — used until a section has a navLabel override.
   var DEFAULT_NAV_LABELS = {
     disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
-    bias: "Bias & Noise", ai: "AI & Ownership", object: "The Object",
+    assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership", object: "The Object",
     principles: "Principles", toolkit: "Toolkit"
   };
 
@@ -292,6 +292,34 @@
     });
   }
 
+  // Show/hide each section's optional illustration (config.sectionText.<id>.image).
+  // Nothing renders on the public site when unset — this is not a visible
+  // "placeholder"; the empty-state affordance lives only in the admin editor.
+  function applySectionImages(cfg) {
+    var st = cfg.sectionText;
+    if (!st) return;
+    Object.keys(st).forEach(function (id) {
+      var sec = document.getElementById(id);
+      if (!sec) return;
+      var head = sec.querySelector(".head");
+      if (!head) return;
+      var t = st[id] || {};
+      var fig = sec.querySelector(".head-figure");
+      if (t.image) {
+        if (!fig) {
+          fig = document.createElement("figure");
+          fig.className = "head-figure reveal in";
+          head.parentNode.insertBefore(fig, head.nextSibling);
+        }
+        var img = fig.querySelector("img");
+        if (!img) { img = document.createElement("img"); img.alt = ""; fig.appendChild(img); }
+        if (img.getAttribute("src") !== t.image) img.setAttribute("src", t.image);
+      } else if (fig) {
+        fig.remove();
+      }
+    });
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -330,6 +358,7 @@
     whenBody(function () {
       applySectionOrder(cfg);
       applySectionText(cfg);
+      applySectionImages(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);

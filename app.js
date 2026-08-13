@@ -197,6 +197,61 @@
     }
   }
 
+  /* ---------- Self-assessment (5-question decision-management check) ----------
+     Deliberately scoped to .assess / .aseg so it never touches the tier
+     diagnostic's .seg[data-q] wiring above, even though both reuse the same
+     .seg button styling. */
+  (function () {
+    var assessEl = document.querySelector(".assess");
+    if (!assessEl) return;
+    var fill = document.getElementById("assessFill");
+    var scoreEl = document.getElementById("assessScore");
+    var noteEl = document.getElementById("assessNote");
+    var total = assessEl.querySelectorAll(".assess-q").length;
+    var answers = {};
+
+    var DEFAULT_NOTE = noteEl.textContent;
+    var BANDS = [
+      { max: 0, cls: "good",   score: "Zero gaps",
+        note: "That's rare — most organizations we talk to have at least one. Whatever keeps decisions visible and documented here, it's working." },
+      { max: 2, cls: "accent", score: function (n) { return n + " of 5 — a couple of gaps"; },
+        note: "Common, and still cheap to close. Most organizations don't notice until the third or fourth." },
+      { max: 4, cls: "warn",   score: function (n) { return n + " of 5 — meaningful blind spots"; },
+        note: "Real gaps in how decisions get made, governed, or remembered — not yet a crisis, but compounding." },
+      { max: 5, cls: "danger", score: "Five for five",
+        note: "There's effectively no visibility into how or why decisions get made here. That's not a judgment — it's the default for most organizations that haven't made decision management a discipline yet." }
+    ];
+
+    function render() {
+      var answered = Object.keys(answers).length;
+      if (answered < total) {
+        fill.style.width = (answered / total * 100) + "%";
+        fill.style.background = "var(--line-2)";
+        scoreEl.textContent = answered + " / " + total + " answered";
+        noteEl.textContent = DEFAULT_NOTE;
+        return;
+      }
+      var gaps = 0;
+      Object.keys(answers).forEach(function (k) { gaps += answers[k]; });
+      var band = BANDS.filter(function (b) { return gaps <= b.max; })[0];
+      fill.style.width = (gaps / total * 100) + "%";
+      fill.style.background = "var(--" + band.cls + ")";
+      scoreEl.textContent = typeof band.score === "function" ? band.score(gaps) : band.score;
+      noteEl.textContent = band.note;
+    }
+
+    assessEl.addEventListener("click", function (e) {
+      var btn = e.target.closest(".aseg button");
+      if (!btn) return;
+      var seg = btn.closest(".aseg");
+      var q = seg.getAttribute("data-aq-seg");
+      seg.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); });
+      btn.classList.add("on");
+      answers[q] = parseInt(btn.getAttribute("data-v"), 10);
+      render();
+    });
+  })();
+
   /* ---------- Pre-decision checklist ---------- */
   var checklist = document.getElementById("checklist");
   if (checklist) {

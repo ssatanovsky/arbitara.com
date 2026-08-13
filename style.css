@@ -187,6 +187,12 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .head h2 { font-size: clamp(30px, 4.4vw, 46px); margin: 0 0 18px; letter-spacing: -.015em; }
 .head p { font-size: clamp(17px, 2vw, 20px); color: var(--muted); margin: 0; }
 
+/* Optional per-section illustration/diagram, set from the admin. Framed as a
+   card so any uploaded image — including ones with their own background —
+   sits consistently in either theme. */
+.head-figure { margin: 8px 0 clamp(38px, 5vw, 60px); border: 1px solid var(--line); border-radius: var(--rad); background: var(--card); box-shadow: var(--shadow-sm); overflow: hidden; }
+.head-figure img { display: block; width: 100%; height: auto; }
+
 /* ---------- Losses / feature grid ---------- */
 .grid { display: grid; gap: 22px; }
 .g-2 { grid-template-columns: repeat(2, 1fr); }
@@ -284,6 +290,23 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .diag-result .rtier.o { color: var(--slate-soft); }
 .diag-result .rtier.none { color: var(--faint); font-size: 24px; }
 .diag-result p { font-size: 15px; color: var(--muted); margin: 0; }
+
+/* ---------- Self-assessment ---------- */
+.assess { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; margin-top: 8px; }
+.assess-body { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; }
+.assess-qs { padding: 6px 30px; border-right: 1px solid var(--line); }
+.assess-q { display: flex; gap: 16px; align-items: flex-start; padding: 22px 0; border-top: 1px solid var(--line); }
+.assess-q:first-child { border-top: none; }
+.aq-icon { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-ink); }
+.aq-icon svg { width: 20px; height: 20px; }
+.aq-main { flex: 1; min-width: 0; padding-top: 2px; }
+.aq-text { font-size: 15px; color: var(--ink-soft); margin: 0 0 12px; line-height: 1.45; }
+.assess-result { padding: 30px; display: flex; flex-direction: column; justify-content: center; background: var(--paper-2); }
+.ar-label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 700; margin-bottom: 14px; }
+.ar-meter { height: 10px; border-radius: 5px; background: var(--paper); border: 1px solid var(--line-2); overflow: hidden; margin-bottom: 16px; }
+.ar-fill { height: 100%; width: 0%; background: var(--line-2); transition: width .4s ease, background .4s ease; }
+.ar-score { font-family: var(--serif); font-size: 22px; color: var(--ink); margin-bottom: 10px; letter-spacing: -.005em; }
+.ar-note { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
 
 /* ---------- Biases ---------- */
 .bias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -411,6 +434,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .phases { grid-template-columns: repeat(2, 1fr); gap: 14px 18px; }
   .diag-body { grid-template-columns: 1fr; }
   .diag-tests { border-right: none; border-bottom: 1px solid var(--line); }
+  .assess-body { grid-template-columns: 1fr; }
+  .assess-qs { border-right: none; border-bottom: 1px solid var(--line); }
   .nav-links { display: none; }
   .nav-links.open { display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column; background: var(--paper); border-bottom: 1px solid var(--line); padding: 14px 26px 22px; gap: 4px; }
   .nav-links.open a { padding: 10px 0; border-bottom: 1px solid var(--line); }

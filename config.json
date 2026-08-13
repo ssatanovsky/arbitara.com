@@ -8,7 +8,8 @@
     "ai": true,
     "object": true,
     "principles": true,
-    "toolkit": true
+    "toolkit": true,
+    "assessment": true
   },
   "gate": {
     "enabled": true
@@ -87,6 +88,11 @@
       "title": "Put it to work on your next decision.",
       "intro": "A pre-decision checklist you can run in five minutes, and a one-page decision record you can print and fill in by hand. Nothing to install.",
       "navLabel": ""
+    },
+    "assessment": {
+      "eyebrow": "A five-question self-check",
+      "title": "Where does your organization actually stand?",
+      "intro": "Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today — not how the org chart says they should."
     }
   },
   "sectionOrder": [
@@ -95,6 +101,7 @@
     "disappear",
     "anatomy",
     "tiers",
+    "assessment",
     "object",
     "bias",
     "principles",
