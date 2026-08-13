@@ -133,6 +133,54 @@ export default {
       return json({ sha: d.content.sha });
     }
 
+    // ---- POST /upload  { id, contentBase64, contentType } -> { path } ----
+    // The server derives the file path from `id` (never trusts a client-supplied
+    // path) so this endpoint can only ever write into uploads/<id>.<ext> — no
+    // path traversal, no overwriting worker.js / config.json / anything else.
+    if (url.pathname.endsWith("/upload") && request.method === "POST") {
+      if (!authed) return json({ error: "unauthorized" }, 401);
+      let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
+
+      const id = String(body.id || "");
+      if (!/^[a-zA-Z0-9_-]{1,64}$/.test(id)) return json({ error: "invalid id" }, 400);
+
+      const EXT_BY_TYPE = {
+        "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp",
+        "image/gif": "gif", "image/svg+xml": "svg",
+        "application/pdf": "pdf",
+        "application/msword": "doc",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+      };
+      const ext = EXT_BY_TYPE[body.contentType];
+      if (!ext) return json({ error: "unsupported file type" }, 400);
+
+      let content = String(body.contentBase64 || "");
+      content = content.replace(/^data:[^;]+;base64,/, "");
+      if (!content) return json({ error: "empty file" }, 400);
+      if (content.length > 14000000) return json({ error: "file too large (max ~10MB)" }, 400);
+
+      const uploadPath = "uploads/" + id + "." + ext;
+      const uploadApi = "https://api.github.com/repos/" + repo + "/contents/" + uploadPath;
+
+      // Look up the current sha if this path already has a file (required by
+      // GitHub's API to overwrite it; absent means "create new").
+      let existingSha;
+      const head = await fetch(uploadApi + "?ref=" + branch, { headers: ghHeaders() });
+      if (head.ok) { const hd = await head.json(); existingSha = hd.sha; }
+
+      const put = {
+        message: "Upload file via admin (" + id + ")",
+        content: content,
+        branch: branch,
+      };
+      if (existingSha) put.sha = existingSha;
+
+      const r = await fetch(uploadApi, { method: "PUT", headers: ghHeaders({ "Content-Type": "application/json" }), body: JSON.stringify(put) });
+      const d = await r.json();
+      if (!r.ok) return json({ error: (d && d.message) || ("GitHub upload failed (" + r.status + ")") }, 502);
+      return json({ path: uploadPath });
+    }
+
     return json({ error: "not found" }, 404);
   },
 };
