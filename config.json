@@ -109,7 +109,9 @@
     "contact": {
       "eyebrow": "Get in touch",
       "title": "Whatever stage you're at, start here.",
-      "intro": "Arbitara is in stealth. Leave your details and tell us where your interest sits today. We'll follow up accordingly, whether that's a note when membership opens or a conversation this week."
+      "intro": "Arbitara is in stealth. Leave your details and tell us where your interest sits today. We'll follow up accordingly, whether that's a note when membership opens or a conversation this week.",
+      "navLabel": "",
+      "image": ""
     }
   },
   "sectionOrder": [
