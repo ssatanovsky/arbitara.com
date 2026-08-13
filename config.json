@@ -21,7 +21,7 @@
   },
   "banner": {
     "enabled": false,
-    "text": "Arbitara is in early access — join the waitlist for the practitioner tools."
+    "text": "Arbitara is in early access. Join the waitlist for the practitioner tools."
   },
   "comingSoon": {
     "enabled": false,
@@ -38,56 +38,56 @@
     "disappear": {
       "eyebrow": "The visibility gap",
       "title": "Decisions are made, but are they reasoned and communicated systematically?",
-      "intro": "Walk through what happens when a significant choice is made. A recommendation is presented. Alternatives are discussed — sometimes cursorily. A direction is chosen; a follow-up goes out. What almost never survives the meeting is the <em>reasoning</em>: the options weighed, the criteria that decided it, the assumptions it rests on, and the owner who committed. The outcome becomes visible. The logic that produced it evaporates.",
+      "intro": "Walk through what happens when a significant choice is made. A recommendation is presented. Alternatives are discussed, sometimes cursorily. A direction is chosen; a follow-up goes out. What almost never survives the meeting is the <em>reasoning</em>: the options weighed, the criteria that decided it, the assumptions it rests on, and the owner who committed. The outcome becomes visible. The logic that produced it evaporates.",
       "navLabel": "The ghost of the decision",
       "image": ""
     },
     "anatomy": {
       "eyebrow": "The anatomy of a good decision",
       "title": "Judge the process, not the outcome.",
-      "intro": "Decision science does not promise the right answer. It promises something more durable: that a rigorous process yields decisions as good as the information allows — and that their quality can be measured, improved, and learned from. Judging a decision by its result alone is a trap behavioral economists call <em>outcome bias</em>.",
+      "intro": "Decision science does not promise the right answer. It promises something more durable: that a rigorous process yields decisions as good as the information allows, and that their quality can be measured, improved, and learned from. Judging a decision by its result alone is a trap behavioral economists call <em>outcome bias</em>.",
       "navLabel": "",
       "image": ""
     },
     "process": {
       "eyebrow": "The practitioner's process",
       "title": "Twelve steps, four phases. Each exists because a specific, costly thing goes wrong in its absence.",
-      "intro": "This is not an abstract checklist — it is a response to failure modes the literature has documented for sixty years. The right analysis in the wrong order produces the wrong decision as reliably as no analysis at all. Weight scales with stakes: a <strong>Light</strong> decision runs a core subset; <strong>Standard</strong> and <strong>Heavy</strong> run all twelve; a <strong>Fast-track</strong> call is logged on one screen.",
+      "intro": "This is not an abstract checklist. It is a response to failure modes the literature has documented for sixty years. The right analysis in the wrong order produces the wrong decision as reliably as no analysis at all. Weight scales with stakes: a <strong>Light</strong> decision runs a core subset; <strong>Standard</strong> and <strong>Heavy</strong> run all twelve; a <strong>Fast-track</strong> call is logged on one screen.",
       "navLabel": "The Process",
       "image": ""
     },
     "tiers": {
       "eyebrow": "Strategic · Tactical · Operational",
       "title": "Not all decisions deserve the same weight.",
-      "intro": "Conflating the three tiers is one of the most common and costly failures in management. Organizations over-govern decisions that should iterate, and under-govern the ones that lock in a decade. The misallocation isn't random — it's behavioral, and it's correctable by design.",
+      "intro": "Conflating the three tiers is one of the most common and costly failures in management. Organizations over-govern decisions that should iterate, and under-govern the ones that lock in a decade. The misallocation isn't random. It's behavioral, and it's correctable by design.",
       "navLabel": "",
       "image": ""
     },
     "bias": {
       "eyebrow": "The bias problem",
       "title": "Bias is not a character flaw. It's a systems problem.",
-      "intro": "Executives know the vocabulary — anchoring, sunk cost, groupthink. They return from the offsite resolved to decide differently, and nothing changes. Individual awareness does not remove the organizational conditions that activate bias. The response is not behavioral. It is architectural: a record, phase-separation, and a feedback loop. These six earn their place by activating frequently, doing directional damage, and yielding to process design.",
+      "intro": "Executives know the vocabulary: anchoring, sunk cost, groupthink. They return from the offsite resolved to decide differently, and nothing changes. Individual awareness does not remove the organizational conditions that activate bias. The response is not behavioral. It is architectural: a record, phase-separation, and a feedback loop. These six earn their place by activating frequently, doing directional damage, and yielding to process design.",
       "navLabel": "",
       "image": ""
     },
     "ai": {
       "eyebrow": "A governance commitment",
       "title": "AI advises. The human decides. Always.",
-      "intro": "Management decisions are not primarily an analytical problem — they are an <em>organizational commitment</em> problem, and the two require different instruments. AI expands the decision-maker's field of view; it does not carry the moral accountability the choice demands. That accountability requires someone who can be questioned, explain their reasoning, and bear the consequences of being wrong.",
+      "intro": "Management decisions are not primarily an analytical problem. They are an <em>organizational commitment</em> problem, and the two require different instruments. AI expands the decision-maker's field of view; it does not carry the moral accountability the choice demands. That accountability requires someone who can be questioned, explain their reasoning, and bear the consequences of being wrong.",
       "navLabel": "AI & Human Collab",
       "image": "uploads/ai.jpg"
     },
     "object": {
       "eyebrow": "The unit that wasn't there",
       "title": "Make the decision a thing you can hold.",
-      "intro": "Customer relationships, business processes, and enterprise architectures each became governable only once they were made into a structured, persistent object. The management decision is the last major organizational object still living in meeting notes, email threads, and individual memory. Give it four field groups, a named owner, and a lifecycle — and it stops disappearing.",
+      "intro": "Customer relationships, business processes, and enterprise architectures each became governable only once they were made into a structured, persistent object. The management decision is the last major organizational object still living in meeting notes, email threads, and individual memory. Give it four field groups, a named owner, and a lifecycle, and it stops disappearing.",
       "navLabel": "",
       "image": ""
     },
     "principles": {
       "eyebrow": "Seven working principles",
       "title": "The rules a practitioner can hold themselves to.",
-      "intro": "Specific enough to constrain, honest enough to be tested. Adopt them for the next decision on your desk — no platform required.",
+      "intro": "Specific enough to constrain, honest enough to be tested. Adopt them for the next decision on your desk. No platform required.",
       "navLabel": "",
       "image": ""
     },
@@ -101,7 +101,7 @@
     "assessment": {
       "eyebrow": "A five-question self-check",
       "title": "Where does your organization actually stand?",
-      "intro": "Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today — not how the org chart says they should.",
+      "intro": "Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today, not how the org chart says they should.",
       "navLabel": "",
       "image": ""
     }

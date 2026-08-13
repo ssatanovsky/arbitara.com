@@ -136,7 +136,7 @@
       var send = window.ARB_WAITLIST_SEND || function () { return Promise.resolve(); };
       send(email).then(function () {
         form.style.display = "none";
-        msg.textContent = "You're on the list — thank you. We'll be in touch.";
+        msg.textContent = "You're on the list, thank you. We'll be in touch.";
       }).catch(function () {
         btn.disabled = false; btn.textContent = "Join the waitlist";
         msg.textContent = "Something went wrong. Please try again."; msg.classList.add("err");
@@ -193,7 +193,7 @@
             btn.disabled = false; msg.textContent = "Incorrect password."; input.select();
           }
         }).catch(function () {
-          btn.disabled = false; msg.textContent = "Could not verify — please try again.";
+          btn.disabled = false; msg.textContent = "Could not verify. Please try again.";
         });
       });
       setTimeout(function () { input.focus(); }, 50);

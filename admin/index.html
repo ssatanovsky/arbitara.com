@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Arbitara — Content Admin</title>
+<title>Arbitara: Content Admin</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231C2340'/%3E%3Cpath d='M20 6 L32 19 L8 19 Z' fill='%23EFEAE0'/%3E%3Cpath d='M20 10.6 L27.4 18 L12.6 18 Z' fill='%23BE9A3B'/%3E%3Cpath d='M8 21 L32 21 L20 34 Z' fill='%23BE9A3B'/%3E%3Cpath d='M12.6 22 L27.4 22 L20 29.4 Z' fill='%23EFEAE0'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -219,7 +219,7 @@
 
   function loadConfig(){
     return fetch(API_BASE+"/config",{headers:{"Authorization":"Bearer "+session},cache:"no-store"})
-      .then(function(r){ if(r.status===401) throw new Error("Session expired — sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
+      .then(function(r){ if(r.status===401) throw new Error("Session expired. Sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
       .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); render(); showEditor(); })
       .catch(function(err){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect(err.message,true); });
   }
@@ -264,11 +264,11 @@
           '<label class="sw"><input type="checkbox" data-k="sections.'+id+'"><span></span></label>'+
         '</div>'+
         '<div class="srow-text hidden">'+
-          '<label class="fld">Nav &amp; footer label <span style="text-transform:none;font-weight:400;color:var(--faint)">(short — used in the menu and footer)</span></label><input type="text" data-k="sectionText.'+id+'.navLabel" placeholder="'+m.label+'">'+
+          '<label class="fld">Nav &amp; footer label <span style="text-transform:none;font-weight:400;color:var(--faint)">(short, used in the menu and footer)</span></label><input type="text" data-k="sectionText.'+id+'.navLabel" placeholder="'+m.label+'">'+
           '<label class="fld">Eyebrow</label><input type="text" data-k="sectionText.'+id+'.eyebrow">'+
           '<label class="fld">Title</label><input type="text" data-k="sectionText.'+id+'.title">'+
           '<label class="fld">Intro (HTML allowed)</label><textarea data-k="sectionText.'+id+'.intro"></textarea>'+
-          '<label class="fld">Illustration <span style="text-transform:none;font-weight:400;color:var(--faint)">(optional — shown as a framed image below the intro · PNG/JPG/WebP/GIF/SVG, max 4MB)</span></label>'+
+          '<label class="fld">Illustration <span style="text-transform:none;font-weight:400;color:var(--faint)">(optional, shown as a framed image below the intro · PNG/JPG/WebP/GIF/SVG, max 4MB)</span></label>'+
           '<div class="img-upload" data-img-for="'+id+'">'+
             '<div class="img-preview empty">No image</div>'+
             '<div class="img-actions">'+
@@ -360,7 +360,7 @@
         .then(function(j){
           up.querySelector("input[type=hidden]").value=j.path;
           setImagePreview(up, reader.result); // instant local preview — no wait on GitHub Pages
-          msg.textContent="Uploaded — click Save to publish."; msg.className="img-msg ok";
+          msg.textContent="Uploaded. Click Save to publish."; msg.className="img-msg ok";
         })
         .catch(function(err){ msg.textContent=err.message||"Upload failed."; msg.className="img-msg err"; });
     };
@@ -389,10 +389,10 @@
     }).then(function(j){
       sha=j.sha; $("#pwNew").value="";
       saveMsg(newPw
-        ? "Saved. New site password goes live in ~1 min — visitors will be asked to sign in again."
+        ? "Saved. New site password goes live in ~1 min. Visitors will be asked to sign in again."
         : "Saved. Live on arbitara.com in ~1 minute.","ok");
     }).catch(function(err){
-      if(err.status===401){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect("Session expired — sign in again.",true); }
+      if(err.status===401){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect("Session expired. Sign in again.",true); }
       else saveMsg(err.message||"Save failed.","err");
     }).finally(function(){ $("#saveBtn").disabled=false; });
   }
@@ -409,7 +409,7 @@
   wireStandaloneImageUpload(document.querySelector('.img-upload[data-img-for="hero"]'));
 
   // boot
-  if(!configured()){ showConnect("Admin not configured yet — the Worker URL still needs to be set in this page.",true); return; }
+  if(!configured()){ showConnect("Admin not configured yet. The Worker URL still needs to be set in this page.",true); return; }
   try{ session=sessionStorage.getItem(SESSION_KEY); }catch(e){}
   if(session){ loadConfig(); } else showConnect("");
 })();
