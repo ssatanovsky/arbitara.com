@@ -21,8 +21,8 @@
     "record": true
   },
   "banner": {
-    "enabled": true,
-    "text": "DIAGNOSTIC TEST BANNER 55221"
+    "enabled": false,
+    "text": "Arbitara is in early access. Join the waitlist for the practitioner tools."
   },
   "comingSoon": {
     "enabled": false,
