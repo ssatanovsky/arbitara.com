@@ -431,7 +431,11 @@
       });
     }
 
-    function send(email) {
+    // Accepts either a plain email string (the gate's own use) or a full
+    // lead object (name, email, interest, source — the contact form's use).
+    // Both end up on the same list through the same endpoint.
+    function send(payload) {
+      var body = typeof payload === "string" ? { email: payload, source: "arbitara.com waitlist" } : payload;
       if (!WAITLIST_ENDPOINT) {
         // Not configured yet: unlock locally, nothing captured server-side.
         if (window.console) console.warn("[Arbitara] Waitlist endpoint not set: signup not stored. See WAITLIST_ENDPOINT in app.js.");
@@ -440,7 +444,7 @@
       return fetch(WAITLIST_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ email: email, source: "arbitara.com waitlist", page: location.href })
+        body: JSON.stringify(Object.assign({ page: location.href }, body))
       }).then(function (r) { if (!r.ok) throw new Error("bad status " + r.status); return r; });
     }
 
@@ -490,8 +494,11 @@
       });
     }
 
-    // Let the coming-soon screen (config.js) reuse the same waitlist sender.
+    // Let the coming-soon screen (config.js) and the contact form reuse the
+    // same sender, so every lead capture point on the site (gate, coming-
+    // soon, contact) writes to the one list rather than separate ones.
     window.ARB_WAITLIST_SEND = send;
+    window.ARB_SUBMIT_LEAD = send;
 
     // Boot — waits for config.js so it can honour the gate on/off + per-tool switches.
     function boot(cfg) {
@@ -514,6 +521,49 @@
     } else {
       boot();
     }
+  })();
+
+  /* ==========================================================================
+     Contact form — one form for the whole spectrum of interest, from "keep
+     me posted" to "ready to buy". Submits through the same sender as the
+     gate/waitlist, so it's one list, not two.
+     ========================================================================== */
+  (function initContact() {
+    var form = document.getElementById("contactForm");
+    if (!form) return;
+    var msg = form.querySelector(".cf-msg");
+    var btn = form.querySelector("button[type=submit]");
+    var btnLabel = btn.textContent;
+
+    function setMsg(text, isErr) {
+      msg.textContent = text;
+      msg.classList.toggle("err", !!isErr);
+    }
+    function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = (form.name.value || "").trim();
+      var email = (form.email.value || "").trim();
+      var interestField = form.querySelector('input[name="interest"]:checked');
+      var interest = interestField ? interestField.value : "";
+      if (!name) { setMsg("Please enter your name.", true); form.name.focus(); return; }
+      if (!validEmail(email)) { setMsg("Please enter a valid email address.", true); form.email.focus(); return; }
+      if (!interest) { setMsg("Please choose where you're at.", true); return; }
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+      var send = window.ARB_SUBMIT_LEAD || function () { return Promise.resolve(); };
+      send({ name: name, email: email, interest: interest, source: "arbitara.com contact" }).then(function () {
+        setMsg("Thank you. We'll be in touch.", false);
+        form.reset();
+        btn.disabled = false;
+        btn.textContent = btnLabel;
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = btnLabel;
+        setMsg("Something went wrong sending that. Please try again.", true);
+      });
+    });
   })();
 
   /* ---------- Scroll reveal ---------- */

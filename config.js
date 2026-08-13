@@ -9,7 +9,7 @@
   var docEl = document.documentElement;
 
   var DEFAULTS = {
-    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, object: true, principles: true, toolkit: true },
+    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, object: true, principles: true, toolkit: true, contact: true },
     gate: { enabled: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
@@ -33,7 +33,7 @@
       // section hides
       ".arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
       ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai,.arb-hide-object #object," +
-      ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit{display:none!important;}" +
+      ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
       // whole-tool hides (for everyone, members included)
       ".arb-hide-tool-checklist #checklist{display:none!important;}" +
       ".arb-hide-tool-diagnostic .diag{display:none!important;}" +
@@ -228,7 +228,7 @@
   var DEFAULT_NAV_LABELS = {
     disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
     assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership", object: "The Object",
-    principles: "Principles", toolkit: "Toolkit"
+    principles: "Principles", toolkit: "Toolkit", contact: "Contact"
   };
 
   function navLabelFor(cfg, id) {

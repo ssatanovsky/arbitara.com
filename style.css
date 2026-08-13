@@ -341,6 +341,25 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ar-score { font-family: var(--serif); font-size: 22px; color: var(--ink); margin-bottom: 10px; letter-spacing: -.005em; }
 .ar-note { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
 
+/* ---------- Contact ---------- */
+.contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 38px); max-width: 640px; }
+.cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cf-field { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+.cf-row .cf-field { margin-top: 0; }
+.contact-card > .cf-row:first-child { margin-top: 0; }
+.cf-field > label { font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.cf-field input[type="text"], .cf-field input[type="email"] { font-family: var(--sans); font-size: 15px; color: var(--ink); background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 11px; padding: 13px 14px; }
+.cf-field input[type="text"]:focus, .cf-field input[type="email"]:focus { outline: none; border-color: var(--accent); }
+.cf-interest { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 2px; }
+.cf-interest input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.cf-interest label { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-soft); background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 10px 18px; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+.cf-interest input[type="radio"]:checked + label { border-color: var(--accent); color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+.cf-interest input[type="radio"]:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.contact-card .btn { margin-top: 26px; }
+.cf-msg { font-size: 13px; margin: 12px 0 0; min-height: 1.1em; color: var(--good); }
+.cf-msg.err { color: var(--danger); }
+@media (max-width: 640px) { .cf-row { grid-template-columns: 1fr; } }
+
 /* ---------- Biases ---------- */
 .bias-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .bias { background: var(--card); border: 1px solid var(--line); border-radius: var(--rad); padding: 24px; box-shadow: var(--shadow-sm); transition: transform .2s, box-shadow .2s; }

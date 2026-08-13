@@ -9,7 +9,8 @@
     "object": true,
     "principles": true,
     "toolkit": false,
-    "assessment": true
+    "assessment": true,
+    "contact": true
   },
   "gate": {
     "enabled": true
@@ -104,6 +105,11 @@
       "intro": "Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today, not how the org chart says they should.",
       "navLabel": "",
       "image": ""
+    },
+    "contact": {
+      "eyebrow": "Get in touch",
+      "title": "Whatever stage you're at, start here.",
+      "intro": "Arbitara is in stealth. Leave your details and tell us where your interest sits today. We'll follow up accordingly, whether that's a note when membership opens or a conversation this week."
     }
   },
   "sectionOrder": [
@@ -116,7 +122,8 @@
     "object",
     "bias",
     "principles",
-    "toolkit"
+    "toolkit",
+    "contact"
   ],
   "hero": {
     "image": "uploads/hero.jpg",
