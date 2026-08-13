@@ -119,6 +119,33 @@
     "toolkit"
   ],
   "hero": {
-    "image": "uploads/hero.jpg"
+    "image": "uploads/hero.jpg",
+    "eyebrow": "Arbitara · Decide to win",
+    "headline": "The power to <span class=\"em\">decide</span> is a discipline, not a talent.",
+    "lede": "Organizations map their processes, model their architectures, and instrument everything they do. Then they make their most consequential choices in a room, with no structure, no record, and no way to learn from what happens next. Arbitara is a practitioner's field guide to closing that gap.",
+    "ctaPrimary": "See the twelve-step process",
+    "ctaSecondary": "Get the pre-decision checklist",
+    "stats": [
+      {
+        "n": "<span class=\"u\">20%</span>",
+        "l": "of respondents say their organization excels at decision making.",
+        "src": "McKinsey Global Survey, 2019"
+      },
+      {
+        "n": "&gt;<span class=\"u\">45%</span>",
+        "l": "of decision-making at large companies is too slow.",
+        "src": "Harvard Business Review, 2025"
+      },
+      {
+        "n": "<span class=\"u\">95%</span>",
+        "l": "correlation between excelling at decisions and top-tier financial results.",
+        "src": "Bain &amp; Company, 2011"
+      },
+      {
+        "n": "<span class=\"u\">$250M</span>",
+        "l": "in wages squandered annually: about 530,000 lost manager-days a year at a typical Fortune 500 company.",
+        "src": "McKinsey, 2019"
+      }
+    ]
   }
 }

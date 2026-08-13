@@ -338,6 +338,39 @@
     }
   }
 
+  // Optional hero copy overrides (config.hero.eyebrow/headline/lede/ctaPrimary/
+  // ctaSecondary). Each field only overrides if set — same "override if
+  // present, else keep the default" convention as section text.
+  function applyHeroText(cfg) {
+    var h = cfg.hero || {};
+    var hero = document.getElementById("hero");
+    if (!hero) return;
+    var eb = hero.querySelector(".eyebrow"); if (eb && h.eyebrow) eb.textContent = h.eyebrow;
+    var h1 = hero.querySelector("h1"); if (h1 && h.headline) h1.innerHTML = h.headline;
+    var lede = hero.querySelector(".lede"); if (lede && h.lede) lede.innerHTML = h.lede;
+    var ctas = hero.querySelectorAll(".hero-cta .cta-label");
+    if (ctas[0] && h.ctaPrimary) ctas[0].textContent = h.ctaPrimary;
+    if (ctas[1] && h.ctaSecondary) ctas[1].textContent = h.ctaSecondary;
+  }
+
+  // Optional hero stats strip (config.hero.stats = [{n, l, src}, ...]). When
+  // set (non-empty), fully rebuilds the .stats children from the array —
+  // this is a genuine list, not field overrides, since the count itself can
+  // change. Absent/empty, the static default 4 stats in index.html stand.
+  function applyHeroStats(cfg) {
+    var stats = cfg.hero && cfg.hero.stats;
+    if (!stats || !stats.length) return;
+    var host = document.querySelector(".hero .stats");
+    if (!host) return;
+    host.innerHTML = stats.map(function (s) {
+      return '<div class="stat">' +
+        '<div class="n">' + (s.n || "") + '</div>' +
+        '<div class="l">' + (s.l || "") + '</div>' +
+        '<div class="src">' + (s.src || "") + '</div>' +
+        '</div>';
+    }).join("");
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -378,6 +411,8 @@
       applySectionText(cfg);
       applySectionImages(cfg);
       applyHeroImage(cfg);
+      applyHeroText(cfg);
+      applyHeroStats(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);

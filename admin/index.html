@@ -109,6 +109,28 @@
     <p class="sub">Flip a switch, then <b>Save</b>. Changes go live on arbitara.com about a minute later.</p>
 
     <div class="card">
+      <h2>Hero text</h2>
+      <p class="desc">The homepage's opening headline block.</p>
+      <label class="fld">Eyebrow</label>
+      <input type="text" data-k="hero.eyebrow">
+      <label class="fld">Headline <span style="text-transform:none;font-weight:400;color:var(--faint)">(HTML allowed — wrap a word in &lt;span class="em"&gt;…&lt;/span&gt; to give it the gold italic treatment)</span></label>
+      <input type="text" data-k="hero.headline">
+      <label class="fld">Lede paragraph <span style="text-transform:none;font-weight:400;color:var(--faint)">(HTML allowed)</span></label>
+      <textarea data-k="hero.lede"></textarea>
+      <label class="fld">Primary button label</label>
+      <input type="text" data-k="hero.ctaPrimary">
+      <label class="fld">Secondary button label</label>
+      <input type="text" data-k="hero.ctaSecondary">
+    </div>
+
+    <div class="card">
+      <h2>Hero stats</h2>
+      <p class="desc">The row of four figures below the headline. Reorder with ↑ ↓, add or remove as needed.</p>
+      <div id="statList"></div>
+      <button type="button" class="btn" id="statAdd" style="margin-top:12px">+ Add a stat</button>
+    </div>
+
+    <div class="card">
       <h2>Hero photo</h2>
       <p class="desc">The background photo on the homepage's opening section. Leave empty to use the plain default look.</p>
       <div class="img-upload" data-img-for="hero">
@@ -220,7 +242,7 @@
   function loadConfig(){
     return fetch(API_BASE+"/config",{headers:{"Authorization":"Bearer "+session},cache:"no-store"})
       .then(function(r){ if(r.status===401) throw new Error("Session expired. Sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
-      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); render(); showEditor(); })
+      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); buildStats(); render(); showEditor(); })
       .catch(function(err){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect(err.message,true); });
   }
 
@@ -254,17 +276,18 @@
     host.innerHTML="";
     order.forEach(function(id){
       var m=byId[id]; if(!m) return;
+      var live=get(cfg,"sectionText."+id+".navLabel")||get(cfg,"sectionText."+id+".title")||m.label;
       var row=document.createElement("div");
       row.className="srow"; row.setAttribute("data-id",id);
       row.innerHTML=
         '<div class="srow-head">'+
           '<div class="ord"><button type="button" class="mv up" aria-label="Move up">↑</button><button type="button" class="mv down" aria-label="Move down">↓</button></div>'+
-          '<div class="lab">'+m.label+'</div>'+
+          '<div class="lab" data-default="'+m.label+'">'+live+'</div>'+
           '<button type="button" class="btn-txt">Text</button>'+
           '<label class="sw"><input type="checkbox" data-k="sections.'+id+'"><span></span></label>'+
         '</div>'+
         '<div class="srow-text hidden">'+
-          '<label class="fld">Nav &amp; footer label <span style="text-transform:none;font-weight:400;color:var(--faint)">(short, used in the menu and footer)</span></label><input type="text" data-k="sectionText.'+id+'.navLabel" placeholder="'+m.label+'">'+
+          '<label class="fld">Nav &amp; footer label <span style="text-transform:none;font-weight:400;color:var(--faint)">(short, used in the menu and footer — this is the section\'s name)</span></label><input type="text" class="nav-label-input" data-k="sectionText.'+id+'.navLabel" placeholder="'+m.label+'">'+
           '<label class="fld">Eyebrow</label><input type="text" data-k="sectionText.'+id+'.eyebrow">'+
           '<label class="fld">Title</label><input type="text" data-k="sectionText.'+id+'.title">'+
           '<label class="fld">Intro (HTML allowed)</label><textarea data-k="sectionText.'+id+'.intro"></textarea>'+
@@ -292,6 +315,12 @@
         setImagePreview(up, "");
       }
     };
+    host.addEventListener("input", function(e){
+      if(!e.target.classList.contains("nav-label-input")) return;
+      var row=e.target.closest(".srow");
+      var lab=row.querySelector(".lab");
+      lab.textContent=e.target.value.trim()||lab.getAttribute("data-default");
+    });
     host.addEventListener("change", function(e){
       if(!e.target.classList.contains("img-file")) return;
       var up=e.target.closest(".img-upload");
@@ -375,7 +404,56 @@
     });
     var order=[].map.call(document.querySelectorAll("#sectionList .srow"),function(r){return r.getAttribute("data-id");});
     if(order.length) cfg.sectionOrder=order;
+    collectStats();
   }
+
+  // ---- Hero stats: a genuine repeatable list, not field overrides, so it's
+  // read/written as a plain array rather than through the dot-path set()
+  // helper (which doesn't handle array-length changes cleanly). ----
+  function buildStats(){
+    var host=document.getElementById("statList");
+    var stats=(cfg.hero&&cfg.hero.stats)||[];
+    host.innerHTML="";
+    stats.forEach(function(s){ host.appendChild(statRow(s)); });
+  }
+  function statRow(s){
+    s=s||{n:"",l:"",src:""};
+    var row=document.createElement("div");
+    row.className="srow";
+    row.innerHTML=
+      '<div class="srow-head">'+
+        '<div class="ord"><button type="button" class="mv up" aria-label="Move up">↑</button><button type="button" class="mv down" aria-label="Move down">↓</button></div>'+
+        '<div class="lab">Stat</div>'+
+        '<button type="button" class="btn-txt stat-remove" style="color:var(--danger);border-color:var(--danger)">Remove</button>'+
+      '</div>'+
+      '<div class="srow-text" style="display:block">'+
+        '<label class="fld">Number <span style="text-transform:none;font-weight:400;color:var(--faint)">(HTML allowed — wrap the figure in &lt;span class="u"&gt;…&lt;/span&gt; for the gold highlight)</span></label>'+
+        '<input type="text" class="stat-n">'+
+        '<label class="fld">Label</label><textarea class="stat-l" style="min-height:44px"></textarea>'+
+        '<label class="fld">Source</label><input type="text" class="stat-src">'+
+      '</div>';
+    row.querySelector(".stat-n").value=s.n||"";
+    row.querySelector(".stat-l").value=s.l||"";
+    row.querySelector(".stat-src").value=s.src||"";
+    return row;
+  }
+  function collectStats(){
+    var rows=document.querySelectorAll("#statList .srow");
+    cfg.hero=cfg.hero||{};
+    cfg.hero.stats=[].map.call(rows,function(r){
+      return { n:r.querySelector(".stat-n").value, l:r.querySelector(".stat-l").value, src:r.querySelector(".stat-src").value };
+    });
+  }
+  document.getElementById("statList").addEventListener("click",function(e){
+    var row=e.target.closest(".srow"); if(!row) return;
+    var host=document.getElementById("statList");
+    if(e.target.classList.contains("up")){ var pv=row.previousElementSibling; if(pv) host.insertBefore(row,pv); }
+    else if(e.target.classList.contains("down")){ var nx=row.nextElementSibling; if(nx) host.insertBefore(nx,row); }
+    else if(e.target.classList.contains("stat-remove")){ row.remove(); }
+  });
+  document.getElementById("statAdd").addEventListener("click",function(){
+    document.getElementById("statList").appendChild(statRow());
+  });
 
   function save(){
     saveMsg("Saving…"); $("#saveBtn").disabled=true;
