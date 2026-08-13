@@ -174,8 +174,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .hero-photo .btn-ghost:hover { border-color: #E4C97A; color: #E4C97A; }
 .hero-photo .btn-primary { background: #FBF8F1; color: #191712; }
 .hero-photo .btn-primary:hover { background: #E4C97A; color: #191712; }
-.hero-photo .arb-card { background: rgba(255,252,246,.32); box-shadow: 0 24px 60px -20px rgba(0,0,0,.55); backdrop-filter: blur(7px) saturate(140%); -webkit-backdrop-filter: blur(7px) saturate(140%); }
-.hero-photo .arb-card .lat, .hero-photo .arb-card .word, .hero-photo .arb-card .phon, .hero-photo .arb-card .pos, .hero-photo .arb-card .def, .hero-photo .arb-card .rule { text-shadow: 0 1px 1px rgba(255,252,246,1), 0 1px 3px rgba(255,252,246,1), 0 2px 8px rgba(255,252,246,.9), 0 3px 16px rgba(255,252,246,.7); }
+.hero-photo .arb-card { background: rgba(255,252,246,.45); box-shadow: 0 24px 60px -20px rgba(0,0,0,.55); backdrop-filter: blur(9px) saturate(140%); -webkit-backdrop-filter: blur(9px) saturate(140%); }
+.hero-photo .arb-card .lat, .hero-photo .arb-card .word, .hero-photo .arb-card .phon, .hero-photo .arb-card .pos, .hero-photo .arb-card .def, .hero-photo .arb-card .rule { text-shadow: 0 1px 2px rgba(255,252,246,.9); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 9px;
