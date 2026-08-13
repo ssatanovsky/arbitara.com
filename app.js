@@ -308,9 +308,7 @@
     // Tools/templates behind the gate. `spaced` mirrors the element's own top margin.
     var GATED = [
       { sel: "#checklist", tool: "checklist", name: "The pre-decision checklist",
-        blurb: "Run the ten-item pass over the decision on your desk.", spaced: false },
-      { sel: ".diag", tool: "diagnostic", name: "The tier diagnostic",
-        blurb: "Three quick tests that place a decision as strategic, tactical, or operational.", spaced: true }
+        blurb: "Run the ten-item pass over the decision on your desk.", spaced: false }
     ];
 
     var LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
