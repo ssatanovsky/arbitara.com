@@ -1,14 +1,14 @@
 {
   "sections": {
-    "disappear": true,
+    "disappear": false,
     "anatomy": true,
     "process": true,
     "tiers": true,
-    "bias": true,
+    "bias": false,
     "ai": true,
     "object": true,
     "principles": true,
-    "toolkit": true,
+    "toolkit": false,
     "assessment": true
   },
   "gate": {
