@@ -320,6 +320,24 @@
     });
   }
 
+  // Optional hero photo (config.hero.image). Adds the .hero-photo treatment
+  // only when a photo is set — otherwise the hero keeps its plain default look.
+  function applyHeroImage(cfg) {
+    var path = cfg.hero && cfg.hero.image;
+    var hero = document.getElementById("hero");
+    var host = document.getElementById("heroBg");
+    if (!hero || !host) return;
+    if (path) {
+      hero.classList.add("hero-photo");
+      var img = host.querySelector("img");
+      if (!img) { img = document.createElement("img"); img.alt = ""; host.appendChild(img); }
+      if (img.getAttribute("src") !== path) img.setAttribute("src", path);
+    } else {
+      hero.classList.remove("hero-photo");
+      host.innerHTML = "";
+    }
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -359,6 +377,7 @@
       applySectionOrder(cfg);
       applySectionText(cfg);
       applySectionImages(cfg);
+      applyHeroImage(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);

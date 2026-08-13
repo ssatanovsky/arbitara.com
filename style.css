@@ -137,12 +137,44 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .nav-toggle { display: none; }
 
 /* ---------- Hero ---------- */
-.hero { padding: clamp(72px, 12vw, 150px) 0 clamp(56px, 8vw, 96px); overflow: hidden; }
-.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(30px, 5vw, 72px); align-items: center; }
+.hero { padding: clamp(72px, 12vw, 150px) 0 clamp(56px, 8vw, 96px); overflow: hidden; position: relative; }
+.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(30px, 5vw, 72px); align-items: center; position: relative; z-index: 1; }
 .hero h1 { font-size: clamp(42px, 7vw, 82px); line-height: 1.02; margin: 0 0 26px; letter-spacing: -.02em; }
 .hero h1 .em { font-style: italic; color: var(--accent-ink); }
 .hero .lede { font-size: clamp(18px, 2.2vw, 21px); color: var(--ink-soft); max-width: 40ch; margin-bottom: 34px; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+/* Optional photo treatment — applied only when config.hero.image is set
+   (config.js adds .hero-photo + injects .hero-bg). Absent that, the hero
+   keeps its plain look above untouched.
+   .hero-bg and .hero-grid are stacked in the same CSS Grid cell so the photo
+   always exactly matches however tall the headline/card content actually is
+   — no independently-guessed height that can drift out of sync with content
+   (which is what let the CTA buttons spill below the photo before). The
+   stats strip is a later grid item, so it falls to its own row below,
+   staying on the normal page background with its normal dark theme colors. */
+.hero-photo { display: grid; grid-template-columns: 1fr; padding-top: 0; padding-bottom: 0; }
+.hero-photo > .hero-bg { grid-area: 1 / 1; position: relative; width: 100%; height: 100%; overflow: hidden; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 38%; display: block; }
+.hero-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgba(10,9,7,.90) 0%, rgba(10,9,7,.72) 26%, rgba(10,9,7,.32) 48%, rgba(10,9,7,.06) 64%, rgba(10,9,7,0) 76%);
+}
+.hero-photo > .hero-grid {
+  grid-area: 1 / 1; position: relative; z-index: 1;
+  min-height: clamp(520px, 74vh, 740px); align-content: center;
+  padding-top: clamp(90px, 14vw, 170px); padding-bottom: clamp(56px, 8vw, 96px); margin-bottom: 0;
+}
+.hero-photo .eyebrow { color: #E4C97A; }
+.hero-photo .eyebrow::before { background: #E4C97A; }
+.hero-photo h1 { color: #FBF8F1; }
+.hero-photo h1 .em { color: #E4C97A; }
+.hero-photo .lede { color: rgba(251,248,241,.86); }
+.hero-photo .btn-ghost { color: #FBF8F1; border-color: rgba(251,248,241,.4); }
+.hero-photo .btn-ghost:hover { border-color: #E4C97A; color: #E4C97A; }
+.hero-photo .btn-primary { background: #FBF8F1; color: #191712; }
+.hero-photo .btn-primary:hover { background: #E4C97A; color: #191712; }
+.hero-photo .arb-card { background: rgba(255,252,246,.94); box-shadow: 0 24px 60px -20px rgba(0,0,0,.55); backdrop-filter: blur(6px); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 9px;

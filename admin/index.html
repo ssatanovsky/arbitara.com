@@ -109,6 +109,20 @@
     <p class="sub">Flip a switch, then <b>Save</b>. Changes go live on arbitara.com about a minute later.</p>
 
     <div class="card">
+      <h2>Hero photo</h2>
+      <p class="desc">The background photo on the homepage's opening section. Leave empty to use the plain default look.</p>
+      <div class="img-upload" data-img-for="hero">
+        <div class="img-preview empty">No image</div>
+        <div class="img-actions">
+          <label class="btn btn-file">Upload image<input type="file" class="img-file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden></label>
+          <button type="button" class="btn img-remove hidden">Remove</button>
+          <span class="img-msg"></span>
+        </div>
+        <input type="hidden" data-k="hero.image">
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Site password protection</h2>
       <p class="desc">Require a password to view the whole public site. (This is separate from your admin password above.)</p>
       <div class="row"><div class="lab">Password required <small>Visitors must enter the site password</small></div>
@@ -286,11 +300,34 @@
       e.target.value=""; // allow re-selecting the same file later
       if(file) uploadImage(id, file, up);
     });
-    // Populate previews for any images already in the loaded config.
+    refreshImagePreviews();
+  }
+
+  // Populate every .img-upload's preview from whatever config path its own
+  // hidden input targets (sectionText.<id>.image for a section, hero.image
+  // for the hero) — works uniformly, no special-casing by id.
+  function refreshImagePreviews(){
     document.querySelectorAll(".img-upload").forEach(function(up){
+      var key=up.querySelector("input[type=hidden]").getAttribute("data-k");
+      var path=get(cfg,key);
+      setImagePreview(up, path ? "../"+path : "");
+    });
+  }
+
+  // The hero's upload control is static markup (not rebuilt per-row like
+  // section rows are), so it's wired once, directly, rather than through
+  // buildSections()'s per-row delegation.
+  function wireStandaloneImageUpload(up){
+    if(!up) return;
+    up.querySelector(".img-file").addEventListener("change", function(e){
       var id=up.getAttribute("data-img-for");
-      var path=get(cfg,"sectionText."+id+".image");
-      if(path) setImagePreview(up, "../"+path);
+      var file=e.target.files[0];
+      e.target.value="";
+      if(file) uploadImage(id, file, up);
+    });
+    up.querySelector(".img-remove").addEventListener("click", function(){
+      up.querySelector("input[type=hidden]").value="";
+      setImagePreview(up, "");
     });
   }
 
@@ -369,6 +406,7 @@
     session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
     $("#pw").value=""; showConnect("Signed out.",false);
   });
+  wireStandaloneImageUpload(document.querySelector('.img-upload[data-img-for="hero"]'));
 
   // boot
   if(!configured()){ showConnect("Admin not configured yet — the Worker URL still needs to be set in this page.",true); return; }

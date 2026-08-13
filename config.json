@@ -117,5 +117,8 @@
     "bias",
     "principles",
     "toolkit"
-  ]
+  ],
+  "hero": {
+    "image": "uploads/hero.jpg"
+  }
 }
