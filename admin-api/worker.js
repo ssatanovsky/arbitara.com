@@ -181,6 +181,35 @@ export default {
       return json({ path: uploadPath });
     }
 
+    // ---- POST /lead  { name, email, interest, source } -> { ok } ----
+    // Public — called by anonymous site visitors submitting the contact form.
+    // Stores into KV (never the git repo) since leads carry PII and the repo
+    // is served publicly. The record is duplicated into KV metadata so
+    // GET /leads can list everything with a single call, no per-key reads.
+    if (url.pathname.endsWith("/lead") && request.method === "POST") {
+      let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
+      const name = String(body.name || "").trim().slice(0, 200);
+      const email = String(body.email || "").trim().slice(0, 200);
+      const interest = String(body.interest || "").trim().slice(0, 200);
+      const source = String(body.source || "").trim().slice(0, 200);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return json({ error: "a valid email is required" }, 400);
+      }
+      const ts = Date.now();
+      const key = "lead:" + ts + ":" + crypto.randomUUID().slice(0, 8);
+      const record = { name, email, interest, source, ts };
+      await env.LEADS.put(key, JSON.stringify(record), { metadata: record });
+      return json({ ok: true });
+    }
+
+    // ---- GET /leads -> { leads: [...] } ----
+    if (url.pathname.endsWith("/leads") && request.method === "GET") {
+      if (!authed) return json({ error: "unauthorized" }, 401);
+      const list = await env.LEADS.list({ prefix: "lead:" });
+      const leads = list.keys.map((k) => k.metadata).filter(Boolean).sort((a, b) => b.ts - a.ts);
+      return json({ leads: leads });
+    }
+
     return json({ error: "not found" }, 404);
   },
 };

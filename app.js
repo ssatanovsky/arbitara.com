@@ -286,28 +286,18 @@
      ========================================================================== */
   (function initLeadSender() {
 
-    /* ===================================================================
-       CONFIG — paste your Formspree endpoint to start collecting emails.
-       1. Create a free form at https://formspree.io (use hello@arbitara.com).
-       2. Formspree gives you a URL like  https://formspree.io/f/abcdwxyz
-       3. Paste it between the quotes below and redeploy.
-       Until this is set, forms still work locally, but nothing is sent.
-       =================================================================== */
-    var WAITLIST_ENDPOINT = "";
+    var LEAD_ENDPOINT = "https://arbitara-admin.slava-satanovsky.workers.dev/lead";
 
     // Accepts either a plain email string (the coming-soon screen's use) or
     // a full lead object (name, email, interest, source — the contact
     // form's use).
     function send(payload) {
       var body = typeof payload === "string" ? { email: payload, source: "arbitara.com waitlist" } : payload;
-      if (!WAITLIST_ENDPOINT) {
-        if (window.console) console.warn("[Arbitara] Waitlist endpoint not set: signup not stored. See WAITLIST_ENDPOINT in app.js.");
-        return Promise.resolve();
-      }
-      return fetch(WAITLIST_ENDPOINT, {
+      body = Object.assign({ name: body.name || "", page: location.href }, body);
+      return fetch(LEAD_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(Object.assign({ page: location.href }, body))
+        body: JSON.stringify(body)
       }).then(function (r) { if (!r.ok) throw new Error("bad status " + r.status); return r; });
     }
 
