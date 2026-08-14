@@ -29,10 +29,25 @@
   function injectStyles() {
     if (document.getElementById("arb-cfg-styles")) return;
     var css =
-      // section hides
+      // section hides — also hide the matching nav link and footer entry,
+      // so a disabled section disappears everywhere, not just its own anchor
       ".arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
       ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai," +
       ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
+      ".arb-hide-disappear .nav-links a[href='#disappear'],.arb-hide-anatomy .nav-links a[href='#anatomy']," +
+      ".arb-hide-process .nav-links a[href='#process'],.arb-hide-tiers .nav-links a[href='#tiers']," +
+      ".arb-hide-bias .nav-links a[href='#bias'],.arb-hide-ai .nav-links a[href='#ai']," +
+      ".arb-hide-principles .nav-links a[href='#principles'],.arb-hide-toolkit .nav-links a[href='#toolkit']," +
+      ".arb-hide-contact .nav-links a[href='#contact']{display:none!important;}" +
+      ".arb-hide-disappear .footer li:has(a[href='#disappear'])," +
+      ".arb-hide-anatomy .footer li:has(a[href='#anatomy'])," +
+      ".arb-hide-process .footer li:has(a[href='#process'])," +
+      ".arb-hide-tiers .footer li:has(a[href='#tiers'])," +
+      ".arb-hide-bias .footer li:has(a[href='#bias'])," +
+      ".arb-hide-ai .footer li:has(a[href='#ai'])," +
+      ".arb-hide-principles .footer li:has(a[href='#principles'])," +
+      ".arb-hide-toolkit .footer li:has(a[href='#toolkit'])," +
+      ".arb-hide-contact .footer li:has(a[href='#contact']){display:none!important;}" +
       // whole-tool hides (for everyone, members included)
       ".arb-hide-tool-checklist #checklist{display:none!important;}" +
       ".arb-hide-tool-diagnostic .diag{display:none!important;}" +
