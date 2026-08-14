@@ -12,9 +12,6 @@
     "assessment": true,
     "contact": true
   },
-  "gate": {
-    "enabled": true
-  },
   "tools": {
     "checklist": true,
     "diagnostic": true,
@@ -156,5 +153,22 @@
         "src": "McKinsey, 2019"
       }
     ]
+  },
+  "toolsText": {
+    "checklist": {
+      "name": "Before you decide: the ten-item pass",
+      "body": "Run the ten-item pass over the decision on your desk.",
+      "doc": ""
+    },
+    "diagnostic": {
+      "name": "Three tests to place a decision, before you deliberate",
+      "body": "Answer for the decision on your desk right now. All three are observable before the choice is made.",
+      "doc": ""
+    },
+    "record": {
+      "name": "The one-page decision record",
+      "body": "A single sheet with every field group (context, governance, options & criteria, assumptions & outcomes) ready to print or fill in a document. It's the smallest possible version of treating a decision as an object.",
+      "doc": ""
+    }
   }
 }

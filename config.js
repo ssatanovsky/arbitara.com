@@ -10,13 +10,12 @@
 
   var DEFAULTS = {
     sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, object: true, principles: true, toolkit: true, contact: true },
-    gate: { enabled: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
     comingSoon: { enabled: false, heading: "Something is being built here.", text: "Arbitara is in stealth. Add your email and we'll be in touch." }
   };
 
-  // Readiness promise consumed by app.js so the gate can respect config.
+  // Readiness promise consumed by app.js so its behavior can respect config.
   var resolveReady;
   window.ARB_READY = new Promise(function (res) { resolveReady = res; });
 
@@ -320,6 +319,34 @@
     });
   }
 
+  // Per-tool name / body text / optional document link, for the checklist,
+  // diagnostic, and one-page record — each keyed generically off cfg.toolsText
+  // so a new tool only needs an entry in TOOL_HOOKS, not new code.
+  var TOOL_HOOKS = {
+    checklist: { name: "#checklist .ch-head h3", body: "#checklist .ch-desc", doc: '[data-tool-doc="checklist"]' },
+    diagnostic: { name: ".diag-head h3", body: ".diag-head p", doc: '[data-tool-doc="diagnostic"]' },
+    record: { name: "#recordPromo h3", body: "#recordPromo p", doc: '[data-tool-doc="record"]' }
+  };
+  function applyToolsText(cfg) {
+    var tt = cfg.toolsText;
+    if (!tt) return;
+    Object.keys(TOOL_HOOKS).forEach(function (id) {
+      var t = tt[id];
+      var hooks = TOOL_HOOKS[id];
+      var nameEl = document.querySelector(hooks.name);
+      if (nameEl && t && t.name) nameEl.textContent = t.name;
+      var bodyEl = document.querySelector(hooks.body);
+      if (bodyEl && t && t.body) bodyEl.textContent = t.body;
+      var docHost = document.querySelector(hooks.doc);
+      if (docHost) {
+        docHost.innerHTML = (t && t.doc)
+          ? '<a href="' + t.doc + '" target="_blank" rel="noopener">Download the document' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>'
+          : "";
+      }
+    });
+  }
+
   // Optional hero photo (config.hero.image). Adds the .hero-photo treatment
   // only when a photo is set — otherwise the hero keeps its plain default look.
   function applyHeroImage(cfg) {
@@ -399,17 +426,11 @@
     if (tools.diagnostic === false) docEl.classList.add("arb-hide-tool-diagnostic");
     if (tools.record === false) docEl.classList.add("arb-hide-tool-record");
 
-    // Gate off → open the tools to everyone (overrides the locked default).
-    if (get(cfg, "gate.enabled", true) === false) {
-      docEl.classList.add("arb-gate-off");
-      docEl.classList.remove("arb-locked");
-      docEl.classList.add("arb-unlocked");
-    }
-
     whenBody(function () {
       applySectionOrder(cfg);
       applySectionText(cfg);
       applySectionImages(cfg);
+      applyToolsText(cfg);
       applyHeroImage(cfg);
       applyHeroText(cfg);
       applyHeroStats(cfg);

@@ -77,6 +77,17 @@
   .img-msg{font-size:12.5px;color:var(--faint);}
   .img-msg.ok{color:var(--good);}
   .img-msg.err{color:var(--danger);}
+  .tool-block{border-top:1px solid var(--line);padding-top:18px;margin-top:18px;}
+  .tool-block:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+  .doc-upload{display:flex;flex-direction:column;gap:10px;}
+  .doc-preview{border:1px solid var(--line-2);border-radius:10px;background:var(--paper-2);
+    min-height:44px;display:flex;align-items:center;padding:0 14px;font-size:13.5px;}
+  .doc-preview.empty{color:var(--faint);font-size:13px;border-style:dashed;}
+  .doc-preview a{color:var(--accent-ink);font-weight:600;word-break:break-all;}
+  .doc-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .doc-msg{font-size:12.5px;color:var(--faint);}
+  .doc-msg.ok{color:var(--good);}
+  .doc-msg.err{color:var(--danger);}
 </style>
 </head>
 <body>
@@ -175,11 +186,8 @@
 
     <div class="card">
       <h2>Practitioner tools</h2>
-      <div class="row"><div class="lab">Access gate <small>Tools require the contact form below to unlock</small></div>
-        <label class="sw"><input type="checkbox" data-k="gate.enabled"><span></span></label></div>
-      <div class="row"><div class="lab">Pre-decision checklist</div><label class="sw"><input type="checkbox" data-k="tools.checklist"><span></span></label></div>
-      <div class="row"><div class="lab">Tier diagnostic</div><label class="sw"><input type="checkbox" data-k="tools.diagnostic"><span></span></label></div>
-      <div class="row"><div class="lab">One-page decision record</div><label class="sw"><input type="checkbox" data-k="tools.record"><span></span></label></div>
+      <p class="desc">Each tool can be switched off, renamed, given its own description, and offered as an optional downloadable document.</p>
+      <div id="toolList"></div>
     </div>
 
     <div class="card">
@@ -242,7 +250,7 @@
   function loadConfig(){
     return fetch(API_BASE+"/config",{headers:{"Authorization":"Bearer "+session},cache:"no-store"})
       .then(function(r){ if(r.status===401) throw new Error("Session expired. Sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
-      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); buildStats(); render(); showEditor(); })
+      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); buildStats(); buildTools(); render(); showEditor(); })
       .catch(function(err){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect(err.message,true); });
   }
 
@@ -455,6 +463,93 @@
   document.getElementById("statAdd").addEventListener("click",function(){
     document.getElementById("statList").appendChild(statRow());
   });
+
+  // ---- Practitioner tools: name / body text / optional document per tool ----
+  var TOOL_META=[
+    {id:"checklist",label:"Pre-decision checklist"},
+    {id:"diagnostic",label:"Tier diagnostic"},
+    {id:"record",label:"One-page decision record"}
+  ];
+  function buildTools(){
+    var host=document.getElementById("toolList");
+    host.innerHTML="";
+    TOOL_META.forEach(function(m){
+      var row=document.createElement("div");
+      row.className="tool-block";
+      row.innerHTML=
+        '<div class="row"><div class="lab">'+m.label+'</div><label class="sw"><input type="checkbox" data-k="tools.'+m.id+'"><span></span></label></div>'+
+        '<label class="fld">Name</label><input type="text" data-k="toolsText.'+m.id+'.name" placeholder="'+m.label+'">'+
+        '<label class="fld">Body text</label><textarea data-k="toolsText.'+m.id+'.body"></textarea>'+
+        '<label class="fld">Document <span style="text-transform:none;font-weight:400;color:var(--faint)">(optional — shown as a "Download the document" link · PDF, DOC, or DOCX, max 10MB)</span></label>'+
+        '<div class="doc-upload" data-doc-for="'+m.id+'">'+
+          '<div class="doc-preview empty">No document</div>'+
+          '<div class="doc-actions">'+
+            '<label class="btn btn-file">Upload document<input type="file" class="doc-file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>'+
+            '<button type="button" class="btn doc-remove hidden">Remove</button>'+
+            '<span class="doc-msg"></span>'+
+          '</div>'+
+          '<input type="hidden" data-k="toolsText.'+m.id+'.doc">'+
+        '</div>';
+      host.appendChild(row);
+    });
+    host.onclick=function(e){
+      if(e.target.classList.contains("doc-remove")){
+        var up=e.target.closest(".doc-upload");
+        up.querySelector("input[type=hidden]").value="";
+        setDocPreview(up, "");
+      }
+    };
+    host.addEventListener("change", function(e){
+      if(!e.target.classList.contains("doc-file")) return;
+      var up=e.target.closest(".doc-upload");
+      var id=up.getAttribute("data-doc-for");
+      var file=e.target.files[0];
+      e.target.value="";
+      if(file) uploadDoc(id, file, up);
+    });
+    refreshDocPreviews();
+  }
+  function refreshDocPreviews(){
+    document.querySelectorAll(".doc-upload").forEach(function(up){
+      var key=up.querySelector("input[type=hidden]").getAttribute("data-k");
+      setDocPreview(up, get(cfg,key)||"");
+    });
+  }
+  function setDocPreview(up, path){
+    var box=up.querySelector(".doc-preview");
+    var removeBtn=up.querySelector(".doc-remove");
+    if(path){
+      box.classList.remove("empty");
+      box.innerHTML='<a href="../'+path+'" target="_blank" rel="noopener">'+path.split("/").pop()+'</a>';
+      removeBtn.classList.remove("hidden");
+    } else {
+      box.classList.add("empty");
+      box.innerHTML="No document";
+      removeBtn.classList.add("hidden");
+    }
+  }
+  var MAX_DOC_BYTES = 10*1024*1024;
+  function uploadDoc(id, file, up){
+    var allowed=["application/pdf","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    var msg=up.querySelector(".doc-msg");
+    msg.textContent=""; msg.className="doc-msg";
+    if(allowed.indexOf(file.type)<0){ msg.textContent="Unsupported file type (PDF, DOC, or DOCX only)."; msg.className="doc-msg err"; return; }
+    if(file.size>MAX_DOC_BYTES){ msg.textContent="File is over 10MB."; msg.className="doc-msg err"; return; }
+    msg.textContent="Uploading…";
+    var reader=new FileReader();
+    reader.onload=function(){
+      fetch(API_BASE+"/upload",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session},
+        body:JSON.stringify({id:id+"-doc",contentType:file.type,contentBase64:reader.result})})
+        .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Upload failed."); return j; }); })
+        .then(function(j){
+          up.querySelector("input[type=hidden]").value=j.path;
+          setDocPreview(up, j.path);
+          msg.textContent="Uploaded. Click Save to publish."; msg.className="doc-msg ok";
+        })
+        .catch(function(err){ msg.textContent=err.message||"Upload failed."; msg.className="doc-msg err"; });
+    };
+    reader.readAsDataURL(file);
+  }
 
   function save(){
     saveMsg("Saving…"); $("#saveBtn").disabled=true;

@@ -281,81 +281,26 @@
   }
 
   /* ==========================================================================
-     Access gate — practitioner tools & templates are members / waitlist only.
-     Soft gate: unlocks in-browser after an email is submitted. Not a security
-     boundary (a static site can't enforce one) — it's a lead capture + gate.
+     Lead sender — shared by the coming-soon screen and the contact form, so
+     every capture point on the site writes to the one list, not several.
      ========================================================================== */
-  (function initGate() {
+  (function initLeadSender() {
 
     /* ===================================================================
        CONFIG — paste your Formspree endpoint to start collecting emails.
        1. Create a free form at https://formspree.io (use hello@arbitara.com).
        2. Formspree gives you a URL like  https://formspree.io/f/abcdwxyz
        3. Paste it between the quotes below and redeploy.
-       Until this is set, the gate still unlocks the tools locally, but
-       signups are NOT sent anywhere.
+       Until this is set, forms still work locally, but nothing is sent.
        =================================================================== */
     var WAITLIST_ENDPOINT = "";
 
-    var ACCESS_KEY = "arb-access";
-    var EMAIL_KEY = "arb-email";
-    var docEl = document.documentElement;
-
-    function hasAccess() {
-      try { return localStorage.getItem(ACCESS_KEY) === "granted"; } catch (e) { return false; }
-    }
-
-    // Tools/templates behind the gate. `spaced` mirrors the element's own top margin.
-    var GATED = [
-      { sel: "#checklist", tool: "checklist", name: "The pre-decision checklist",
-        blurb: "Run the ten-item pass over the decision on your desk.", spaced: false }
-    ];
-
-    var LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
-
-    /* ---- styles (injected so only app.js needs redeploying) ---- */
-    function injectStyles() {
-      if (document.getElementById("gate-styles")) return;
-      var css =
-        ".gate-lock{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:44px 34px;text-align:center;display:flex;flex-direction:column;align-items:center;}" +
-        ".gate-lock.spaced{margin-top:34px;}" +
-        ".gate-lock .gl-badge{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent-ink);margin-bottom:16px;}" +
-        ".gate-lock .gl-badge svg{width:24px;height:24px;}" +
-        ".gate-lock .gl-tag{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}" +
-        ".gate-lock h3{font-family:var(--serif);font-size:23px;margin:8px 0 8px;color:var(--ink);}" +
-        ".gate-lock p{font-size:15px;color:var(--muted);margin:0 0 22px;max-width:42ch;}";
-      var s = document.createElement("style");
-      s.id = "gate-styles";
-      s.textContent = css;
-      document.head.appendChild(s);
-    }
-
-    /* ---- one shared unlock path: scroll to the contact form and remember
-       what to open once it's been submitted. No separate modal/form. ---- */
-    var pendingHref = null;
-
-    function scrollToContact() {
-      var el = document.getElementById("contact");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    function requestUnlock(href) {
-      pendingHref = href || null;
-      scrollToContact();
-      var card = document.querySelector(".contact-card");
-      if (card) {
-        card.classList.add("flash");
-        setTimeout(function () { card.classList.remove("flash"); }, 1800);
-      }
-    }
-
     // Accepts either a plain email string (the coming-soon screen's use) or
     // a full lead object (name, email, interest, source — the contact
-    // form's use). Both end up on the same list through the same endpoint.
+    // form's use).
     function send(payload) {
       var body = typeof payload === "string" ? { email: payload, source: "arbitara.com waitlist" } : payload;
       if (!WAITLIST_ENDPOINT) {
-        // Not configured yet: unlock locally, nothing captured server-side.
         if (window.console) console.warn("[Arbitara] Waitlist endpoint not set: signup not stored. See WAITLIST_ENDPOINT in app.js.");
         return Promise.resolve();
       }
@@ -366,82 +311,8 @@
       }).then(function (r) { if (!r.ok) throw new Error("bad status " + r.status); return r; });
     }
 
-    // Called after the contact form submits successfully — one action both
-    // captures the lead and unlocks the gated tools on this device.
-    function grantAccess(email) {
-      try {
-        localStorage.setItem(ACCESS_KEY, "granted");
-        if (email) localStorage.setItem(EMAIL_KEY, email);
-      } catch (e) {}
-      docEl.classList.remove("arb-locked");
-      docEl.classList.add("arb-unlocked");
-      // Remove locked placeholders — the real tools are revealed by the CSS class swap.
-      Array.prototype.forEach.call(document.querySelectorAll(".gate-lock"), function (n) { n.remove(); });
-      var goto = pendingHref;
-      pendingHref = null;
-      if (goto) window.open(goto, "_blank", "noopener");
-    }
-
-    /* ---- locked placeholders in place of each gated tool ---- */
-    function placeLocks(tools) {
-      tools = tools || {};
-      GATED.forEach(function (g) {
-        if (g.tool && tools[g.tool] === false) return; // tool switched off entirely — hidden by config.js
-        var el = document.querySelector(g.sel);
-        if (!el || !el.parentNode) return;
-        var card = document.createElement("div");
-        card.className = "gate-lock" + (g.spaced ? " spaced" : "");
-        card.setAttribute("data-tool", g.tool || "");
-        card.innerHTML =
-          '<span class="gl-badge">' + LOCK_SVG + '</span>' +
-          '<span class="gl-tag">Members &amp; contact</span>' +
-          '<h3>' + g.name + '</h3>' +
-          '<p>' + g.blurb + '</p>' +
-          '<button type="button" class="btn btn-primary gate-open">Unlock with the contact form</button>';
-        el.parentNode.insertBefore(card, el);
-        card.querySelector(".gate-open").addEventListener("click", function () { requestUnlock(); });
-      });
-    }
-
-    /* ---- intercept links to the gated template (the one-page record) ---- */
-    function guardRecordLinks() {
-      document.addEventListener("click", function (e) {
-        if (hasAccess()) return;
-        var a = e.target.closest('a[href^="decision-record"]');
-        if (!a) return;
-        e.preventDefault();
-        requestUnlock(a.getAttribute("href"));
-      });
-    }
-
-    // Let the coming-soon screen (config.js) and the contact form reuse the
-    // same sender, so every lead capture point on the site (gate, coming-
-    // soon, contact) writes to the one list rather than separate ones.
     window.ARB_WAITLIST_SEND = send;
     window.ARB_SUBMIT_LEAD = send;
-    window.ARB_GRANT_ACCESS = grantAccess;
-
-    // Boot — waits for config.js so it can honour the gate on/off + per-tool switches.
-    function boot(cfg) {
-      cfg = cfg || window.ARB_CONFIG || {};
-      injectStyles();
-      var gateOff = cfg.gate && cfg.gate.enabled === false;
-      if (gateOff || hasAccess()) {
-        docEl.classList.remove("arb-locked");
-        docEl.classList.add("arb-unlocked");
-        return;
-      }
-      placeLocks(cfg.tools || {});
-      guardRecordLinks();
-      // Deep link from the record-page guard: jump straight to the form.
-      if (location.hash === "#unlock") requestUnlock();
-    }
-
-    if (window.ARB_READY && typeof window.ARB_READY.then === "function") {
-      window.ARB_READY.then(boot);
-    } else {
-      boot();
-    }
   })();
 
   /* ==========================================================================
@@ -473,11 +344,9 @@
       if (!interest) { setMsg("Please choose where you're at.", true); return; }
       btn.disabled = true;
       btn.textContent = "Sending…";
-      var wasLocked = document.documentElement.classList.contains("arb-locked");
       var send = window.ARB_SUBMIT_LEAD || function () { return Promise.resolve(); };
       send({ name: name, email: email, interest: interest, source: "arbitara.com contact" }).then(function () {
-        if (window.ARB_GRANT_ACCESS) window.ARB_GRANT_ACCESS(email);
-        setMsg(wasLocked ? "Thank you. The practitioner tools are now unlocked on this device." : "Thank you. We'll be in touch.", false);
+        setMsg("Thank you. We'll be in touch.", false);
         form.reset();
         btn.disabled = false;
         btn.textContent = btnLabel;

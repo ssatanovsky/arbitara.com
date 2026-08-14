@@ -13,8 +13,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231C2340'/%3E%3Cpath d='M20 6 L32 19 L8 19 Z' fill='%23EFEAE0'/%3E%3Cpath d='M20 10.6 L27.4 18 L12.6 18 Z' fill='%23BE9A3B'/%3E%3Cpath d='M8 21 L32 21 L20 34 Z' fill='%23BE9A3B'/%3E%3Cpath d='M12.6 22 L27.4 22 L20 29.4 Z' fill='%23EFEAE0'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 <script>document.documentElement.className+=' arb-cloak';setTimeout(function(){document.documentElement.classList.remove('arb-cloak');},2000);</script>
-<style>html.arb-cloak{visibility:hidden}.arb-locked #checklist{display:none!important}</style>
-<script>(function(){try{var g=localStorage.getItem('arb-access')==='granted';document.documentElement.className+=(g?' arb-unlocked':' arb-locked');}catch(e){document.documentElement.className+=' arb-locked';}})();</script>
+<style>html.arb-cloak{visibility:hidden}</style>
 <script src="config.js"></script>
 </head>
 <body>
@@ -255,6 +254,7 @@
       <div class="diag-head">
         <h3>Three tests to place a decision, before you deliberate</h3>
         <p>Answer for the decision on your desk right now. All three are observable before the choice is made.</p>
+        <div class="tool-doc" data-tool-doc="diagnostic"></div>
       </div>
       <div class="diag-body">
         <div class="diag-tests">
@@ -526,9 +526,13 @@
     <div class="toolkit">
       <div class="checklist reveal" id="checklist">
         <div class="ch-head">
-          <h3>Before you decide: the ten-item pass</h3>
+          <div>
+            <h3>Before you decide: the ten-item pass</h3>
+            <p class="ch-desc">Run the ten-item pass over the decision on your desk.</p>
+          </div>
           <span id="chCount">0 / 10</span>
         </div>
+        <div class="tool-doc" data-tool-doc="checklist"></div>
         <ul>
           <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Have I framed the <b>right question</b>, one with more than two answers?</span></li>
           <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Is this environment <b>complicated or complex</b>? Analyze, or probe?</span></li>
@@ -555,6 +559,7 @@
           <a href="decision-record.html" class="btn btn-primary" target="_blank" rel="noopener">Open the printable one-pager
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
         </div>
+        <div class="tool-doc" data-tool-doc="record"></div>
         </div>
 
         <h3 style="font-size:20px;margin:40px 0 16px">Where the ideas come from</h3>
