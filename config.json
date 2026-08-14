@@ -163,8 +163,8 @@
     }
   },
   "whitepaper": {
-    "enabled": false,
-    "doc": "",
+    "enabled": true,
+    "doc": "uploads/whitepaper-doc.docx",
     "gated": true
   }
 }
