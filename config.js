@@ -9,7 +9,7 @@
   var docEl = document.documentElement;
 
   var DEFAULTS = {
-    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, object: true, principles: true, toolkit: true, contact: true },
+    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, contact: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
     comingSoon: { enabled: false, heading: "Something is being built here.", text: "Arbitara is in stealth. Add your email and we'll be in touch." }
@@ -31,7 +31,7 @@
     var css =
       // section hides
       ".arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
-      ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai,.arb-hide-object #object," +
+      ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai," +
       ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
       // whole-tool hides (for everyone, members included)
       ".arb-hide-tool-checklist #checklist{display:none!important;}" +
@@ -226,7 +226,7 @@
   // Default nav/footer labels — used until a section has a navLabel override.
   var DEFAULT_NAV_LABELS = {
     disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
-    assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership", object: "The Object",
+    assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership",
     principles: "Principles", toolkit: "Toolkit", contact: "Contact"
   };
 

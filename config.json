@@ -6,7 +6,6 @@
     "tiers": true,
     "bias": false,
     "ai": true,
-    "object": true,
     "principles": true,
     "toolkit": false,
     "assessment": true,
@@ -75,13 +74,6 @@
       "navLabel": "AI & Human Collab",
       "image": "uploads/ai.jpg"
     },
-    "object": {
-      "eyebrow": "The unit that wasn't there",
-      "title": "Make the decision a thing you can hold.",
-      "intro": "Customer relationships, business processes, and enterprise architectures each became governable only once they were made into a structured, persistent object. The management decision is the last major organizational object still living in meeting notes, email threads, and individual memory. Give it four field groups, a named owner, and a lifecycle, and it stops disappearing.",
-      "navLabel": "",
-      "image": ""
-    },
     "principles": {
       "eyebrow": "Seven working principles",
       "title": "The rules a practitioner can hold themselves to.",
@@ -118,7 +110,6 @@
     "anatomy",
     "tiers",
     "assessment",
-    "object",
     "bias",
     "principles",
     "toolkit",
