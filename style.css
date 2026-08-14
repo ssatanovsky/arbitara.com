@@ -314,6 +314,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .diag-q p { font-size: 15.5px; margin: 0 0 12px; color: var(--ink-soft); }
 .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
 .seg button { border: none; background: transparent; padding: 8px 15px; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-left: 1px solid var(--line-2); transition: background .15s,color .15s; }
+.diag-tests .seg button { min-width: 168px; text-align: center; }
 .seg button:first-child { border-left: none; }
 .seg button.on { background: var(--ink); color: var(--paper); }
 .diag-result { padding: 26px 30px; display: flex; flex-direction: column; justify-content: center; background: var(--paper-2); }
