@@ -343,7 +343,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ar-note { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
 
 /* ---------- Contact ---------- */
-.contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 38px); max-width: 640px; }
+.contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 38px); max-width: 640px; transition: box-shadow .3s ease; }
+.contact-card.flash { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent), var(--shadow); }
 .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .cf-field { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
 .cf-row .cf-field { margin-top: 0; }

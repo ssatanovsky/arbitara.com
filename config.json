@@ -121,7 +121,7 @@
     "headline": "The power to <span class=\"em\">decide</span> is a discipline, not a talent.",
     "lede": "Organizations map their processes, model their architectures, and instrument everything they do. Then they make their most consequential choices in a room, with no structure, no record, and no way to learn from what happens next. Arbitara is a practitioner's field guide to closing that gap.",
     "ctaPrimary": "See the twelve-step process",
-    "ctaSecondary": "Get the pre-decision checklist",
+    "ctaSecondary": "Download the white paper",
     "stats": [
       {
         "n": "<span class=\"u\">20%</span>",
@@ -161,5 +161,10 @@
       "body": "A single sheet with every field group (context, governance, options & criteria, assumptions & outcomes) ready to print or fill in a document. It's the smallest possible version of treating a decision as an object.",
       "doc": ""
     }
+  },
+  "whitepaper": {
+    "enabled": false,
+    "doc": "",
+    "gated": true
   }
 }
