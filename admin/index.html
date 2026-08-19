@@ -556,7 +556,12 @@
     host.innerHTML="";
     slides.forEach(function(s){ host.appendChild(govSlideRow(s)); });
   }
-  function govSlideRow(text){
+  function govSlideRow(slide){
+    // A slide is either a plain string (single line) or {a, b} where b is the
+    // optional gold second line.
+    var a, b;
+    if(slide && typeof slide==="object"){ a=slide.a||""; b=slide.b||""; }
+    else { a=slide||""; b=""; }
     var row=document.createElement("div");
     row.className="srow";
     row.innerHTML=
@@ -566,9 +571,11 @@
         '<button type="button" class="btn-txt gov-slide-remove" style="color:var(--danger);border-color:var(--danger)">Remove</button>'+
       '</div>'+
       '<div class="srow-text" style="display:block">'+
-        '<label class="fld">Statement</label><textarea class="gov-slide-text" style="min-height:60px"></textarea>'+
+        '<label class="fld">Line 1 <span style="text-transform:none;font-weight:400;color:var(--faint)">(default colour)</span></label><textarea class="gov-slide-a" style="min-height:44px"></textarea>'+
+        '<label class="fld">Line 2 <span style="text-transform:none;font-weight:400;color:var(--faint)">(gold accent — optional; leave blank for a single line)</span></label><textarea class="gov-slide-b" style="min-height:44px"></textarea>'+
       '</div>';
-    row.querySelector(".gov-slide-text").value=text||"";
+    row.querySelector(".gov-slide-a").value=a;
+    row.querySelector(".gov-slide-b").value=b;
     return row;
   }
   function collectGovSlides(){
@@ -576,8 +583,15 @@
     cfg.sectionText=cfg.sectionText||{};
     cfg.sectionText.governance=cfg.sectionText.governance||{};
     cfg.sectionText.governance.slides=[].map.call(rows,function(r){
-      return r.querySelector(".gov-slide-text").value;
-    }).filter(function(s){ return s.trim(); });
+      var a=r.querySelector(".gov-slide-a").value;
+      var b=r.querySelector(".gov-slide-b").value;
+      // Keep single-line slides as plain strings; only use {a,b} when a gold
+      // second line is present.
+      return b.trim() ? {a:a, b:b} : a;
+    }).filter(function(s){
+      if(s && typeof s==="object") return (s.a&&s.a.trim())||(s.b&&s.b.trim());
+      return s && s.trim();
+    });
   }
   document.getElementById("govSlideList").addEventListener("click",function(e){
     var row=e.target.closest(".srow"); if(!row) return;

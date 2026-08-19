@@ -242,7 +242,16 @@
     var main = document.querySelector("main");
     if (!main) return;
     var t = (cfg.sectionText && cfg.sectionText.governance) || {};
-    var slides = Array.isArray(t.slides) ? t.slides.filter(function (s) { return s && String(s).trim(); }) : [];
+    // Each slide is either a plain string (a single line, default colour) or
+    // an object { a, b } where `a` is the first line (default ink) and `b` is
+    // an optional second line rendered in the gold accent.
+    function slideParts(s) {
+      if (s && typeof s === "object") return { a: (s.a || "").trim(), b: (s.b || "").trim() };
+      return { a: String(s || "").trim(), b: "" };
+    }
+    var slides = Array.isArray(t.slides) ? t.slides.filter(function (s) {
+      var p = slideParts(s); return p.a || p.b;
+    }) : [];
     if (!slides.length) return; // nothing to show
 
     var sec = document.createElement("section");
@@ -277,8 +286,11 @@
     car.setAttribute("aria-roledescription", "carousel");
     car.setAttribute("aria-label", (t.navLabel || "Decision Governance") + " quotes");
 
-    var slidesHtml = slides.map(function (text, i) {
-      return '<div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="' + (i + 1) + " of " + n + '"><p>' + text + "</p></div>";
+    var slidesHtml = slides.map(function (s, i) {
+      var p = slideParts(s);
+      var body = (p.a ? '<span class="cs-line">' + p.a + "</span>" : "") +
+                 (p.b ? '<span class="cs-line cs-accent">' + p.b + "</span>" : "");
+      return '<div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="' + (i + 1) + " of " + n + '"><p>' + body + "</p></div>";
     }).join("");
 
     var dotsHtml = slides.map(function (text, i) {
