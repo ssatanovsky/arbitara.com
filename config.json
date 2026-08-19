@@ -9,7 +9,8 @@
     "principles": true,
     "toolkit": false,
     "assessment": true,
-    "contact": true
+    "contact": true,
+    "governance": false
   },
   "tools": {
     "checklist": true,
@@ -101,6 +102,23 @@
       "intro": "Arbitara is in stealth. Leave your details and tell us where your interest sits today. We'll follow up accordingly, whether that's a note when membership opens or a conversation this week.",
       "navLabel": "",
       "image": ""
+    },
+    "governance": {
+      "eyebrow": "Decision Governance",
+      "title": "",
+      "intro": "",
+      "navLabel": "Decision Governance",
+      "image": "",
+      "slides": [
+        "You govern everything except the decision itself.",
+        "Keine Buchung ohne Beleg. But a strategy pivot? No document required.",
+        "Three signatures to approve a laptop. One email to bet the strategy.",
+        "Your expenses need approval. Your assumptions don't.",
+        "You can trace every invoice for seven years. Can you trace last year's biggest decision?",
+        "Every line of code gets reviewed. The decision to build it got none.",
+        "It's called the business judgment rule. The rule protects you. The judgment disappears.",
+        "We govern everything except the decision itself. I've spent years wondering why."
+      ]
     }
   },
   "sectionOrder": [
@@ -113,6 +131,7 @@
     "bias",
     "principles",
     "toolkit",
+    "governance",
     "contact"
   ],
   "hero": {

@@ -360,6 +360,100 @@
   })();
 
   /* ==========================================================================
+     Decision Governance carousel — only exists in the DOM when config.js has
+     built it (config.sections.governance === true), so this just wires
+     behavior onto whatever it finds; nothing to do when it's absent.
+     ========================================================================== */
+  (function initGovernanceCarousel() {
+    function boot() {
+      var root = document.getElementById("governanceCarousel");
+      if (!root) return;
+      var track = root.querySelector(".carousel-track");
+      var slides = [].slice.call(root.querySelectorAll(".carousel-slide"));
+      var dots = [].slice.call(root.querySelectorAll(".carousel-dots button"));
+      var prevBtn = root.querySelector(".carousel-btn.prev");
+      var nextBtn = root.querySelector(".carousel-btn.next");
+      var n = slides.length;
+      if (!track || !n) return;
+
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var index = 0;
+      var timer = null;
+      var userInteracted = false;
+      var AUTOPLAY_MS = 7000;
+
+      function render() {
+        track.style.transform = "translateX(-" + (index * 100) + "%)";
+        dots.forEach(function (d, i) { d.setAttribute("aria-current", i === index ? "true" : "false"); });
+      }
+
+      function goTo(i, manual) {
+        index = ((i % n) + n) % n;
+        if (manual) { userInteracted = true; stop(); }
+        render();
+      }
+
+      function next(manual) { goTo(index + 1, manual); }
+      function prev(manual) { goTo(index - 1, manual); }
+
+      function start() {
+        if (reduceMotion || userInteracted || n < 2) return;
+        stop();
+        timer = setInterval(function () { next(false); }, AUTOPLAY_MS);
+      }
+      function stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+
+      prevBtn && prevBtn.addEventListener("click", function () { prev(true); });
+      nextBtn && nextBtn.addEventListener("click", function () { next(true); });
+      dots.forEach(function (d, i) {
+        d.addEventListener("click", function () { goTo(i, true); });
+      });
+
+      root.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") { e.preventDefault(); prev(true); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); next(true); }
+      });
+
+      root.addEventListener("mouseenter", stop);
+      root.addEventListener("mouseleave", function () { if (!userInteracted) start(); });
+      root.addEventListener("focusin", stop);
+      root.addEventListener("focusout", function () { if (!userInteracted) start(); });
+
+      // Touch swipe
+      var touchStartX = null, touchStartY = null, dragging = false;
+      track.addEventListener("touchstart", function (e) {
+        var t = e.touches[0];
+        touchStartX = t.clientX; touchStartY = t.clientY; dragging = false;
+      }, { passive: true });
+      track.addEventListener("touchmove", function (e) {
+        if (touchStartX == null) return;
+        var t = e.touches[0];
+        var dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+        if (!dragging && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) dragging = true;
+        if (dragging) e.preventDefault();
+      }, { passive: false });
+      track.addEventListener("touchend", function (e) {
+        if (touchStartX == null) return;
+        var t = e.changedTouches[0];
+        var dx = t.clientX - touchStartX;
+        if (dragging && Math.abs(dx) > 40) { dx < 0 ? next(true) : prev(true); }
+        touchStartX = null; touchStartY = null; dragging = false;
+      });
+
+      render();
+      start();
+    }
+
+    if (window.ARB_READY && typeof window.ARB_READY.then === "function") {
+      window.ARB_READY.then(boot);
+    } else {
+      boot();
+    }
+  })();
+
+  /* ==========================================================================
      Contact form — one form for the whole spectrum of interest, from "keep
      me posted" to "ready to buy". Submits through the same sender as the
      gate/waitlist, so it's one list, not two.
@@ -388,6 +482,7 @@
       if (!name) { setMsg("Please enter your name.", true); form.name.focus(); return; }
       if (!validEmail(email)) { setMsg("Please enter a valid email address.", true); form.email.focus(); return; }
       if (!interest) { setMsg("Please choose where you're at.", true); return; }
+      if (!form.consent.checked) { setMsg("Please agree to the Privacy Policy to continue.", true); form.consent.focus(); return; }
       btn.disabled = true;
       btn.textContent = "Sending…";
       var hadPendingDownload = window.ARB_HAS_PENDING_DOWNLOAD && window.ARB_HAS_PENDING_DOWNLOAD();

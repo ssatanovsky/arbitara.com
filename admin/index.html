@@ -233,6 +233,13 @@
       <div id="sectionList"></div>
     </div>
 
+    <div class="card">
+      <h2>Decision Governance — slides</h2>
+      <p class="desc">The quote carousel's slides, in order. This section is confidential pre-launch content: switch it on above only when you're ready for it to appear on the live site — while off, none of this text is sent to visitors or crawlers, only stored here in the CMS. Reorder with ↑ ↓, add or remove as needed.</p>
+      <div id="govSlideList"></div>
+      <button type="button" class="btn" id="govSlideAdd" style="margin-top:12px">+ Add a slide</button>
+    </div>
+
     </div><!-- /panelContent -->
 
     <div id="panelContacts" class="hidden">
@@ -301,7 +308,7 @@
   function loadConfig(){
     return fetch(API_BASE+"/config",{headers:{"Authorization":"Bearer "+session},cache:"no-store"})
       .then(function(r){ if(r.status===401) throw new Error("Session expired. Sign in again."); return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||"Load failed."); return j; }); })
-      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); buildStats(); buildTools(); render(); showEditor(); })
+      .then(function(j){ cfg=j.config; sha=j.sha; $("#who").textContent="Signed in"; buildSections(); buildStats(); buildTools(); buildGovSlides(); render(); showEditor(); })
       .catch(function(err){ session=null; try{sessionStorage.removeItem(SESSION_KEY);}catch(e){} showConnect(err.message,true); });
   }
 
@@ -325,6 +332,7 @@
     {id:"ai",label:"AI & Ownership"},
     {id:"principles",label:"Seven Principles"},
     {id:"toolkit",label:"Toolkit"},
+    {id:"governance",label:"Decision Governance (carousel)"},
     {id:"contact",label:"Contact"}
   ];
   function buildSections(){
@@ -481,6 +489,7 @@
     var order=[].map.call(document.querySelectorAll("#sectionList .srow"),function(r){return r.getAttribute("data-id");});
     if(order.length) cfg.sectionOrder=order;
     collectStats();
+    collectGovSlides();
   }
 
   // ---- Hero stats: a genuine repeatable list, not field overrides, so it's
@@ -529,6 +538,48 @@
   });
   document.getElementById("statAdd").addEventListener("click",function(){
     document.getElementById("statList").appendChild(statRow());
+  });
+
+  // ---- Decision Governance slides: same repeatable-list pattern as Hero
+  // stats above (a genuine array, not dot-path field overrides). ----
+  function buildGovSlides(){
+    var host=document.getElementById("govSlideList");
+    var slides=(cfg.sectionText&&cfg.sectionText.governance&&cfg.sectionText.governance.slides)||[];
+    host.innerHTML="";
+    slides.forEach(function(s){ host.appendChild(govSlideRow(s)); });
+  }
+  function govSlideRow(text){
+    var row=document.createElement("div");
+    row.className="srow";
+    row.innerHTML=
+      '<div class="srow-head">'+
+        '<div class="ord"><button type="button" class="mv up" aria-label="Move up">↑</button><button type="button" class="mv down" aria-label="Move down">↓</button></div>'+
+        '<div class="lab">Slide</div>'+
+        '<button type="button" class="btn-txt gov-slide-remove" style="color:var(--danger);border-color:var(--danger)">Remove</button>'+
+      '</div>'+
+      '<div class="srow-text" style="display:block">'+
+        '<label class="fld">Statement</label><textarea class="gov-slide-text" style="min-height:60px"></textarea>'+
+      '</div>';
+    row.querySelector(".gov-slide-text").value=text||"";
+    return row;
+  }
+  function collectGovSlides(){
+    var rows=document.querySelectorAll("#govSlideList .srow");
+    cfg.sectionText=cfg.sectionText||{};
+    cfg.sectionText.governance=cfg.sectionText.governance||{};
+    cfg.sectionText.governance.slides=[].map.call(rows,function(r){
+      return r.querySelector(".gov-slide-text").value;
+    }).filter(function(s){ return s.trim(); });
+  }
+  document.getElementById("govSlideList").addEventListener("click",function(e){
+    var row=e.target.closest(".srow"); if(!row) return;
+    var host=document.getElementById("govSlideList");
+    if(e.target.classList.contains("up")){ var pv=row.previousElementSibling; if(pv) host.insertBefore(row,pv); }
+    else if(e.target.classList.contains("down")){ var nx=row.nextElementSibling; if(nx) host.insertBefore(nx,row); }
+    else if(e.target.classList.contains("gov-slide-remove")){ row.remove(); }
+  });
+  document.getElementById("govSlideAdd").addEventListener("click",function(){
+    document.getElementById("govSlideList").appendChild(govSlideRow());
   });
 
   // ---- Practitioner tools: name / body text / optional document per tool ----
@@ -683,10 +734,11 @@
         if(!leads.length){ body.innerHTML='<p class="leads-empty">No contacts yet.</p>'; return; }
         var rows=leads.map(function(l){
           return "<tr><td>"+escHtml(fmtDate(l.ts))+"</td><td>"+escHtml(l.name)+"</td>"+
-            '<td class="email">'+escHtml(l.email)+"</td><td>"+escHtml(l.interest)+"</td><td>"+escHtml(l.source)+"</td></tr>";
+            '<td class="email">'+escHtml(l.email)+"</td><td>"+escHtml(l.jobTitle)+"</td><td>"+escHtml(l.companySize)+"</td>"+
+            "<td>"+escHtml(l.interest)+"</td><td>"+escHtml(l.source)+"</td></tr>";
         }).join("");
         body.innerHTML='<div class="leads-table-wrap"><table class="leads"><thead><tr>'+
-          "<th>Date</th><th>Name</th><th>Email</th><th>Interest</th><th>Source</th>"+
+          "<th>Date</th><th>Name</th><th>Email</th><th>Job title</th><th>Company size</th><th>Interest</th><th>Source</th>"+
           "</tr></thead><tbody>"+rows+"</tbody></table></div>";
       })
       .catch(function(err){

@@ -9,7 +9,11 @@
   var docEl = document.documentElement;
 
   var DEFAULTS = {
-    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, contact: true },
+    // "governance" is deliberately false — see buildGovernanceSection() below:
+    // unlike every other section here, it isn't hidden with CSS on top of
+    // static markup. It's confidential pre-launch copy, so nothing about it
+    // (markup, nav link, footer link) is created at all unless switched on.
+    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, governance: false, contact: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
     comingSoon: { enabled: false, heading: "Something is being built here.", text: "Arbitara is in stealth. Add your email and we'll be in touch." }
@@ -224,6 +228,90 @@
     else fn();
   }
 
+  // Confidential, pre-launch "Decision Governance" quote carousel. Unlike
+  // every other managed section, this one has NO static markup in index.html
+  // and no nav/footer <a> tags authored anywhere — when off, there is
+  // nothing for a hide-class to hide, because nothing was ever created.
+  // Only when cfg.sections.governance === true does this build the section,
+  // its nav link, and its footer link and insert them into the page. It
+  // must run before applySectionOrder()/syncNavAndFooter() so the new
+  // elements get positioned and labeled exactly like any static section.
+  function buildGovernanceSection(cfg) {
+    if (!(cfg.sections && cfg.sections.governance === true)) return;
+    if (document.getElementById("governance")) return; // already built
+    var main = document.querySelector("main");
+    if (!main) return;
+    var t = (cfg.sectionText && cfg.sectionText.governance) || {};
+    var slides = Array.isArray(t.slides) ? t.slides.filter(function (s) { return s && String(s).trim(); }) : [];
+    if (!slides.length) return; // nothing to show
+
+    var sec = document.createElement("section");
+    sec.id = "governance";
+    sec.setAttribute("aria-label", t.navLabel || "Decision Governance");
+
+    var wrap = document.createElement("div");
+    wrap.className = "wrap";
+    sec.appendChild(wrap);
+
+    if (t.eyebrow || t.title) {
+      var head = document.createElement("div");
+      head.className = "head reveal in";
+      head.innerHTML =
+        (t.eyebrow ? '<p class="eyebrow">' + t.eyebrow + "</p>" : "") +
+        (t.title ? "<h2>" + t.title + "</h2>" : "") +
+        (t.intro ? "<p>" + t.intro + "</p>" : "");
+      wrap.appendChild(head);
+      if (t.image) {
+        var fig = document.createElement("figure");
+        fig.className = "head-figure reveal in";
+        fig.innerHTML = '<img alt="" src="' + t.image + '">';
+        wrap.appendChild(fig);
+      }
+    }
+
+    var n = slides.length;
+    var car = document.createElement("div");
+    car.className = "carousel reveal in";
+    car.id = "governanceCarousel";
+    car.setAttribute("role", "region");
+    car.setAttribute("aria-roledescription", "carousel");
+    car.setAttribute("aria-label", (t.navLabel || "Decision Governance") + " quotes");
+
+    var slidesHtml = slides.map(function (text, i) {
+      return '<div class="carousel-slide" role="group" aria-roledescription="slide" aria-label="' + (i + 1) + " of " + n + '"><p>' + text + "</p></div>";
+    }).join("");
+
+    var dotsHtml = slides.map(function (text, i) {
+      return '<button type="button" aria-label="Quote ' + (i + 1) + " of " + n + '" aria-current="' + (i === 0 ? "true" : "false") + '"></button>';
+    }).join("");
+
+    car.innerHTML =
+      '<div class="carousel-viewport"><div class="carousel-track">' + slidesHtml + "</div></div>" +
+      '<button type="button" class="carousel-btn prev" aria-label="Previous quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>' +
+      '<button type="button" class="carousel-btn next" aria-label="Next quote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>' +
+      '<div class="carousel-dots" role="group" aria-label="Choose a quote">' + dotsHtml + "</div>";
+
+    wrap.appendChild(car);
+    main.appendChild(sec);
+
+    var navHost = document.getElementById("navLinks");
+    if (navHost) {
+      var a = document.createElement("a");
+      a.href = "#governance";
+      a.textContent = navLabelFor(cfg, "governance");
+      navHost.appendChild(a);
+    }
+    var footerCols = document.querySelectorAll(".footer ul");
+    if (footerCols.length) {
+      var li = document.createElement("li");
+      var fa = document.createElement("a");
+      fa.href = "#governance";
+      fa.textContent = navLabelFor(cfg, "governance");
+      li.appendChild(fa);
+      footerCols[footerCols.length - 1].appendChild(li);
+    }
+  }
+
   // Reorder the managed <section> elements to match config.sectionOrder.
   function applySectionOrder(cfg) {
     var order = cfg.sectionOrder;
@@ -242,7 +330,7 @@
   var DEFAULT_NAV_LABELS = {
     disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
     assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership",
-    principles: "Principles", toolkit: "Toolkit", contact: "Contact"
+    principles: "Principles", toolkit: "Toolkit", governance: "Decision Governance", contact: "Contact"
   };
 
   function navLabelFor(cfg, id) {
@@ -442,6 +530,7 @@
     if (tools.record === false) docEl.classList.add("arb-hide-tool-record");
 
     whenBody(function () {
+      buildGovernanceSection(cfg);
       applySectionOrder(cfg);
       applySectionText(cfg);
       applySectionImages(cfg);
