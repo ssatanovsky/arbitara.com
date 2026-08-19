@@ -234,9 +234,11 @@
     </div>
 
     <div class="card">
-      <h2>Decision Governance — slides</h2>
-      <p class="desc">The quote carousel's slides, in order. This section is confidential pre-launch content: switch it on above only when you're ready for it to appear on the live site — while off, none of this text is sent to visitors or crawlers, only stored here in the CMS. Reorder with ↑ ↓, add or remove as needed.</p>
-      <div id="govSlideList"></div>
+      <h2>Carousel</h2>
+      <p class="desc">A full-width quote carousel near the top of the page. Confidential pre-launch content: while the switch below is off, none of this text is sent to visitors or crawlers — it lives only here in the CMS. Reorder slides with ↑ ↓, add or remove as needed.</p>
+      <div class="row"><div class="lab">Show the carousel <small>Off = completely absent from the live site</small></div>
+        <label class="sw"><input type="checkbox" data-k="sections.governance"><span></span></label></div>
+      <div id="govSlideList" style="margin-top:16px"></div>
       <button type="button" class="btn" id="govSlideAdd" style="margin-top:12px">+ Add a slide</button>
     </div>
 
@@ -332,7 +334,6 @@
     {id:"ai",label:"AI & Ownership"},
     {id:"principles",label:"Seven Principles"},
     {id:"toolkit",label:"Toolkit"},
-    {id:"governance",label:"Decision Governance (carousel)"},
     {id:"contact",label:"Contact"}
   ];
   function buildSections(){
@@ -487,7 +488,14 @@
       else set(cfg,k,el.value);
     });
     var order=[].map.call(document.querySelectorAll("#sectionList .srow"),function(r){return r.getAttribute("data-id");});
-    if(order.length) cfg.sectionOrder=order;
+    if(order.length){
+      // The carousel isn't a reorderable row in the Page Sections list, so it
+      // never appears in `order`. Keep it pinned to the front so it always
+      // renders at the top of the page, right after the hero.
+      order=order.filter(function(id){return id!=="governance";});
+      order.unshift("governance");
+      cfg.sectionOrder=order;
+    }
     collectStats();
     collectGovSlides();
   }

@@ -10,7 +10,7 @@
     "toolkit": false,
     "assessment": true,
     "contact": true,
-    "governance": false
+    "governance": true
   },
   "tools": {
     "checklist": true,
@@ -122,6 +122,7 @@
     }
   },
   "sectionOrder": [
+    "governance",
     "process",
     "ai",
     "disappear",
@@ -131,7 +132,6 @@
     "bias",
     "principles",
     "toolkit",
-    "governance",
     "contact"
   ],
   "hero": {
