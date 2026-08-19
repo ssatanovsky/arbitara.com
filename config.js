@@ -13,7 +13,7 @@
     // unlike every other section here, it isn't hidden with CSS on top of
     // static markup. It's confidential pre-launch copy, so nothing about it
     // (markup, nav link, footer link) is created at all unless switched on.
-    sections: { disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, governance: false, contact: true },
+    sections: { platform: true, disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, governance: false, contact: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
     comingSoon: { enabled: false, heading: "Something is being built here.", text: "Arbitara is in stealth. Add your email and we'll be in touch." }
@@ -35,14 +35,15 @@
     var css =
       // section hides — also hide the matching nav link and footer entry,
       // so a disabled section disappears everywhere, not just its own anchor
-      ".arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
+      ".arb-hide-platform #platform,.arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
       ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai," +
       ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
-      ".arb-hide-disappear .nav-links a[href='#disappear'],.arb-hide-anatomy .nav-links a[href='#anatomy']," +
+      ".arb-hide-platform .nav-links a[href='#platform'],.arb-hide-disappear .nav-links a[href='#disappear'],.arb-hide-anatomy .nav-links a[href='#anatomy']," +
       ".arb-hide-process .nav-links a[href='#process'],.arb-hide-tiers .nav-links a[href='#tiers']," +
       ".arb-hide-bias .nav-links a[href='#bias'],.arb-hide-ai .nav-links a[href='#ai']," +
       ".arb-hide-principles .nav-links a[href='#principles'],.arb-hide-toolkit .nav-links a[href='#toolkit']," +
       ".arb-hide-contact .nav-links a[href='#contact']{display:none!important;}" +
+      ".arb-hide-platform .footer li:has(a[href='#platform'])," +
       ".arb-hide-disappear .footer li:has(a[href='#disappear'])," +
       ".arb-hide-anatomy .footer li:has(a[href='#anatomy'])," +
       ".arb-hide-process .footer li:has(a[href='#process'])," +
@@ -340,7 +341,7 @@
 
   // Default nav/footer labels — used until a section has a navLabel override.
   var DEFAULT_NAV_LABELS = {
-    disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
+    platform: "Platform", disappear: "The Gap", anatomy: "Anatomy", process: "The Process", tiers: "Tiers",
     assessment: "Self-Check", bias: "Bias & Noise", ai: "AI & Ownership",
     principles: "Principles", toolkit: "Toolkit", governance: "Decision Governance", contact: "Contact"
   };

@@ -10,7 +10,8 @@
     "toolkit": false,
     "assessment": true,
     "contact": true,
-    "governance": true
+    "governance": true,
+    "platform": true
   },
   "tools": {
     "checklist": true,
@@ -140,10 +141,16 @@
           "b": "Why?"
         }
       ]
+    },
+    "platform": {
+      "eyebrow": "What Arbitara is",
+      "title": "A decision framework, and the platform to run it.",
+      "intro": "Arbitara combines a practitioner's decision framework with the technology to operate it — capturing, governing, and learning from every decision. Accountability and speed stop trading against each other, and each decision leaves a reusable asset behind."
     }
   },
   "sectionOrder": [
     "governance",
+    "platform",
     "process",
     "ai",
     "disappear",
