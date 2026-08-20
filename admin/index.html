@@ -100,6 +100,7 @@
   table.leads td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);}
   table.leads tr:last-child td{border-bottom:none;}
   table.leads td.email{color:var(--accent-ink);}
+  table.leads td.message{white-space:normal;max-width:280px;color:var(--muted);}
   .leads-empty{color:var(--faint);font-size:14px;padding:30px 4px;text-align:center;}
 </style>
 </head>
@@ -758,10 +759,10 @@
         var rows=leads.map(function(l){
           return "<tr><td>"+escHtml(fmtDate(l.ts))+"</td><td>"+escHtml(l.name)+"</td>"+
             '<td class="email">'+escHtml(l.email)+"</td><td>"+escHtml(l.jobTitle)+"</td><td>"+escHtml(l.companySize)+"</td>"+
-            "<td>"+escHtml(l.interest)+"</td><td>"+escHtml(l.source)+"</td></tr>";
+            "<td>"+escHtml(l.interest)+'</td><td class="message">'+escHtml(l.message)+"</td><td>"+escHtml(l.source)+"</td></tr>";
         }).join("");
         body.innerHTML='<div class="leads-table-wrap"><table class="leads"><thead><tr>'+
-          "<th>Date</th><th>Name</th><th>Email</th><th>Job title</th><th>Company size</th><th>Interest</th><th>Source</th>"+
+          "<th>Date</th><th>Name</th><th>Email</th><th>Job title</th><th>Company size</th><th>Interest</th><th>Message</th><th>Source</th>"+
           "</tr></thead><tbody>"+rows+"</tbody></table></div>";
       })
       .catch(function(err){

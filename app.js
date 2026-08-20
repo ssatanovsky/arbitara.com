@@ -508,6 +508,7 @@
       var email = (form.email.value || "").trim();
       var jobTitle = (form.jobTitle.value || "").trim();
       var companySize = (form.companySize.value || "").trim();
+      var message = (form.message.value || "").trim();
       var interestField = form.querySelector('input[name="interest"]:checked');
       var interest = interestField ? interestField.value : "";
       if (!name) { setMsg("Please enter your name.", true); form.name.focus(); return; }
@@ -518,7 +519,7 @@
       btn.textContent = "Sending…";
       var hadPendingDownload = window.ARB_HAS_PENDING_DOWNLOAD && window.ARB_HAS_PENDING_DOWNLOAD();
       var send = window.ARB_SUBMIT_LEAD || function () { return Promise.resolve(); };
-      send({ name: name, email: email, jobTitle: jobTitle, companySize: companySize, interest: interest, source: "arbitara.com contact" }).then(function () {
+      send({ name: name, email: email, jobTitle: jobTitle, companySize: companySize, interest: interest, message: message, source: "arbitara.com contact" }).then(function () {
         if (window.ARB_ON_LEAD_CAPTURED) window.ARB_ON_LEAD_CAPTURED();
         setMsg(hadPendingDownload ? "Thank you. Your download will open in a new tab." : "Thank you. We'll be in touch.", false);
         form.reset();

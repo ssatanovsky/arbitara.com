@@ -181,7 +181,7 @@ export default {
       return json({ path: uploadPath });
     }
 
-    // ---- POST /lead  { name, email, jobTitle, companySize, interest, source } -> { ok } ----
+    // ---- POST /lead  { name, email, jobTitle, companySize, interest, message, source } -> { ok } ----
     // Public — called by anonymous site visitors submitting the contact form.
     // Stores into KV (never the git repo) since leads carry PII and the repo
     // is served publicly. The record is duplicated into KV metadata so
@@ -196,12 +196,16 @@ export default {
       const companySize = String(body.companySize || "").trim().slice(0, 60);
       const interest = String(body.interest || "").trim().slice(0, 60);
       const source = String(body.source || "").trim().slice(0, 60);
+      // Capped tighter than the other fields — with everything else maxed
+      // out, this still has to fit the metadata record under KV's 1024-byte
+      // limit (see the comment above).
+      const message = String(body.message || "").trim().slice(0, 300);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return json({ error: "a valid email is required" }, 400);
       }
       const ts = Date.now();
       const key = "lead:" + ts + ":" + crypto.randomUUID().slice(0, 8);
-      const record = { name, email, jobTitle, companySize, interest, source, ts };
+      const record = { name, email, jobTitle, companySize, interest, message, source, ts };
       await env.LEADS.put(key, JSON.stringify(record), { metadata: record });
       return json({ ok: true });
     }
