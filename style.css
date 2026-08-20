@@ -158,7 +158,13 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 38%; display: block; }
 .hero-bg::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(100deg, rgba(10,9,7,.90) 0%, rgba(10,9,7,.72) 26%, rgba(10,9,7,.32) 48%, rgba(10,9,7,.06) 64%, rgba(10,9,7,0) 76%);
+  /* Two layers: a strong left-to-right scrim that holds darkness across the
+     text column so the busy photo can't bleed through the copy, plus a light
+     full-cover veil so the right side and full-width mobile text keep a
+     minimum backing. */
+  background:
+    linear-gradient(100deg, rgba(10,9,7,.97) 0%, rgba(10,9,7,.95) 56%, rgba(10,9,7,.9) 70%, rgba(10,9,7,.5) 82%, rgba(10,9,7,.08) 95%),
+    linear-gradient(180deg, rgba(10,9,7,.44), rgba(10,9,7,.26) 45%, rgba(10,9,7,.46));
 }
 .hero-photo > .hero-grid {
   grid-area: 1 / 1; position: relative; z-index: 1;
@@ -167,9 +173,9 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 }
 .hero-photo .eyebrow { color: #E4C97A; }
 .hero-photo .eyebrow::before { background: #E4C97A; }
-.hero-photo h1 { color: #FBF8F1; }
+.hero-photo h1 { color: #FBF8F1; text-shadow: 0 2px 18px rgba(10,9,7,.45); }
 .hero-photo h1 .em { color: #E4C97A; }
-.hero-photo .lede { color: rgba(251,248,241,.86); }
+.hero-photo .lede { color: rgba(251,248,241,.95); text-shadow: 0 1px 10px rgba(10,9,7,.55); }
 .hero-photo .btn-ghost { color: #FBF8F1; border-color: rgba(251,248,241,.4); }
 .hero-photo .btn-ghost:hover { border-color: #E4C97A; color: #E4C97A; }
 .hero-photo .btn-primary { background: #FBF8F1; color: #191712; }
@@ -566,6 +572,15 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .hero-grid { grid-template-columns: 1fr; }
   .hero .arb-card { max-width: 460px; }
   .hero-photo .arb-card { background: rgba(255,252,246,.94); backdrop-filter: blur(9px) saturate(120%); -webkit-backdrop-filter: blur(9px) saturate(120%); }
+  /* Text is full-width here and the uploaded photo has high-contrast text on
+     it, so a partial scrim ghosts through. Make the reading band effectively
+     solid, leaving just a faint photo hint at the very top and bottom. Also
+     dim the source image so any residual show-through has no contrast. */
+  .hero-photo > .hero-bg img { filter: brightness(.62); }
+  .hero-photo > .hero-bg::after {
+    background:
+      linear-gradient(180deg, rgba(10,9,7,.88) 0%, rgba(10,9,7,.98) 40%, rgba(10,9,7,.98) 78%, rgba(10,9,7,.92) 100%);
+  }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat:nth-child(3) { border-left: none; }
   .stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
