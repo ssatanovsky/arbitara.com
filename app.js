@@ -314,6 +314,11 @@
     var btn = document.getElementById("heroWpBtn");
     if (!btn) return;
 
+    // The nav's "White paper" link just triggers the hero button's own
+    // (gated/ungated/disabled) behavior, wired below — one source of truth.
+    var navBtn = document.getElementById("navWpBtn");
+    if (navBtn) navBtn.addEventListener("click", function (e) { e.preventDefault(); btn.click(); });
+
     var pendingDoc = null;
 
     function scrollToContact() {

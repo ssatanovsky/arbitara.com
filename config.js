@@ -303,7 +303,7 @@
   // elements get positioned and labeled exactly like any static section.
   function buildGovernanceSection(cfg) {
     if (!(cfg.sections && cfg.sections.governance === true)) return;
-    if (!docEl.hasAttribute("data-arb-fieldguide")) return; // lives on field-guide.html only
+    if (docEl.hasAttribute("data-arb-fieldguide")) return; // homepage only, not the Field Guide page
     if (document.getElementById("governance")) return; // already built
     var main = document.querySelector("main");
     if (!main) return;
@@ -379,10 +379,10 @@
       a.textContent = navLabelFor(cfg, "governance");
       navHost.appendChild(a);
     }
-    // Targets the FIRST footer column deliberately: this only ever builds on
-    // field-guide.html (see the data-arb-fieldguide guard above), where that
-    // column is "This Page" — the section belongs there, not in whichever
-    // column happens to be last.
+    // Targets the FIRST footer column deliberately: on every page this
+    // builds on (see the data-arb-fieldguide guard above), that column is
+    // "This Page" — the section belongs there, not in whichever column
+    // happens to be last.
     var footerCols = document.querySelectorAll(".footer ul");
     if (footerCols.length) {
       var li = document.createElement("li");
