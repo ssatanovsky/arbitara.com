@@ -232,6 +232,15 @@
     try { return !!pw.hash && sessionStorage.getItem("arb-pw") === pw.hash; } catch (e) { return false; }
   }
 
+  // Local preview never hits the password gate — the public site (any real
+  // hostname) always does. This makes `python3 dev-server.py` show the full
+  // site with no password dance, while production stays gated. It's safe to
+  // ship: on arbitara.com this is false, so the gate behaves normally.
+  function isLocalPreview() {
+    var h = location.hostname;
+    return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "" /* file:// */;
+  }
+
   function buildPasswordGate(pw) {
     function place() {
       if (document.getElementById("arb-pw")) return;
@@ -578,7 +587,7 @@
     // Whole-site password gate is the outermost layer — everything stays hidden
     // behind it until the correct password is entered.
     var pw = cfg.password || {};
-    if (pw.enabled === true && !passwordCleared(pw)) {
+    if (pw.enabled === true && !passwordCleared(pw) && !isLocalPreview()) {
       docEl.classList.add("arb-pw-lock");
       whenBody(function () { buildPasswordGate(pw); uncloak(); });
       resolveReady(cfg);

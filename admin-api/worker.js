@@ -181,23 +181,27 @@ export default {
       return json({ path: uploadPath });
     }
 
-    // ---- POST /lead  { name, email, interest, source } -> { ok } ----
+    // ---- POST /lead  { name, email, jobTitle, companySize, interest, source } -> { ok } ----
     // Public — called by anonymous site visitors submitting the contact form.
     // Stores into KV (never the git repo) since leads carry PII and the repo
     // is served publicly. The record is duplicated into KV metadata so
     // GET /leads can list everything with a single call, no per-key reads.
+    // Field lengths are capped tightly so the record stays under KV's
+    // 1024-byte metadata limit.
     if (url.pathname.endsWith("/lead") && request.method === "POST") {
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
-      const name = String(body.name || "").trim().slice(0, 200);
-      const email = String(body.email || "").trim().slice(0, 200);
-      const interest = String(body.interest || "").trim().slice(0, 200);
-      const source = String(body.source || "").trim().slice(0, 200);
+      const name = String(body.name || "").trim().slice(0, 120);
+      const email = String(body.email || "").trim().slice(0, 160);
+      const jobTitle = String(body.jobTitle || "").trim().slice(0, 120);
+      const companySize = String(body.companySize || "").trim().slice(0, 60);
+      const interest = String(body.interest || "").trim().slice(0, 60);
+      const source = String(body.source || "").trim().slice(0, 60);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return json({ error: "a valid email is required" }, 400);
       }
       const ts = Date.now();
       const key = "lead:" + ts + ":" + crypto.randomUUID().slice(0, 8);
-      const record = { name, email, interest, source, ts };
+      const record = { name, email, jobTitle, companySize, interest, source, ts };
       await env.LEADS.put(key, JSON.stringify(record), { metadata: record });
       return json({ ok: true });
     }

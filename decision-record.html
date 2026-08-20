@@ -11,9 +11,12 @@
   function gate(){ location.replace("index.html#unlock"); }
   function show(){ d.style.visibility=""; }
   var access=false; try{ access=localStorage.getItem("arb-access")==="granted"; }catch(e){}
+  // Local preview (dev-server.py) is never gated; the public site always is.
+  var localPreview=(function(){var h=location.hostname;return h==="localhost"||h==="127.0.0.1"||h==="[::1]"||h==="";})();
   var to=setTimeout(function(){ decide(null); },1500);
   function decide(cfg){
     clearTimeout(to); cfg=cfg||{};
+    if(localPreview) return show();
     if(cfg.password&&cfg.password.enabled){                         // whole-site password on
       var okpw=false; try{okpw=sessionStorage.getItem("arb-pw")===cfg.password.hash&&!!cfg.password.hash;}catch(e){}
       if(!okpw) return home();
