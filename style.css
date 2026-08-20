@@ -483,8 +483,9 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .plat-tier:first-of-type { border-top: none; padding-top: 0; }
 .plat-tier-name { flex: 0 0 170px; font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: #9FB0DF; }
 .plat-blocks { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
-.plat-block { font-family: var(--sans); font-size: 14.5px; font-weight: 600; padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(159,176,223,.5); color: #DCE3F5; background: rgba(159,176,223,.08); cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+.plat-block { font-family: var(--sans); font-size: 14.5px; font-weight: 600; padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(159,176,223,.5); border-bottom-width: 3px; color: #DCE3F5; background: rgba(159,176,223,.08); cursor: pointer; transition: border-color .15s, background .15s, color .15s, transform .1s; }
 .plat-block:hover { border-color: rgba(159,176,223,.9); background: rgba(159,176,223,.16); }
+.plat-block:active { transform: translateY(1px); border-bottom-width: 1px; margin-top: 2px; }
 .plat-block.active { border-color: #DCE3F5; background: rgba(159,176,223,.22); color: #FBF8F1; }
 .plat-block:focus-visible { outline: 2px solid #9FB0DF; outline-offset: 2px; }
 .plat-block.gold { border-color: rgba(228,201,122,.55); color: #F1D888; background: rgba(228,201,122,.1); }
