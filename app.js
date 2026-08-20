@@ -454,6 +454,37 @@
   })();
 
   /* ==========================================================================
+     "What Arbitara is" — each framework step and platform block reveals a
+     brief explanation right below its panel when clicked (and hides again
+     when clicked a second time). Static markup, so no ARB_READY needed.
+     ========================================================================== */
+  (function initPlatform() {
+    var sec = document.getElementById("platform");
+    if (!sec) return;
+    [].forEach.call(sec.querySelectorAll(".plat-panel"), function (panel) {
+      var detail = panel.querySelector(".plat-detail");
+      if (!detail) return;
+      var chips = [].slice.call(panel.querySelectorAll("[data-note]"));
+      function collapse() {
+        chips.forEach(function (c) { c.classList.remove("active"); c.setAttribute("aria-expanded", "false"); });
+        detail.hidden = true;
+        detail.innerHTML = "";
+      }
+      chips.forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          var wasActive = chip.classList.contains("active");
+          collapse();
+          if (wasActive) return; // second click on the same chip → close
+          chip.classList.add("active");
+          chip.setAttribute("aria-expanded", "true");
+          detail.innerHTML = "<b>" + chip.getAttribute("data-label") + "</b> — " + chip.getAttribute("data-note");
+          detail.hidden = false;
+        });
+      });
+    });
+  })();
+
+  /* ==========================================================================
      Contact form — one form for the whole spectrum of interest, from "keep
      me posted" to "ready to buy". Submits through the same sender as the
      gate/waitlist, so it's one list, not two.
