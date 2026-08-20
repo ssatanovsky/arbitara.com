@@ -142,6 +142,10 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .hero h1 { font-size: clamp(42px, 7vw, 82px); line-height: 1.02; margin: 0 0 26px; letter-spacing: -.02em; }
 .hero h1 .em { font-style: italic; color: var(--accent-ink); }
 .hero .lede { font-size: clamp(18px, 2.2vw, 21px); color: var(--ink-soft); max-width: 40ch; margin-bottom: 34px; }
+.hero-thesis { font-weight: 600; color: var(--ink); }
+.hero-etym { margin-top: 22px; font-size: 13.5px; color: var(--faint); max-width: 48ch; }
+.hero-etym b { font-family: var(--serif); font-style: normal; font-weight: 600; color: var(--muted); }
+.hero-etym i { font-style: italic; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 
 /* Optional photo treatment — applied only when config.hero.image is set
@@ -176,13 +180,13 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .hero-photo h1 { color: #FBF8F1; text-shadow: 0 2px 18px rgba(10,9,7,.45); }
 .hero-photo h1 .em { color: #E4C97A; }
 .hero-photo .lede { color: rgba(251,248,241,.95); text-shadow: 0 1px 10px rgba(10,9,7,.55); }
+.hero-photo .hero-thesis { color: rgba(251,248,241,.98); text-shadow: 0 1px 10px rgba(10,9,7,.55); }
+.hero-photo .hero-etym { color: rgba(251,248,241,.72); text-shadow: 0 1px 8px rgba(10,9,7,.6); }
+.hero-photo .hero-etym b { color: rgba(251,248,241,.9); }
 .hero-photo .btn-ghost { color: #FBF8F1; border-color: rgba(251,248,241,.4); }
 .hero-photo .btn-ghost:hover { border-color: #E4C97A; color: #E4C97A; }
 .hero-photo .btn-primary { background: #FBF8F1; color: #191712; }
 .hero-photo .btn-primary:hover { background: #E4C97A; color: #191712; }
-.hero-photo .arb-card { background: rgba(255,252,246,.45); box-shadow: 0 24px 60px -20px rgba(0,0,0,.55); backdrop-filter: blur(9px) saturate(140%); -webkit-backdrop-filter: blur(9px) saturate(140%); }
-.hero-photo .arb-card .lat, .hero-photo .arb-card .word, .hero-photo .arb-card .phon, .hero-photo .arb-card .pos, .hero-photo .arb-card .def, .hero-photo .arb-card .rule { text-shadow: 0 1px 2px rgba(255,252,246,.9); }
-.hero-photo .arb-card .rule { color: var(--ink-soft); }
 
 .btn {
   display: inline-flex; align-items: center; gap: 9px;
@@ -196,20 +200,6 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-2); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent-ink); }
 .btn svg { width: 16px; height: 16px; }
-
-/* arbitrium card */
-.arb-card {
-  background: var(--card); border: 1px solid var(--line); border-radius: 18px;
-  padding: 34px 34px 30px; box-shadow: var(--shadow); position: relative;
-}
-.arb-card .lat { font-size: 13px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
-.arb-card .word { font-family: var(--serif); font-size: clamp(38px, 6vw, 54px); line-height: 1; margin: 10px 0 4px; color: var(--ink); }
-.arb-card .word i { color: var(--accent-ink); }
-.arb-card .phon { color: var(--muted); font-style: italic; margin-bottom: 20px; font-size: 16px; }
-.arb-card .pos { font-size: 13px; color: var(--accent-ink); font-weight: 700; letter-spacing:.04em; }
-.arb-card .def { color: var(--ink-soft); margin: 6px 0 20px; }
-.arb-card .rule { border-top: 1px dashed var(--line-2); padding-top: 18px; font-size: 15px; color: var(--muted); }
-.arb-card .rule b { color: var(--ink); }
 
 /* stat strip */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-block: 1px solid var(--line); margin-top: clamp(48px,7vw,84px); }
@@ -570,8 +560,6 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 @media (max-width: 940px) {
   body { font-size: 17px; }
   .hero-grid { grid-template-columns: 1fr; }
-  .hero .arb-card { max-width: 460px; }
-  .hero-photo .arb-card { background: rgba(255,252,246,.94); backdrop-filter: blur(9px) saturate(120%); -webkit-backdrop-filter: blur(9px) saturate(120%); }
   /* Text is full-width here and the uploaded photo has high-contrast text on
      it, so a partial scrim ghosts through. Make the reading band effectively
      solid, leaving just a faint photo hint at the very top and bottom. Also
