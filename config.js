@@ -13,7 +13,7 @@
     // unlike every other section here, it isn't hidden with CSS on top of
     // static markup. It's confidential pre-launch copy, so nothing about it
     // (markup, nav link, footer link) is created at all unless switched on.
-    sections: { platform: true, disappear: true, anatomy: true, process: true, tiers: true, bias: true, ai: true, principles: true, toolkit: true, governance: false, contact: true },
+    sections: { platform: true, disappear: true, anatomy: true, process: true, tiers: true, assessment: true, bias: true, ai: true, principles: true, toolkit: true, governance: false, contact: true },
     tools: { checklist: true, diagnostic: true, record: true },
     banner: { enabled: false, text: "" },
     comingSoon: { enabled: false, heading: "Something is being built here.", text: "Arbitara is in stealth. Add your email and we'll be in touch." }
@@ -36,10 +36,11 @@
       // section hides — also hide the matching nav link and footer entry,
       // so a disabled section disappears everywhere, not just its own anchor
       ".arb-hide-platform #platform,.arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
-      ".arb-hide-tiers #tiers,.arb-hide-bias #bias,.arb-hide-ai #ai," +
+      ".arb-hide-tiers #tiers,.arb-hide-assessment #assessment,.arb-hide-bias #bias,.arb-hide-ai #ai," +
       ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
       ".arb-hide-platform .nav-links a[href='#platform'],.arb-hide-disappear .nav-links a[href='#disappear'],.arb-hide-anatomy .nav-links a[href='#anatomy']," +
       ".arb-hide-process .nav-links a[href='#process'],.arb-hide-tiers .nav-links a[href='#tiers']," +
+      ".arb-hide-assessment .nav-links a[href='#assessment']," +
       ".arb-hide-bias .nav-links a[href='#bias'],.arb-hide-ai .nav-links a[href='#ai']," +
       ".arb-hide-principles .nav-links a[href='#principles'],.arb-hide-toolkit .nav-links a[href='#toolkit']," +
       ".arb-hide-contact .nav-links a[href='#contact']{display:none!important;}" +
@@ -48,6 +49,7 @@
       ".arb-hide-anatomy .footer li:has(a[href='#anatomy'])," +
       ".arb-hide-process .footer li:has(a[href='#process'])," +
       ".arb-hide-tiers .footer li:has(a[href='#tiers'])," +
+      ".arb-hide-assessment .footer li:has(a[href='#assessment'])," +
       ".arb-hide-bias .footer li:has(a[href='#bias'])," +
       ".arb-hide-ai .footer li:has(a[href='#ai'])," +
       ".arb-hide-principles .footer li:has(a[href='#principles'])," +
@@ -301,6 +303,7 @@
   // elements get positioned and labeled exactly like any static section.
   function buildGovernanceSection(cfg) {
     if (!(cfg.sections && cfg.sections.governance === true)) return;
+    if (!docEl.hasAttribute("data-arb-fieldguide")) return; // lives on field-guide.html only
     if (document.getElementById("governance")) return; // already built
     var main = document.querySelector("main");
     if (!main) return;
@@ -376,6 +379,10 @@
       a.textContent = navLabelFor(cfg, "governance");
       navHost.appendChild(a);
     }
+    // Targets the FIRST footer column deliberately: this only ever builds on
+    // field-guide.html (see the data-arb-fieldguide guard above), where that
+    // column is "This Page" — the section belongs there, not in whichever
+    // column happens to be last.
     var footerCols = document.querySelectorAll(".footer ul");
     if (footerCols.length) {
       var li = document.createElement("li");
@@ -383,7 +390,7 @@
       fa.href = "#governance";
       fa.textContent = navLabelFor(cfg, "governance");
       li.appendChild(fa);
-      footerCols[footerCols.length - 1].appendChild(li);
+      footerCols[0].appendChild(li);
     }
   }
 
@@ -421,16 +428,19 @@
 
     var navHost = document.getElementById("navLinks");
     if (navHost) {
-      var navLinks = [].slice.call(navHost.querySelectorAll("a[href^='#']"));
-      navLinks.forEach(function (a) {
-        var id = a.getAttribute("href").slice(1);
-        if (rank.hasOwnProperty(id)) a.textContent = navLabelFor(cfg, id);
+      // Select every link, not just #-anchors — a static link (e.g. to
+      // field-guide.html) has no matching id in `rank`, but still needs to
+      // be reappended in the sort below or it gets left behind at whatever
+      // position the matched links' reordering happens to push it to.
+      var navLinks = [].slice.call(navHost.querySelectorAll("a"));
+      navLinks.forEach(function (a, i) {
+        var href = a.getAttribute("href") || "";
+        var id = href.charAt(0) === "#" ? href.slice(1) : null;
+        if (id && rank.hasOwnProperty(id)) a.textContent = navLabelFor(cfg, id);
+        a.__arbRank = (id && rank.hasOwnProperty(id)) ? rank[id] : (1000 + i);
       });
-      navLinks.sort(function (a, b) {
-        var ra = rank[a.getAttribute("href").slice(1)], rb = rank[b.getAttribute("href").slice(1)];
-        if (ra == null) ra = 999; if (rb == null) rb = 999;
-        return ra - rb;
-      }).forEach(function (a) { navHost.appendChild(a); });
+      navLinks.sort(function (a, b) { return a.__arbRank - b.__arbRank; })
+        .forEach(function (a) { navHost.appendChild(a); delete a.__arbRank; });
     }
 
     // Footer keeps its existing two-column grouping — only the relative order

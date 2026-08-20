@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" data-arb-fieldguide>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Field Guide — Arbitara</title>
+<meta name="description" content="The full Arbitara decision framework: the anatomy of a good decision, the twelve-step process, the three tiers, bias and noise, working principles, and a practitioner's toolkit.">
+<meta property="og:title" content="The Field Guide — Arbitara">
+<meta property="og:description" content="The full Arbitara decision framework: the anatomy of a good decision, the twelve-step process, the three tiers, bias and noise, working principles, and a practitioner's toolkit.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#FAF7F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14130F" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%231C2340'/%3E%3Cpath d='M20 6 L32 19 L8 19 Z' fill='%23EFEAE0'/%3E%3Cpath d='M20 10.6 L27.4 18 L12.6 18 Z' fill='%23BE9A3B'/%3E%3Cpath d='M8 21 L32 21 L20 34 Z' fill='%23BE9A3B'/%3E%3Cpath d='M12.6 22 L27.4 22 L20 29.4 Z' fill='%23EFEAE0'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.className+=' arb-cloak';setTimeout(function(){document.documentElement.classList.remove('arb-cloak');},2000);</script>
+<style>html.arb-cloak{visibility:hidden}</style>
+<script src="config.js"></script>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a href="index.html" class="brand" aria-label="Arbitara home">
+      <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect width="40" height="40" rx="9" fill="#1C2340"/>
+        <path d="M20 6 L32 19 L8 19 Z" fill="#EFEAE0"/>
+        <path d="M20 10.6 L27.4 18 L12.6 18 Z" fill="#BE9A3B"/>
+        <path d="M8 21 L32 21 L20 34 Z" fill="#BE9A3B"/>
+        <path d="M12.6 22 L27.4 22 L20 29.4 Z" fill="#EFEAE0"/>
+      </svg>
+      Arbitara <small>Decision Discipline</small>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Sections">
+      <a href="#anatomy">Anatomy</a>
+      <a href="#process">The Process</a>
+      <a href="#tiers">Tiers</a>
+      <a href="#assessment">Self-Check</a>
+      <a href="#bias">Bias &amp; Noise</a>
+      <a href="#principles">Principles</a>
+      <a href="#toolkit">Toolkit</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <div class="nav-tools">
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8 6 18M18 6l1.8-1.8"/></svg>
+      </button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============ FIELD GUIDE INTRO ============ -->
+<section class="hero" id="fgIntro" style="padding-bottom:40px">
+  <div class="wrap hero-grid" style="grid-template-columns:1fr">
+    <div class="reveal">
+      <p class="eyebrow">Arbitara · The Field Guide</p>
+      <h1>The full framework, for whoever wants to go deeper.</h1>
+      <p class="lede">Everything on this page is the detail behind the summary on the <a href="index.html">homepage</a>: the anatomy of a good decision, the twelve-step process, how to weigh a decision's tier, the bias catalog, seven working principles, and a practitioner's toolkit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANATOMY ============ -->
+<section id="anatomy">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">The anatomy of a good decision</p>
+      <h2>Judge the process, not the outcome.</h2>
+      <p>Decision science does not promise the right answer. It promises something more durable: that a rigorous process yields decisions as good as the information allows, and that their quality can be measured, improved, and learned from. Judging a decision by its result alone is a trap behavioral economists call <em>outcome bias</em>.</p>
+    </div>
+
+    <div class="grid g-2" style="margin-bottom:24px">
+      <div class="card reveal">
+        <span class="kicker">A poor decision, a good result</span>
+        <p style="font-size:16.5px;color:var(--ink-soft)">A general who charges in and wins by luck. The result flatters a process that ignored what was knowable.</p>
+      </div>
+      <div class="card reveal">
+        <span class="kicker">A sound decision, a poor result</span>
+        <p style="font-size:16.5px;color:var(--ink-soft)">A CFO who bought a strong business at a fair price, then the market collapsed. Good process, unlucky world.</p>
+      </div>
+    </div>
+
+    <div class="grid g-2">
+      <div class="card reveal">
+        <span class="kicker">Foundation · Before the analysis</span>
+        <h3>Framing is the first decision</h3>
+        <p style="margin-bottom:12px">“Should we acquire Company X?” has two answers. “How should we expand in Market Y?” has many, and one may be far better than an acquisition. Most organizations make that framing choice by default, without recognizing it as a choice at all. If you solve the wrong problem, it does not matter how correctly you solve it.</p>
+        <p style="font-size:14px;color:var(--faint)">Is the environment <em>complicated</em> (analysis finds the answer) or <em>complex</em> (probe, sense, adapt)? The two demand categorically different approaches.</p>
+      </div>
+      <div class="card reveal">
+        <span class="kicker">Foundation · The step most often skipped</span>
+        <h3>Name your assumptions before you analyze</h3>
+        <p style="margin-bottom:12px">Every strategic commitment rests on claims about the world. Named explicitly and dated, they bound what you need to learn, and create the mechanism to revisit the decision when conditions change. Skip the step and you don't avoid assumptions; you bury them inside options and criteria, invisible to any later review.</p>
+        <p style="font-size:14px;color:var(--faint)">Treating assumptions as facts is the Kodak failure mode: a reasonable decision, held long past the expiry of the reasoning that made it reasonable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE PROCESS (stepper) ============ -->
+<section id="process" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">The practitioner's process</p>
+      <h2>Twelve steps, four phases. Each exists because a specific, costly thing goes wrong in its absence.</h2>
+      <p>This is not an abstract checklist. It is a response to failure modes the literature has documented for sixty years. The right analysis in the wrong order produces the wrong decision as reliably as no analysis at all. Weight scales with stakes: a <strong>Light</strong> decision runs a core subset; <strong>Standard</strong> and <strong>Heavy</strong> run all twelve; a <strong>Fast-track</strong> call is logged on one screen.</p>
+    </div>
+
+    <div class="proc reveal">
+      <div class="phases" id="phases"><!-- injected --></div>
+      <div class="step-panel" id="stepPanel" aria-live="polite"><!-- injected --></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIERS ============ -->
+<section id="tiers">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Strategic · Tactical · Operational</p>
+      <h2>Not all decisions deserve the same weight.</h2>
+      <p>Conflating the three tiers is one of the most common and costly failures in management. Organizations over-govern decisions that should iterate, and under-govern the ones that lock in a decade. The misallocation isn't random. It's behavioral, and it's correctable by design.</p>
+    </div>
+
+    <div class="tier-grid reveal">
+      <div class="tier strategic">
+        <div class="gv">Maximum governance</div>
+        <div class="tname">Strategic</div>
+        <p style="font-size:14.5px;color:var(--muted);margin:0">Irreversible or slow-to-reverse. Sets direction. Forecloses options downstream. Asymmetric downside: a wrong call doesn't just fail to create value, it compounds.</p>
+        <ul>
+          <li>Market entry, platform bets, major capital, senior appointments</li>
+          <li>Full deliberation, explicit options, named owner, monitored assumptions</li>
+          <li><b>Failure mode:</b> under-governed: tactical process on strategic stakes</li>
+        </ul>
+      </div>
+      <div class="tier tactical">
+        <div class="gv">Proportionate governance</div>
+        <div class="tname">Tactical</div>
+        <p style="font-size:14.5px;color:var(--muted);margin:0">Bounded in scope. Reversible at reasonable cost. Executes within a strategy already set. Iterative: one round's learning informs the next.</p>
+        <ul>
+          <li>Budget within a mandate, hiring within headcount, market prioritization</li>
+          <li>Surface the tradeoffs; connect to strategic context. Not exhaustive.</li>
+          <li><b>Failure mode:</b> over-governed (slows execution) or drifts strategic</li>
+        </ul>
+      </div>
+      <div class="tier operational">
+        <div class="gv">Minimal governance</div>
+        <div class="tname">Operational</div>
+        <p style="font-size:14.5px;color:var(--muted);margin:0">Routine, high-volume, delegatable, locally correctable. Its proper home is the level closest to execution, not the room where strategy is decided.</p>
+        <ul>
+          <li>Day-to-day calls within defined authority</li>
+          <li>Delegated authority with explicit escalation criteria</li>
+          <li><b>Failure mode:</b> escalated: consuming attention that belongs on strategy</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Diagnostic -->
+    <div class="diag reveal">
+      <div class="diag-head">
+        <h3>Three tests to place a decision, before you deliberate</h3>
+        <p>Answer for the decision on your desk right now. All three are observable before the choice is made.</p>
+        <div class="tool-doc" data-tool-doc="diagnostic"></div>
+      </div>
+      <div class="diag-body">
+        <div class="diag-tests">
+          <div class="diag-q">
+            <div class="qh">1 · The reversibility test</div>
+            <p>To undo this, would you need another decision of comparable authority and process weight, or just a routine adjustment within the original authority?</p>
+            <div class="seg" data-q="rev">
+              <button data-v="1">Another major decision</button>
+              <button data-v="0">Routine adjustment</button>
+            </div>
+          </div>
+          <div class="diag-q">
+            <div class="qh">2 · The constraint test</div>
+            <p>Does this create binding constraints for every decision that follows, or does it operate within constraints that already exist?</p>
+            <div class="seg" data-q="con">
+              <button data-v="1">Creates new constraints</button>
+              <button data-v="0">Works within existing</button>
+            </div>
+          </div>
+          <div class="diag-q">
+            <div class="qh">3 · The asymmetry test</div>
+            <p>If this goes wrong, does the damage compound, consuming capital, attention, and trust for years, or is it contained and quickly corrected?</p>
+            <div class="seg" data-q="asy">
+              <button data-v="1">Compounds</button>
+              <button data-v="0">Contained</button>
+            </div>
+          </div>
+        </div>
+        <div class="diag-result" id="diagResult">
+          <div class="rlabel">This decision looks</div>
+          <div class="rtier none" id="rTier">Answer the three tests</div>
+          <p id="rNote">Where the compounding structure is present, the decision is strategic, regardless of the level at which it is being made.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SELF-ASSESSMENT ============ -->
+<section id="assessment">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">A five-question self-check</p>
+      <h2>Where does your organization actually stand?</h2>
+      <p>Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today, not how the org chart says they should.</p>
+    </div>
+
+    <div class="assess reveal">
+      <div class="assess-body">
+        <div class="assess-qs">
+          <div class="assess-q" data-aq="0">
+            <span class="aq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span>
+            <div class="aq-main">
+              <p class="aq-text">Do decisions across your organization reflect your strategy?</p>
+              <div class="seg aseg" data-aq-seg="0"><button type="button" data-v="0">Yes</button><button type="button" data-v="1">Not really</button></div>
+            </div>
+          </div>
+          <div class="assess-q" data-aq="1">
+            <span class="aq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+            <div class="aq-main">
+              <p class="aq-text">Can you tell which decisions your management or employees are currently working on?</p>
+              <div class="seg aseg" data-aq-seg="1"><button type="button" data-v="0">Yes</button><button type="button" data-v="1">Not really</button></div>
+            </div>
+          </div>
+          <div class="assess-q" data-aq="2">
+            <span class="aq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6Z"/><path d="M15 3v4h4"/><path d="M9 12h7M9 15.5h7M9 8.5h3"/></svg></span>
+            <div class="aq-main">
+              <p class="aq-text">Are the strategic and tactical decisions elaborated and documented according to your expectations?</p>
+              <div class="seg aseg" data-aq-seg="2"><button type="button" data-v="0">Yes</button><button type="button" data-v="1">Not really</button></div>
+            </div>
+          </div>
+          <div class="assess-q" data-aq="3">
+            <span class="aq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 0 1 14.5-6"/><path d="M18 3v4h-4"/><path d="M20.5 12a8.5 8.5 0 0 1-14.5 6"/><path d="M6 21v-4h4"/></svg></span>
+            <div class="aq-main">
+              <p class="aq-text">Do you know which decisions need to be reevaluated, and can you demonstrate governance over them?</p>
+              <div class="seg aseg" data-aq-seg="3"><button type="button" data-v="0">Yes</button><button type="button" data-v="1">Not really</button></div>
+            </div>
+          </div>
+          <div class="assess-q" data-aq="4">
+            <span class="aq-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+            <div class="aq-main">
+              <p class="aq-text">When a manager leaves, does the reasoning behind their decisions stay in the company?</p>
+              <div class="seg aseg" data-aq-seg="4"><button type="button" data-v="0">Yes</button><button type="button" data-v="1">Not really</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="assess-result">
+          <div class="ar-label">Your decision-management gap</div>
+          <div class="ar-meter"><div class="ar-fill" id="assessFill"></div></div>
+          <div class="ar-score" id="assessScore">0 / 5 answered</div>
+          <p class="ar-note" id="assessNote">Each question maps to one gap a systematic process closes: strategic alignment, visibility, documentation, governance, and institutional memory.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BIAS & NOISE ============ -->
+<section id="bias" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">The bias problem</p>
+      <h2>Bias is not a character flaw. It's a systems problem.</h2>
+      <p>Executives know the vocabulary: anchoring, sunk cost, groupthink. They return from the offsite resolved to decide differently, and nothing changes. Individual awareness does not remove the organizational conditions that activate bias. The response is not behavioral. It is architectural: a record, phase-separation, and a feedback loop. These six earn their place by activating frequently, doing directional damage, and yielding to process design.</p>
+    </div>
+
+    <div class="bias-grid reveal">
+      <div class="bias">
+        <h3><span class="dot"></span>Confirmation bias</h3>
+        <p class="mech">Decision-makers seek evidence consistent with a prior belief and discount what contradicts it, amplified by the status of whoever holds the belief.</p>
+        <p class="dmg"><b>Damage:</b> due diligence confirms rather than tests; contradictory evidence arrives but never registers.</p>
+      </div>
+      <div class="bias">
+        <h3><span class="dot"></span>Anchoring</h3>
+        <p class="mech">The first number seen (a valuation, a budget, a projected return) sets a reference point that shapes every later estimate, even with no rational basis.</p>
+        <p class="dmg"><b>Damage:</b> forecasts and allocations cluster around a starting figure that was never itself scrutinized.</p>
+      </div>
+      <div class="bias">
+        <h3><span class="dot"></span>Sunk cost</h3>
+        <p class="mech">Money spent, time committed, and public statements made generate pressure to continue, regardless of prospective merit. The investment is unrecoverable; the pressure is not.</p>
+        <p class="dmg"><b>Damage:</b> failed bets are extended long past the point at which abandonment is rational.</p>
+      </div>
+      <div class="bias">
+        <h3><span class="dot"></span>Groupthink</h3>
+        <p class="mech">The desire for cohesion suppresses dissent. Challenges to the perceived consensus go unraised; dissenting information is self-censored before it is spoken.</p>
+        <p class="dmg"><b>Damage:</b> the group converges on a position no individual, reasoning alone, would have endorsed.</p>
+      </div>
+      <div class="bias">
+        <h3><span class="dot"></span>Overconfidence</h3>
+        <p class="mech">Decision-makers overestimate their forecasts, their information, and their ability to execute, then compound it into planning assumptions.</p>
+        <p class="dmg"><b>Damage:</b> projects estimated cheaper, faster, surer than experience warrants. The surprise is built into the plan.</p>
+      </div>
+      <div class="bias">
+        <h3><span class="dot"></span>Availability heuristic</h3>
+        <p class="mech">Probability is judged by how easily an example comes to mind: driven by recency and vividness, not statistical frequency.</p>
+        <p class="dmg"><b>Damage:</b> risk appetite tracks the news cycle, not the evidence.</p>
+      </div>
+    </div>
+
+    <div class="noise-band reveal">
+      <div class="big">Noise</div>
+      <div>
+        <h3>The underappreciated twin</h3>
+        <p>Bias points the compass in a consistent wrong direction. <strong style="color:#fff">Noise makes it spin differently each time it's read</strong>: the same person deciding differently on Tuesday and Friday, the same committee rating a proposal by who chairs the room. Organizations obsess over the first problem. The second is larger, less measured, and more tractable: the same person with explicit criteria and structured deliberation produces dramatically less of it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRINCIPLES ============ -->
+<section id="principles">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Seven working principles</p>
+      <h2>The rules a practitioner can hold themselves to.</h2>
+      <p>Specific enough to constrain, honest enough to be tested. Adopt them for the next decision on your desk. No platform required.</p>
+    </div>
+
+    <div class="principles reveal">
+      <div class="principle"><h3>The arbitrium is always owned</h3><p>Every decision has one named owner, not a team, not a governance body. Accountability distributed across a committee is accountability held by no one.</p></div>
+      <div class="principle"><h3>The do-nothing option is never skipped</h3><p>The status quo is always a choice. State what inaction costs, its risks, its opportunity cost, or you haven't made a decision. You've deferred one.</p></div>
+      <div class="principle"><h3>Structure before speed, never instead of it</h3><p>Urgent decisions get a fast track, but the fast track is still structured. An unrecorded decision isn't faster; it's merely invisible.</p></div>
+      <div class="principle"><h3>Assumptions expire; the decision does not</h3><p>Track the reasoning separately from the commitment. Give every assumption a review date, and flag when review is overdue.</p></div>
+      <div class="principle"><h3>AI advises; the human decides</h3><p>The intelligence layer structures, surfaces, and stress-tests. It does not decide. The human choice, and every input that informed it, is recorded.</p></div>
+      <div class="principle"><h3>Institutional memory belongs to the organization</h3><p>The reasoning in a decision doesn't leave when its author does. Records can be marked superseded, never silently deleted.</p></div>
+      <div class="principle wide"><h3>The boundary is the discipline</h3><p>Arbitara is about strategic and tactical <em>management</em> decisions, not operational routing, not rule-based automation. The precision of that boundary is exactly what makes the practice worth having.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOOLKIT ============ -->
+<section id="toolkit" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">For practitioners</p>
+      <h2>Put it to work on your next decision.</h2>
+      <p>A pre-decision checklist you can run in five minutes, and a one-page decision record you can print and fill in by hand. Nothing to install.</p>
+    </div>
+
+    <div class="toolkit">
+      <div class="checklist reveal" id="checklist">
+        <div class="ch-head">
+          <div>
+            <h3>Before you decide: the ten-item pass</h3>
+            <p class="ch-desc">Run the ten-item pass over the decision on your desk.</p>
+          </div>
+          <span id="chCount">0 / 10</span>
+        </div>
+        <div class="tool-doc" data-tool-doc="checklist"></div>
+        <ul>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Have I framed the <b>right question</b>, one with more than two answers?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Is this environment <b>complicated or complex</b>? Analyze, or probe?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Which <b>tier</b> is this: strategic, tactical, or operational?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Have I written down the <b>assumptions</b>, each with a review date?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Are there <b>genuine alternatives</b>, not one real option and two straw men?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Is the <b>do-nothing option</b> priced, its costs and risks made explicit?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Are the <b>criteria weighted</b> and set <em>before</em> gathering evidence?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Is there <b>one named owner</b> accountable for the outcome?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Will the <b>reasoning</b> travel, not just the conclusion, to those who execute?</span></li>
+          <li class="check-item"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="ct">Is there a <b>review date</b>: a moment the decision must justify itself again?</span></li>
+        </ul>
+        <div class="check-progress">
+          <div class="progress-track"><div class="progress-fill" id="chFill"></div></div>
+          <span id="chMsg">Tap each item as you clear it.</span>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div id="recordPromo">
+        <h3 style="font-size:24px;margin:0 0 14px">The one-page decision record</h3>
+        <p style="color:var(--muted)">A single sheet with every field group (context, governance, options &amp; criteria, assumptions &amp; outcomes) ready to print or fill in a document. It's the smallest possible version of treating a decision as an object.</p>
+        <div class="hero-cta" style="margin-top:22px">
+          <a href="decision-record.html" class="btn btn-primary" target="_blank" rel="noopener">Open the printable one-pager
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        </div>
+        <div class="tool-doc" data-tool-doc="record"></div>
+        </div>
+
+        <h3 style="font-size:20px;margin:40px 0 16px">Where the ideas come from</h3>
+        <div class="reads">
+          <div class="read"><div class="rspine"></div><div><h4>Thinking, Fast and Slow</h4><div class="auth">Daniel Kahneman</div><div class="why">Why System 1 dominates exactly when System 2 is needed.</div></div></div>
+          <div class="read"><div class="rspine"></div><div><h4>Noise</h4><div class="auth">Kahneman, Sibony &amp; Sunstein</div><div class="why">The random variability in judgment that bias-talk misses.</div></div></div>
+          <div class="read"><div class="rspine"></div><div><h4>Smart Choices</h4><div class="auth">Hammond, Keeney &amp; Raiffa</div><div class="why">PrOACT: structured choice with alternatives at the center.</div></div></div>
+          <div class="read"><div class="rspine"></div><div><h4>Playing to Win</h4><div class="auth">Lafley &amp; Martin</div><div class="why">Strategy as a set of integrated choices, and what not to do.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <a href="index.html" class="brand">
+          <svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#1C2340"/><path d="M20 6 L32 19 L8 19 Z" fill="#EFEAE0"/><path d="M20 10.6 L27.4 18 L12.6 18 Z" fill="#BE9A3B"/><path d="M8 21 L32 21 L20 34 Z" fill="#BE9A3B"/><path d="M12.6 22 L27.4 22 L20 29.4 Z" fill="#EFEAE0"/></svg>
+          Arbitara
+        </a>
+        <p>A practice devoted to the arbitrium, the management decision. We write about framing, options, ownership, and the feedback loop most organizations never close. Something is being built here. For now, the field guide.</p>
+        <div class="stealth"><span class="pip"></span> Building quietly · more soon</div>
+      </div>
+      <div>
+        <h5>This Page</h5>
+        <ul>
+          <li><a href="#anatomy">Anatomy of a decision</a></li>
+          <li><a href="#process">The twelve-step process</a></li>
+          <li><a href="#tiers">The three tiers</a></li>
+          <li><a href="#bias">Bias &amp; noise</a></li>
+          <li><a href="#principles">Seven principles</a></li>
+          <li><a href="#toolkit">Pre-decision checklist</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Elsewhere on Arbitara.com</h5>
+        <ul>
+          <li><a href="index.html#platform">What Arbitara is</a></li>
+          <li><a href="index.html#disappear">The visibility gap</a></li>
+          <li><a href="index.html#ai">AI &amp; ownership</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div>© <span id="yr"></span> Arbitara · <span class="lat">Decide to win</span></div>
+      <div><a href="imprint.html">Imprint</a> · <a href="privacy.html">Privacy</a></div>
+      <div><a href="mailto:decide@arbitara.com">decide@arbitara.com</a></div>
+      <div><a href="https://ui-demo-e17.pages.dev" target="_blank" rel="noopener">Preview the workbench →</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
