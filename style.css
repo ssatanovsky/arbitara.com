@@ -534,7 +534,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 
 /* ---------- Footer ---------- */
 .footer { background: var(--paper-2); border-top: 1px solid var(--line); padding: 60px 0 40px; }
-.footer-top { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; margin-bottom: 44px; }
+.footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 26px; margin-bottom: 44px; }
 .footer .brand { margin-bottom: 16px; }
 .footer p { font-size: 14.5px; color: var(--muted); max-width: 42ch; }
 .footer h5 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 0 0 14px; font-family: var(--sans); font-weight: 700; }

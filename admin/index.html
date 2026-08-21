@@ -177,23 +177,6 @@
     </div>
 
     <div class="card">
-      <h2>White paper</h2>
-      <p class="desc">An optional PDF offered from the hero's second button. Stays hidden until a document is uploaded and switched on.</p>
-      <div class="row"><div class="lab">Show the button</div><label class="sw"><input type="checkbox" data-k="whitepaper.enabled"><span></span></label></div>
-      <div class="row"><div class="lab">Require contact details before download</div><label class="sw"><input type="checkbox" data-k="whitepaper.gated"><span></span></label></div>
-      <label class="fld">Document <span style="text-transform:none;font-weight:400;color:var(--faint)">(PDF, DOC, or DOCX, max 10MB)</span></label>
-      <div class="doc-upload" data-doc-for="whitepaper">
-        <div class="doc-preview empty">No document</div>
-        <div class="doc-actions">
-          <label class="btn btn-file">Upload document<input type="file" class="doc-file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
-          <button type="button" class="btn doc-remove hidden">Remove</button>
-          <span class="doc-msg"></span>
-        </div>
-        <input type="hidden" data-k="whitepaper.doc">
-      </div>
-    </div>
-
-    <div class="card">
       <h2>Site password protection</h2>
       <p class="desc">Require a password to view the whole public site. (This is separate from your admin password above.)</p>
       <div class="row"><div class="lab">Password required <small>Visitors must enter the site password</small></div>
@@ -427,23 +410,6 @@
     up.querySelector(".img-remove").addEventListener("click", function(){
       up.querySelector("input[type=hidden]").value="";
       setImagePreview(up, "");
-    });
-  }
-
-  // Same idea as wireStandaloneImageUpload, for a lone .doc-upload control
-  // that isn't part of buildTools()'s per-row delegation (e.g. the white
-  // paper's document, which lives outside #toolList).
-  function wireStandaloneDocUpload(up){
-    if(!up) return;
-    up.querySelector(".doc-file").addEventListener("change", function(e){
-      var id=up.getAttribute("data-doc-for");
-      var file=e.target.files[0];
-      e.target.value="";
-      if(file) uploadDoc(id, file, up);
-    });
-    up.querySelector(".doc-remove").addEventListener("click", function(){
-      up.querySelector("input[type=hidden]").value="";
-      setDocPreview(up, "");
     });
   }
 
@@ -723,7 +689,6 @@
     $("#pw").value=""; leadsLoaded=false; showConnect("Signed out.",false);
   });
   wireStandaloneImageUpload(document.querySelector('.img-upload[data-img-for="hero"]'));
-  wireStandaloneDocUpload(document.querySelector('.doc-upload[data-doc-for="whitepaper"]'));
 
   // ---- Tabs: Content (the switches above) vs Contacts (captured leads) ----
   var leadsLoaded=false;

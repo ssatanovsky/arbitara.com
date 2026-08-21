@@ -306,65 +306,6 @@
   })();
 
   /* ==========================================================================
-     White paper — an optional, admin-uploaded PDF behind the hero's second
-     button. Can stand alone or require the contact form first; either way it
-     stays hidden until a document is actually uploaded and switched on.
-     ========================================================================== */
-  (function initWhitepaper() {
-    var btn = document.getElementById("heroWpBtn");
-    if (!btn) return;
-
-    // The nav's "White paper" link just triggers the hero button's own
-    // (gated/ungated/disabled) behavior, wired below — one source of truth.
-    var navBtn = document.getElementById("navWpBtn");
-    if (navBtn) navBtn.addEventListener("click", function (e) { e.preventDefault(); btn.click(); });
-
-    var pendingDoc = null;
-
-    function scrollToContact() {
-      var el = document.getElementById("contact");
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      var card = document.querySelector(".contact-card");
-      if (card) {
-        card.classList.add("flash");
-        setTimeout(function () { card.classList.remove("flash"); }, 1800);
-      }
-    }
-
-    function boot(cfg) {
-      cfg = cfg || window.ARB_CONFIG || {};
-      var wp = cfg.whitepaper || {};
-      if (!wp.enabled || !wp.doc) {
-        btn.style.display = "none";
-        return;
-      }
-      if (wp.gated) {
-        btn.addEventListener("click", function (e) {
-          e.preventDefault();
-          pendingDoc = wp.doc;
-          scrollToContact();
-        });
-        window.ARB_ON_LEAD_CAPTURED = function () {
-          if (!pendingDoc) return;
-          window.open(pendingDoc, "_blank", "noopener");
-          pendingDoc = null;
-        };
-        window.ARB_HAS_PENDING_DOWNLOAD = function () { return !!pendingDoc; };
-      } else {
-        btn.setAttribute("href", wp.doc);
-        btn.setAttribute("target", "_blank");
-        btn.setAttribute("rel", "noopener");
-      }
-    }
-
-    if (window.ARB_READY && typeof window.ARB_READY.then === "function") {
-      window.ARB_READY.then(boot);
-    } else {
-      boot();
-    }
-  })();
-
-  /* ==========================================================================
      Decision Governance carousel — only exists in the DOM when config.js has
      built it (config.sections.governance === true), so this just wires
      behavior onto whatever it finds; nothing to do when it's absent.
@@ -522,11 +463,9 @@
       if (!form.consent.checked) { setMsg("Please agree to the Privacy Policy to continue.", true); form.consent.focus(); return; }
       btn.disabled = true;
       btn.textContent = "Sending…";
-      var hadPendingDownload = window.ARB_HAS_PENDING_DOWNLOAD && window.ARB_HAS_PENDING_DOWNLOAD();
       var send = window.ARB_SUBMIT_LEAD || function () { return Promise.resolve(); };
       send({ name: name, email: email, jobTitle: jobTitle, companySize: companySize, interest: interest, message: message, source: "arbitara.com contact" }).then(function () {
-        if (window.ARB_ON_LEAD_CAPTURED) window.ARB_ON_LEAD_CAPTURED();
-        setMsg(hadPendingDownload ? "Thank you. Your download will open in a new tab." : "Thank you. We'll be in touch.", false);
+        setMsg("Thank you. We'll be in touch.", false);
         form.reset();
         btn.disabled = false;
         btn.textContent = btnLabel;
