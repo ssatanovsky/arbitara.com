@@ -151,14 +151,14 @@
   "sectionOrder": [
     "governance",
     "platform",
-    "process",
-    "ai",
     "disappear",
     "anatomy",
+    "process",
     "tiers",
-    "assessment",
     "bias",
     "principles",
+    "ai",
+    "assessment",
     "toolkit",
     "contact"
   ],
@@ -168,7 +168,7 @@
     "headline": "The power to <span class=\"em\">decide</span> is a discipline, not a talent.",
     "lede": "Organizations map their processes, model their architectures, and instrument everything they do. Then they make their most consequential choices in a room, with no structure, no record, and no way to learn from what happens next. Arbitara is a practitioner's field guide to closing that gap.",
     "ctaPrimary": "Ask for a demo",
-    "ctaSecondary": "Download the white paper",
+    "ctaSecondary": "Read the white paper",
     "stats": [
       {
         "n": "<span class=\"u\">20%</span>",
