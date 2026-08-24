@@ -384,6 +384,31 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .noise-band p { color: #C9D0E4; font-size: 15.5px; margin: 0; }
 
 /* ---------- AI split ---------- */
+/* AI advises / human decides — small animated flow motif that replaces a
+   static hero image for this section; two node icons with a pulse of dots
+   running between them, looping gently to suggest a continuous exchange. */
+.ai-flow { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 520px; margin: 0 auto clamp(34px, 5vw, 52px); }
+.ai-flow-node { flex: none; width: 52px; height: 52px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); }
+.ai-flow-node svg { width: 24px; height: 24px; }
+.ai-flow-node.ai { color: var(--slate); border-color: color-mix(in srgb, var(--slate) 40%, var(--line-2)); }
+.ai-flow-node.human { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
+.ai-flow-label { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); flex: none; }
+.ai-flow-label.advises { color: var(--slate); }
+.ai-flow-label.decides { color: var(--accent-ink); }
+.ai-flow-line { position: relative; flex: 1; min-width: 40px; height: 2px; background: var(--line); border-radius: 2px; overflow: visible; }
+.ai-flow-dot { position: absolute; top: 50%; left: 0; width: 6px; height: 6px; border-radius: 999px; background: var(--accent); transform: translate(-50%, -50%); opacity: 0; animation: aiFlowDot 2.8s ease-in-out infinite; }
+.ai-flow-dot:nth-child(2) { animation-delay: .35s; }
+.ai-flow-dot:nth-child(3) { animation-delay: .7s; }
+@keyframes aiFlowDot {
+  0% { left: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-flow-dot { animation: none; left: 50%; opacity: .7; }
+}
+
 .ai-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 .ai-col { background: var(--card); border: 1px solid var(--line); border-radius: var(--rad); padding: 30px; box-shadow: var(--shadow-sm); }
 .ai-col.advises { border-top: 4px solid var(--slate); }
@@ -396,6 +421,18 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ai-col li svg { position: absolute; left: 0; top: 13px; width: 18px; height: 18px; }
 .ai-col.advises li svg { color: var(--slate); }
 .ai-col.decides li svg { color: var(--accent); }
+/* Each column's items fly in from their own side once .ai-split scrolls
+   into view (.reveal/.in toggling is handled by the site-wide IntersectionObserver in app.js). */
+.ai-col li { opacity: 0; transform: translateX(-18px); transition: opacity .5s ease, transform .5s ease; }
+.ai-col.decides li { transform: translateX(18px); }
+.ai-split.in .ai-col li { opacity: 1; transform: translateX(0); }
+.ai-split.in .ai-col li:nth-child(1) { transition-delay: .05s; }
+.ai-split.in .ai-col li:nth-child(2) { transition-delay: .15s; }
+.ai-split.in .ai-col li:nth-child(3) { transition-delay: .25s; }
+.ai-split.in .ai-col li:nth-child(4) { transition-delay: .35s; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-col li { transition: none; transform: none; opacity: 1; }
+}
 .ai-quote { text-align: center; max-width: 720px; margin: 40px auto 0; }
 .ai-quote p { font-family: var(--serif); font-size: clamp(22px, 3vw, 30px); font-style: italic; color: var(--ink); line-height: 1.35; }
 
