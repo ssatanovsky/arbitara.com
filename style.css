@@ -527,10 +527,15 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 }
 
 @media (max-width: 900px) {
-  .ai-illo-row { flex-direction: column; align-items: center; gap: 28px; }
+  /* Venn + platform leads, then the two cards stack directly on top of
+     each other (not with the diagram sandwiched between them). */
+  .ai-illo-row { flex-direction: column; align-items: center; gap: 22px; }
+  .ai-illo-center { order: 1; }
+  .ai-illo-list.left { order: 2; }
+  .ai-illo-list.right { order: 3; }
   .ai-illo-list { flex: none; width: 100%; max-width: 360px; margin-top: 0; }
   .ai-illo-list.right { text-align: left; }
-  .ai-illo-list.right li:not(.head-label) { flex-direction: row; transform: translateX(-16px); }
+  .ai-illo-list.right li:not(.head-label) { flex-direction: row; }
   .ai-illo-steps { flex-wrap: wrap; justify-content: center; }
 }
 @media (max-width: 480px) {
