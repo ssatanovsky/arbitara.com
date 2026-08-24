@@ -482,7 +482,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .platform-label { margin-top: 10px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .95s; }
 .ai-illo.in .platform-label { opacity: 1; }
 
-.ai-illo-bottom { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: clamp(26px, 4vw, 40px); padding: 20px 26px; border: 1px solid var(--line); border-radius: var(--rad); }
+.ai-illo-bottom { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: clamp(26px, 4vw, 40px); padding: 20px 26px; background: var(--card); border: 1px solid var(--line); border-radius: var(--rad); box-shadow: var(--shadow-sm); }
 .pedestal { flex: none; display: flex; flex-direction: column; align-items: center; gap: 0; opacity: 0; transform: scale(.7); transition: opacity .5s ease, transform .5s ease; transition-delay: 1.05s; }
 .ai-illo.in .pedestal { opacity: 1; transform: scale(1); }
 .pedestal svg { width: 34px; height: 34px; color: var(--accent-ink); }
