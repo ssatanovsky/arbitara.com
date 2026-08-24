@@ -412,17 +412,50 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 
 .ai-illo-center { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
 .ai-illo-venn { display: flex; align-items: center; gap: 10px; }
-.venn-circle { width: 108px; height: 108px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+.venn-circle { position: relative; width: 108px; height: 108px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
 .venn-circle.ai { color: var(--slate); border-color: color-mix(in srgb, var(--slate) 45%, var(--line-2)); transform: scale(.6) translateX(14px); }
 .venn-circle.human { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 50%, var(--line-2)); transform: scale(.6) translateX(-14px); }
 .ai-illo.in .venn-circle { opacity: 1; transform: scale(1) translateX(0); transition-delay: .1s; }
 .venn-icon { width: 42px; height: 42px; }
-.venn-center { display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .5s; }
+/* Ambient "breathing" ring — a soft pulsing outline, alternating AI/human,
+   so the two nodes read as continuously active rather than static once the
+   entrance settles. Animates box-shadow, not transform, so it never fights
+   the entrance transition above. */
+.venn-circle::after { content: ""; position: absolute; inset: 0; border-radius: 999px; box-shadow: 0 0 0 0 currentColor; opacity: 0; animation: vennBreathe 3.6s ease-in-out infinite; }
+.venn-circle.human::after { animation-delay: 1.8s; }
+@keyframes vennBreathe {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 0; }
+  50% { box-shadow: 0 0 0 8px currentColor; opacity: .16; }
+}
+
+.venn-center { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .5s; padding-top: 16px; min-width: 76px; }
 .ai-illo.in .venn-center { opacity: 1; }
-.venn-center span:not(:last-child)::after { content: "⇔"; display: block; color: var(--line-2); font-size: 9px; margin: 1px 0; }
+/* A small pulse travels between the two nodes, continuously, echoing the
+   ⇔ in "Collaboration ⇔ Context ⇔ Feedback". */
+.venn-pulse-dot { position: absolute; top: 0; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 65%, transparent); opacity: 0; animation: vennDotTravel 3.6s ease-in-out infinite; }
+@keyframes vennDotTravel {
+  0% { transform: translateX(-58px); opacity: 0; }
+  15% { opacity: 1; }
+  50% { transform: translateX(58px); opacity: 1; }
+  85% { opacity: 0; }
+  100% { transform: translateX(-58px); opacity: 0; }
+}
+/* The three words cycle one at a time instead of sitting stacked — each
+   <b> gets the full loop duration with a staggered start so only one is
+   visible at once. */
+.venn-cycle { position: relative; display: block; height: 14px; }
+.venn-cycle b { position: absolute; left: 50%; top: 0; font-weight: 700; white-space: nowrap; opacity: 0; animation: vennCycle 6s ease-in-out infinite; }
+.venn-cycle b:nth-child(1) { animation-delay: 0s; }
+.venn-cycle b:nth-child(2) { animation-delay: 2s; }
+.venn-cycle b:nth-child(3) { animation-delay: 4s; }
+@keyframes vennCycle {
+  0%, 3% { opacity: 0; transform: translate(-50%, 4px); }
+  10%, 23% { opacity: 1; transform: translate(-50%, 0); }
+  30%, 100% { opacity: 0; transform: translate(-50%, -4px); }
+}
 
 .ai-illo-platform { display: flex; margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden; }
-.platform-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--muted); border-left: 1px solid var(--line); opacity: 0; transform: translateY(10px); transition: opacity .45s ease, transform .45s ease; }
+.platform-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 18px 18px; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--muted); border-left: 1px solid var(--line); opacity: 0; transform: translateY(10px); transition: opacity .45s ease, transform .45s ease; }
 .platform-item:first-child { border-left: none; }
 .platform-item svg { width: 22px; height: 22px; color: var(--accent-ink); }
 .ai-illo.in .platform-item { opacity: 1; transform: translateY(0); }
@@ -430,6 +463,17 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ai-illo.in .platform-item:nth-child(2) { transition-delay: .65s; }
 .ai-illo.in .platform-item:nth-child(3) { transition-delay: .75s; }
 .ai-illo.in .platform-item:nth-child(4) { transition-delay: .85s; }
+/* Sequential pulse under each icon — Governance, Memory, Learning, Execution
+   "light up" in turn on a loop, reading as a pipeline that's always running. */
+.platform-item::after { content: ""; position: absolute; bottom: 7px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 999px; background: var(--accent); opacity: 0; animation: platformPulse 4.8s ease-in-out infinite; }
+.platform-item:nth-child(1)::after { animation-delay: 0s; }
+.platform-item:nth-child(2)::after { animation-delay: .4s; }
+.platform-item:nth-child(3)::after { animation-delay: .8s; }
+.platform-item:nth-child(4)::after { animation-delay: 1.2s; }
+@keyframes platformPulse {
+  0%, 84%, 100% { opacity: 0; box-shadow: 0 0 0 0 transparent; }
+  4%, 20% { opacity: 1; box-shadow: 0 0 5px 1px color-mix(in srgb, var(--accent) 60%, transparent); }
+}
 .platform-label { margin-top: 10px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .95s; }
 .ai-illo.in .platform-label { opacity: 1; }
 
@@ -448,18 +492,33 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ai-illo.in .ai-illo-steps .step:nth-of-type(1) { transition-delay: 1.25s; }
 .ai-illo.in .ai-illo-steps .step:nth-of-type(3) { transition-delay: 1.45s; }
 .ai-illo.in .ai-illo-steps .step:nth-of-type(5) { transition-delay: 1.65s; }
-.step-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--line-2)); color: var(--accent-ink); }
+.step-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--line-2)); color: var(--accent-ink); animation: stepIconPulse 3.6s ease-in-out infinite; }
 .step-icon svg { width: 19px; height: 19px; }
+.ai-illo-steps .step:nth-of-type(1) .step-icon { animation-delay: 0s; }
+.ai-illo-steps .step:nth-of-type(3) .step-icon { animation-delay: .5s; }
+.ai-illo-steps .step:nth-of-type(5) .step-icon { animation-delay: 1s; }
+@keyframes stepIconPulse {
+  0%, 86%, 100% { box-shadow: 0 0 0 0 transparent; border-color: color-mix(in srgb, var(--accent) 55%, var(--line-2)); }
+  4% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 20%, transparent); border-color: var(--accent); }
+}
 .ai-illo-steps .step-arrow { flex: none; width: 18px; height: 18px; color: var(--line-2); opacity: 0; transition: opacity .4s ease; }
 .ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(2) { transition-delay: 1.35s; }
 .ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(4) { transition-delay: 1.55s; }
-.ai-illo.in .ai-illo-steps .step-arrow { opacity: 1; }
+.ai-illo.in .ai-illo-steps .step-arrow { opacity: 1; animation: stepArrowPulse 3.6s ease-in-out infinite; }
+.ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(2) { animation-delay: .25s; }
+.ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(4) { animation-delay: .75s; }
+@keyframes stepArrowPulse { 0%, 90%, 100% { color: var(--line-2); } 8% { color: var(--accent); } }
 
 @media (prefers-reduced-motion: reduce) {
   .ai-illo-list li:not(.head-label), .venn-circle, .venn-center, .platform-item, .platform-label,
   .pedestal, .pedestal-note, .ai-illo-steps .step, .ai-illo-steps .step-arrow {
     transition: none; transform: none; opacity: 1;
   }
+  .venn-circle::after, .venn-pulse-dot, .platform-item::after, .step-icon, .ai-illo-steps .step-arrow {
+    animation: none;
+  }
+  .venn-cycle b { animation: none; opacity: 1; position: static; display: block; }
+  .venn-cycle b:not(:first-child) { display: none; }
 }
 
 @media (max-width: 900px) {
