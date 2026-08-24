@@ -395,28 +395,33 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .ai-illo { margin-bottom: clamp(30px, 4vw, 46px); }
 .ai-illo-row { display: flex; align-items: flex-start; justify-content: center; gap: clamp(16px, 3vw, 36px); }
 
-.ai-illo-list { flex: 0 0 200px; list-style: none; margin: 44px 0 0; padding: 0; }
-.ai-illo-list.right { text-align: right; }
-.ai-illo-list .head-label { font-family: var(--sans); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 16px; }
-.ai-illo-list li:not(.head-label) { display: flex; align-items: center; gap: 10px; padding: 9px 0; font-size: 14px; color: var(--ink-soft); opacity: 0; transition: opacity .5s ease, transform .5s ease; }
-.ai-illo-list.left li:not(.head-label) { transform: translateX(-16px); }
-.ai-illo-list.right li:not(.head-label) { flex-direction: row-reverse; transform: translateX(16px); }
+/* Each side is now a whole card that flies in as one unit — reads as a
+   deliberate panel, not loose floating bullets. */
+.ai-illo-list { flex: 0 0 220px; list-style: none; margin: 30px 0 0; padding: 22px 22px 20px; background: var(--card); border: 1px solid var(--line); border-radius: var(--rad); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+.ai-illo-list.left { transform: translateX(-30px); border-top: 3px solid var(--slate); }
+.ai-illo-list.right { transform: translateX(30px); text-align: right; border-top: 3px solid var(--accent); }
+.ai-illo.in .ai-illo-list { opacity: 1; transform: translateX(0); transition-delay: .05s; }
+.ai-illo-list .head-label { font-family: var(--sans); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
+.ai-illo-list li:not(.head-label) { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--line); opacity: 0; transition: opacity .4s ease; }
+.ai-illo-list li:first-of-type { border-top: none; }
+.ai-illo-list.right li:not(.head-label) { flex-direction: row-reverse; }
 .ai-illo-list li svg { flex: none; width: 19px; height: 19px; }
 .ai-illo-list.left li svg { color: var(--slate); }
 .ai-illo-list.right li svg { color: var(--accent-ink); }
-.ai-illo.in .ai-illo-list li:not(.head-label) { opacity: 1; transform: translateX(0); }
-.ai-illo-list li:nth-child(2) { transition-delay: .15s; }
-.ai-illo-list li:nth-child(3) { transition-delay: .3s; }
-.ai-illo-list li:nth-child(4) { transition-delay: .45s; }
-.ai-illo-list li:nth-child(5) { transition-delay: .6s; }
+.ai-illo.in .ai-illo-list li:not(.head-label) { opacity: 1; }
+.ai-illo.in .ai-illo-list li:nth-child(2) { transition-delay: .35s; }
+.ai-illo.in .ai-illo-list li:nth-child(3) { transition-delay: .5s; }
+.ai-illo.in .ai-illo-list li:nth-child(4) { transition-delay: .65s; }
+.ai-illo.in .ai-illo-list li:nth-child(5) { transition-delay: .8s; }
 
 .ai-illo-center { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
 .ai-illo-venn { display: flex; align-items: center; gap: 10px; }
-.venn-circle { position: relative; width: 108px; height: 108px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+.venn-circle { position: relative; width: 108px; height: 108px; border-radius: 999px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+.venn-name { font-family: var(--sans); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .venn-circle.ai { color: var(--slate); border-color: color-mix(in srgb, var(--slate) 45%, var(--line-2)); transform: scale(.6) translateX(14px); }
 .venn-circle.human { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 50%, var(--line-2)); transform: scale(.6) translateX(-14px); }
 .ai-illo.in .venn-circle { opacity: 1; transform: scale(1) translateX(0); transition-delay: .1s; }
-.venn-icon { width: 42px; height: 42px; }
+.venn-icon { width: 36px; height: 36px; }
 /* Ambient "breathing" ring — a soft pulsing outline, alternating AI/human,
    so the two nodes read as continuously active rather than static once the
    entrance settles. Animates box-shadow, not transform, so it never fights
@@ -530,7 +535,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 }
 @media (max-width: 480px) {
   .venn-circle { width: 84px; height: 84px; }
-  .venn-icon { width: 32px; height: 32px; }
+  .venn-icon { width: 26px; height: 26px; }
+  .venn-name { font-size: 9px; }
   .ai-illo-platform { flex-wrap: wrap; }
   .platform-item { flex: 1 1 45%; border-left: none; border-top: 1px solid var(--line); }
   .platform-item:nth-child(1), .platform-item:nth-child(2) { border-top: none; }
