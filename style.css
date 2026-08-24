@@ -383,33 +383,101 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .noise-band h3 { color: #fff; font-size: 22px; margin: 0 0 8px; }
 .noise-band p { color: #C9D0E4; font-size: 15.5px; margin: 0; }
 
-/* ---------- AI split ---------- */
-/* AI advises / human decides — small animated flow motif that replaces a
-   static hero image for this section; two node icons with a pulse of dots
-   running between them, looping gently to suggest a continuous exchange. */
-.ai-flow { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 520px; margin: 0 auto clamp(34px, 5vw, 52px); }
-.ai-flow-node { flex: none; width: 52px; height: 52px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); }
-.ai-flow-node svg { width: 24px; height: 24px; }
-.ai-flow-node.ai { color: var(--slate); border-color: color-mix(in srgb, var(--slate) 40%, var(--line-2)); }
-.ai-flow-node.human { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
-.ai-flow-label { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); flex: none; }
-.ai-flow-label.advises { color: var(--slate); }
-.ai-flow-label.decides { color: var(--accent-ink); }
-.ai-flow-line { position: relative; flex: 1; min-width: 40px; height: 2px; background: var(--line); border-radius: 2px; overflow: visible; }
-.ai-flow-dot { position: absolute; top: 50%; left: 0; width: 6px; height: 6px; border-radius: 999px; background: var(--accent); transform: translate(-50%, -50%); opacity: 0; animation: aiFlowDot 2.8s ease-in-out infinite; }
-.ai-flow-dot:nth-child(2) { animation-delay: .35s; }
-.ai-flow-dot:nth-child(3) { animation-delay: .7s; }
-@keyframes aiFlowDot {
-  0% { left: 0%; opacity: 0; }
-  12% { opacity: 1; }
-  88% { opacity: 1; }
-  100% { left: 100%; opacity: 0; }
-}
+/* ---------- AI illustration ---------- */
+/* Replaces a static uploaded diagram with the same content, rebuilt as
+   native SVG/HTML in the site's own palette, and animated in on scroll:
+   two icon-lists either side, a venn of AI+human meeting in the middle,
+   a "strategic platform" bar underneath, and a closing statement + a
+   three-step loop. Everything keys off .ai-illo.in (the site-wide
+   .reveal/.in IntersectionObserver in app.js) with staggered per-child
+   delays so the whole thing assembles piece by piece rather than as one
+   flat fade. */
+.ai-illo { margin-bottom: clamp(30px, 4vw, 46px); }
+.ai-illo-row { display: flex; align-items: flex-start; justify-content: center; gap: clamp(16px, 3vw, 36px); }
+
+.ai-illo-list { flex: 0 0 200px; list-style: none; margin: 44px 0 0; padding: 0; }
+.ai-illo-list.right { text-align: right; }
+.ai-illo-list .head-label { font-family: var(--sans); font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 16px; }
+.ai-illo-list li:not(.head-label) { display: flex; align-items: center; gap: 10px; padding: 9px 0; font-size: 14px; color: var(--ink-soft); opacity: 0; transition: opacity .5s ease, transform .5s ease; }
+.ai-illo-list.left li:not(.head-label) { transform: translateX(-16px); }
+.ai-illo-list.right li:not(.head-label) { flex-direction: row-reverse; transform: translateX(16px); }
+.ai-illo-list li svg { flex: none; width: 19px; height: 19px; }
+.ai-illo-list.left li svg { color: var(--slate); }
+.ai-illo-list.right li svg { color: var(--accent-ink); }
+.ai-illo.in .ai-illo-list li:not(.head-label) { opacity: 1; transform: translateX(0); }
+.ai-illo-list li:nth-child(2) { transition-delay: .15s; }
+.ai-illo-list li:nth-child(3) { transition-delay: .3s; }
+.ai-illo-list li:nth-child(4) { transition-delay: .45s; }
+.ai-illo-list li:nth-child(5) { transition-delay: .6s; }
+
+.ai-illo-center { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
+.ai-illo-venn { display: flex; align-items: center; gap: 10px; }
+.venn-circle { width: 108px; height: 108px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1.5px solid var(--line-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .6s ease, transform .6s ease; }
+.venn-circle.ai { color: var(--slate); border-color: color-mix(in srgb, var(--slate) 45%, var(--line-2)); transform: scale(.6) translateX(14px); }
+.venn-circle.human { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 50%, var(--line-2)); transform: scale(.6) translateX(-14px); }
+.ai-illo.in .venn-circle { opacity: 1; transform: scale(1) translateX(0); transition-delay: .1s; }
+.venn-icon { width: 42px; height: 42px; }
+.venn-center { display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .5s; }
+.ai-illo.in .venn-center { opacity: 1; }
+.venn-center span:not(:last-child)::after { content: "⇔"; display: block; color: var(--line-2); font-size: 9px; margin: 1px 0; }
+
+.ai-illo-platform { display: flex; margin-top: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden; }
+.platform-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--muted); border-left: 1px solid var(--line); opacity: 0; transform: translateY(10px); transition: opacity .45s ease, transform .45s ease; }
+.platform-item:first-child { border-left: none; }
+.platform-item svg { width: 22px; height: 22px; color: var(--accent-ink); }
+.ai-illo.in .platform-item { opacity: 1; transform: translateY(0); }
+.ai-illo.in .platform-item:nth-child(1) { transition-delay: .55s; }
+.ai-illo.in .platform-item:nth-child(2) { transition-delay: .65s; }
+.ai-illo.in .platform-item:nth-child(3) { transition-delay: .75s; }
+.ai-illo.in .platform-item:nth-child(4) { transition-delay: .85s; }
+.platform-label { margin-top: 10px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); opacity: 0; transition: opacity .5s ease; transition-delay: .95s; }
+.ai-illo.in .platform-label { opacity: 1; }
+
+.ai-illo-bottom { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: clamp(26px, 4vw, 40px); padding: 20px 26px; border: 1px solid var(--line); border-radius: var(--rad); }
+.pedestal { flex: none; display: flex; flex-direction: column; align-items: center; gap: 0; opacity: 0; transform: scale(.7); transition: opacity .5s ease, transform .5s ease; transition-delay: 1.05s; }
+.ai-illo.in .pedestal { opacity: 1; transform: scale(1); }
+.pedestal svg { width: 34px; height: 34px; color: var(--accent-ink); }
+.pedestal-base { width: 44px; height: 8px; margin-top: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-ink)); }
+.pedestal-note { flex: 1 1 220px; font-size: 14.5px; color: var(--ink-soft); margin: 0; opacity: 0; transition: opacity .5s ease; transition-delay: 1.15s; }
+.ai-illo.in .pedestal-note { opacity: 1; }
+.pedestal-note b { color: var(--ink); }
+
+.ai-illo-steps { flex: none; display: flex; align-items: center; gap: 10px; }
+.ai-illo-steps .step { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 96px; text-align: center; font-size: 11.5px; font-weight: 600; color: var(--muted); opacity: 0; transform: translateY(8px); transition: opacity .4s ease, transform .4s ease; }
+.ai-illo.in .ai-illo-steps .step { opacity: 1; transform: translateY(0); }
+.ai-illo.in .ai-illo-steps .step:nth-of-type(1) { transition-delay: 1.25s; }
+.ai-illo.in .ai-illo-steps .step:nth-of-type(3) { transition-delay: 1.45s; }
+.ai-illo.in .ai-illo-steps .step:nth-of-type(5) { transition-delay: 1.65s; }
+.step-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--line-2)); color: var(--accent-ink); }
+.step-icon svg { width: 19px; height: 19px; }
+.ai-illo-steps .step-arrow { flex: none; width: 18px; height: 18px; color: var(--line-2); opacity: 0; transition: opacity .4s ease; }
+.ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(2) { transition-delay: 1.35s; }
+.ai-illo.in .ai-illo-steps .step-arrow:nth-of-type(4) { transition-delay: 1.55s; }
+.ai-illo.in .ai-illo-steps .step-arrow { opacity: 1; }
+
 @media (prefers-reduced-motion: reduce) {
-  .ai-flow-dot { animation: none; left: 50%; opacity: .7; }
+  .ai-illo-list li:not(.head-label), .venn-circle, .venn-center, .platform-item, .platform-label,
+  .pedestal, .pedestal-note, .ai-illo-steps .step, .ai-illo-steps .step-arrow {
+    transition: none; transform: none; opacity: 1;
+  }
 }
 
-.ai-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media (max-width: 900px) {
+  .ai-illo-row { flex-direction: column; align-items: center; gap: 28px; }
+  .ai-illo-list { flex: none; width: 100%; max-width: 360px; margin-top: 0; }
+  .ai-illo-list.right { text-align: left; }
+  .ai-illo-list.right li:not(.head-label) { flex-direction: row; transform: translateX(-16px); }
+  .ai-illo-steps { flex-wrap: wrap; justify-content: center; }
+}
+@media (max-width: 480px) {
+  .venn-circle { width: 84px; height: 84px; }
+  .venn-icon { width: 32px; height: 32px; }
+  .ai-illo-platform { flex-wrap: wrap; }
+  .platform-item { flex: 1 1 45%; border-left: none; border-top: 1px solid var(--line); }
+  .platform-item:nth-child(1), .platform-item:nth-child(2) { border-top: none; }
+}
+
+.ai-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: clamp(30px, 4vw, 46px); }
 .ai-col { background: var(--card); border: 1px solid var(--line); border-radius: var(--rad); padding: 30px; box-shadow: var(--shadow-sm); }
 .ai-col.advises { border-top: 4px solid var(--slate); }
 .ai-col.decides { border-top: 4px solid var(--accent); }
