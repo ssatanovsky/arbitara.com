@@ -536,7 +536,10 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .ai-illo-list { flex: none; width: 100%; max-width: 360px; margin-top: 0; }
   .ai-illo-list.right { text-align: left; }
   .ai-illo-list.right li:not(.head-label) { flex-direction: row; }
-  .ai-illo-steps { flex-wrap: wrap; justify-content: center; }
+  /* flex:none on .ai-illo-steps (base rule) refuses to shrink, so without an
+     explicit width here it just overflows past .ai-illo-bottom instead of
+     ever getting narrow enough to trigger its own wrap. */
+  .ai-illo-steps { flex: none; width: 100%; flex-wrap: wrap; justify-content: center; }
 }
 @media (max-width: 480px) {
   .venn-circle { width: 84px; height: 84px; }
