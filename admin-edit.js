@@ -126,7 +126,7 @@
       pop.className = "arb-admin-pop";
       pop.innerHTML =
         '<h4>Admin sign in</h4>' +
-        '<input type="text" id="arbUser" placeholder="Username" autocomplete="username">' +
+        '<input type="text" id="arbUser" placeholder="Username (leave blank for the admin password)" autocomplete="username">' +
         '<input type="password" id="arbPass" placeholder="Password" autocomplete="current-password">' +
         '<button type="button" id="arbLoginBtn">Sign in</button>' +
         '<div class="arb-admin-msg" id="arbLoginMsg"></div>';
@@ -135,9 +135,13 @@
       var doLogin = function () {
         var username = pop.querySelector("#arbUser").value.trim();
         var password = pop.querySelector("#arbPass").value;
-        if (!username || !password) { msg.textContent = "Enter a username and password."; return; }
+        if (!password) { msg.textContent = "Enter a password."; return; }
         msg.textContent = "Signing in…";
-        api("/demo-login", { method: "POST", body: { username: username, password: password } })
+        // Leaving username blank is the account system's break-glass
+        // bootstrap login (password only) — send a body with no username
+        // key at all, not an empty string, since that's what it checks for.
+        var loginBody = username ? { username: username, password: password } : { password: password };
+        api("/demo-login", { method: "POST", body: loginBody })
           .then(function (d) {
             setLs(TOK, d.token); setLs(NAME, d.name); setLs(ROLE, d.role);
             btn.innerHTML = ICON_USER;
