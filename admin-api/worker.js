@@ -94,7 +94,16 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const origin = env.ALLOW_ORIGIN || "https://arbitara.com";
+    // Reflect-and-validate against an allowlist, not a single static string
+    // — ALLOW_ORIGIN was previously always echoed back verbatim regardless
+    // of the request's real Origin, so anything but the exact string
+    // "https://arbitara.com" (localhost dev preview, www.arbitara.com,
+    // wherever) got a CORS mismatch and a silent "Failed to fetch" in the
+    // browser. Comma-separate multiple origins in the env var.
+    const allowedOrigins = String(env.ALLOW_ORIGIN || "https://arbitara.com,http://localhost:8781")
+      .split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    const requestOrigin = request.headers.get("Origin") || "";
+    const origin = allowedOrigins.indexOf(requestOrigin) >= 0 ? requestOrigin : allowedOrigins[0];
     const repo = env.REPO || "ssatanovsky/arbitara.com";
     const file = env.FILE || "config.json";
     const branch = env.BRANCH || "main";
