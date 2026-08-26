@@ -28,6 +28,24 @@
  * service binding is required, not optional. A browser on arbitara.com
  * never calls arbitara-demo directly either way, so no CORS changes were
  * needed on its side regardless.
+ *
+ * Any arbitara-demo account (not just role "admin") can sign in via
+ * POST /demo-login — non-admin roles just don't pass verifyDemoAdmin(), so
+ * /config, /upload, /leads, /gated-admin stay admin-only regardless. What a
+ * non-admin login IS good for: GET /gated-content, which returns audience-
+ * gated content (see the "gated content" section below) filtered to
+ * whatever that specific account is authorized to see.
+ *
+ *   POST /login        { password }            -> { token }  (own password, admin)
+ *   POST /demo-login    { username, password }  -> { token, name, role, username }
+ *   GET  /config         (Bearer)               -> { config, sha }
+ *   PUT  /config          (Bearer) { config, sha } -> { sha }
+ *   GET  /gated-content   (Bearer, any identity) -> { blocks: {"<key>": html} }
+ *   GET  /gated-admin     (Bearer, admin)        -> { doc }
+ *   PUT  /gated-admin     (Bearer, admin) { doc } -> { ok }
+ *   POST /upload           (Bearer)             { id, contentBase64, contentType } -> { path }
+ *   POST /lead            (public)              { name, email, ... } -> { ok }
+ *   GET  /leads            (Bearer)             -> { leads: [...] }
  */
 
 const enc = new TextEncoder();
@@ -81,18 +99,27 @@ async function verifySession(secret, token) {
     return data.exp && Date.now() < data.exp;
   } catch (e) { return false; }
 }
-// Delegates to the ui-demo account system: is this bearer token a valid,
-// currently-active session for an account with role "admin"? One extra
-// fetch, only reached when our own session check above didn't already
-// authenticate the request (see the `||` short-circuit at the call site).
-async function verifyDemoAdmin(token, demoApi) {
-  if (!token || !demoApi) return false;
+// Delegates to the ui-demo account system: resolves a bearer token to that
+// account's identity ({name, role, username}), or null if it's not a valid,
+// currently-active session. Reached via the DEMO_API service binding — see
+// the header comment for why not a plain fetch(). Shared by verifyDemoAdmin
+// (content-editing access) and the gated-content endpoints below (any valid
+// identity, not just admin).
+async function getDemoIdentity(token, demoApi) {
+  if (!token || !demoApi) return null;
   try {
     const r = await demoApi.fetch("https://arbitara-demo/whoami", { headers: { "Authorization": "Bearer " + token } });
-    if (!r.ok) return false;
-    const d = await r.json();
-    return !!(d && d.role === "admin");
-  } catch (e) { return false; }
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+// Is this bearer token a valid, currently-active session for an account with
+// role "admin"? One extra fetch, only reached when our own session check
+// above didn't already authenticate the request (see the `||` short-circuit
+// at the call site).
+async function verifyDemoAdmin(token, demoApi) {
+  const id = await getDemoIdentity(token, demoApi);
+  return !!(id && id.role === "admin");
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -143,13 +170,15 @@ export default {
       return json({ token: await makeSession(env.SESSION_SECRET, 12) });
     }
 
-    // ---- POST /demo-login  { username, password } -> { token, name, role } ----
-    // Lets an arbitara-demo account with role "admin" edit arbitara.com's
-    // content, without this Worker ever seeing that account system's
-    // signing secret. Just relays the login attempt server-side and passes
-    // the resulting token straight back — it's the same token the caller
-    // then sends as Authorization: Bearer on /config, /upload, /leads,
-    // which verifyDemoAdmin() below checks against demoApi's own /whoami.
+    // ---- POST /demo-login  { username, password } -> { token, name, role, username } ----
+    // Lets any arbitara-demo account sign in on arbitara.com, without this
+    // Worker ever seeing that account system's signing secret. Just relays
+    // the login attempt server-side and passes the resulting token straight
+    // back. What that token then unlocks depends on the account's role,
+    // checked separately per endpoint: verifyDemoAdmin() (role === "admin")
+    // gates /config, /upload, /leads, /gated-admin; any valid identity
+    // (getDemoIdentity()) is enough for /gated-content, which filters by the
+    // account's assigned audiences instead of by role.
     if (url.pathname.endsWith("/demo-login") && request.method === "POST") {
       if (!demoApi) return json({ error: "Account service is not configured (missing DEMO_API binding)." }, 500);
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
@@ -165,8 +194,7 @@ export default {
       }
       let demoData; try { demoData = await demoResp.json(); } catch (e) { demoData = {}; }
       if (!demoResp.ok) return json({ error: demoData.error || "Incorrect username or password." }, 401);
-      if (demoData.role !== "admin") return json({ error: "This account doesn't have content-editing access." }, 403);
-      return json({ token: demoData.token, name: demoData.name, role: demoData.role });
+      return json({ token: demoData.token, name: demoData.name, role: demoData.role, username: demoData.username || null });
     }
 
     const bearer = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/, "");
@@ -195,6 +223,68 @@ export default {
       const d = await r.json();
       if (!r.ok) return json({ error: (d && d.message) || ("GitHub write failed (" + r.status + ")") }, 502);
       return json({ sha: d.content.sha });
+    }
+
+    // Gated content lives in KV (the LEADS namespace, key "gated:doc"), never
+    // in config.json/the git repo — that file is a fully public static asset
+    // fetched unauthenticated by every visitor, so anything confidential put
+    // there (even if hidden client-side) would just be readable via view-
+    // source. See CLAUDE.md's "Audience-gated content" section for the full
+    // rationale. Shape: { audiences: [{id, label, usernames}], blocks:
+    // {"<key>": {html, audiences: [id,...]}} }.
+    const GATED_KEY = "gated:doc";
+    async function getGatedDoc(env) {
+      let doc; try { doc = JSON.parse((await env.LEADS.get(GATED_KEY)) || "null"); } catch (e) { doc = null; }
+      return doc || { audiences: [], blocks: {} };
+    }
+
+    // ---- GET /gated-content -> { blocks: {"<key>": "<html>", ...} } ----
+    // Any authenticated identity, not just admin — an own-password admin
+    // session or a demo account with role "admin" gets every block (same
+    // reach as their edit powers elsewhere); any other valid demo account
+    // gets only the blocks whose audience list includes an audience they're
+    // a member of (matched by username). A key an account isn't authorized
+    // for is never mentioned in the response — not filtered client-side,
+    // never sent, so there's nothing for an unauthorized caller to discover.
+    if (url.pathname.endsWith("/gated-content") && request.method === "GET") {
+      const ownSession = await verifySession(env.SESSION_SECRET, bearer);
+      const identity = ownSession ? null : await getDemoIdentity(bearer, demoApi);
+      if (!ownSession && !identity) return json({ error: "unauthorized" }, 401);
+      const doc = await getGatedDoc(env);
+      const blocks = {};
+      if (ownSession || identity.role === "admin") {
+        Object.keys(doc.blocks || {}).forEach(function (key) { blocks[key] = doc.blocks[key].html; });
+      } else {
+        const myAudiences = (doc.audiences || [])
+          .filter(function (a) { return (a.usernames || []).indexOf(identity.username) >= 0; })
+          .map(function (a) { return a.id; });
+        Object.keys(doc.blocks || {}).forEach(function (key) {
+          const b = doc.blocks[key];
+          if ((b.audiences || []).some(function (a) { return myAudiences.indexOf(a) >= 0; })) blocks[key] = b.html;
+        });
+      }
+      return json({ blocks: blocks });
+    }
+
+    // ---- GET /gated-admin -> { doc } / PUT /gated-admin { doc } -> { ok } ----
+    // Admin-only (same `authed` check as /config) — manages the whole
+    // audiences+blocks document as one unit, same read-modify-write-whole-
+    // document pattern /config uses against GitHub, just against KV instead.
+    // No sha/optimistic-concurrency here unlike /config — an accepted
+    // simplification since this is single-admin-at-a-time in practice.
+    if (url.pathname.endsWith("/gated-admin") && request.method === "GET") {
+      if (!authed) return json({ error: "unauthorized" }, 401);
+      return json({ doc: await getGatedDoc(env) });
+    }
+    if (url.pathname.endsWith("/gated-admin") && request.method === "PUT") {
+      if (!authed) return json({ error: "unauthorized" }, 401);
+      let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
+      const doc = {
+        audiences: Array.isArray(body.doc && body.doc.audiences) ? body.doc.audiences : [],
+        blocks: (body.doc && body.doc.blocks && typeof body.doc.blocks === "object") ? body.doc.blocks : {},
+      };
+      await env.LEADS.put(GATED_KEY, JSON.stringify(doc));
+      return json({ ok: true });
     }
 
     // ---- POST /upload  { id, contentBase64, contentType } -> { path } ----

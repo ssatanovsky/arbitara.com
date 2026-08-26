@@ -1,13 +1,16 @@
 /* ==========================================================================
-   Arbitara — in-page admin editing.
+   Arbitara — sign-in, in-page admin editing, and audience-gated content.
 
-   Lets someone logged in with an arbitara-demo account (role "admin") edit
-   this page's content directly, instead of through the separate /admin
-   panel: toggle sections on/off, drag-reorder them, and edit each section's
-   eyebrow/title/intro text (plus the hero's) in place. Saves go through
-   admin-api/worker.js's existing GET/PUT /config, authenticated with the
-   bearer token POST /demo-login hands back — see that Worker's header
-   comment for the cross-Worker trust model.
+   Any arbitara-demo account can sign in here (the lock icon in the nav).
+   What that unlocks depends on role:
+     - role "admin": in-page editing — toggle sections on/off, reorder them,
+       edit text/images in place, manage audience-gated content — saved
+       through admin-api/worker.js's /config, /gated-admin.
+     - any other role: nothing to edit, but GET /gated-content is fetched
+       and swapped into any [data-arb-gated="<key>"] element the account is
+       authorized to see (see admin-api/worker.js's header comment for the
+       full authorization model — gated content never lives in config.json,
+       since that file is public).
 
    Entirely inert for every other visitor: nothing here runs until someone
    opens the login popover and authenticates.
@@ -86,6 +89,30 @@
     ".arb-img-btn svg{width:15px;height:15px;}" +
     ".arb-img-btn.arb-img-busy{opacity:.4;pointer-events:none;}" +
     ".arb-img-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}" +
+    /* gated-content manager modal */
+    ".arb-gated-modal{position:fixed;inset:0;z-index:400;background:rgba(20,18,14,.55);display:flex;align-items:center;justify-content:center;padding:24px;}" +
+    ".arb-gated-panel{width:100%;max-width:640px;max-height:86vh;overflow:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:24px;font-family:var(--sans);}" +
+    ".arb-gated-panel h4{margin:0 0 8px;font-size:16px;font-weight:700;color:var(--ink);}" +
+    ".arb-gated-panel h5{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}" +
+    ".arb-gated-note{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 14px;}" +
+    ".arb-gated-note code{background:var(--paper-2);padding:1px 5px;border-radius:4px;}" +
+    ".arb-gated-section{margin-bottom:18px;}" +
+    ".arb-gated-aud-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}" +
+    ".arb-gated-aud-row input{flex:1;min-width:0;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;}" +
+    ".arb-gated-block-row{border:1px solid var(--line-2);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}" +
+    ".arb-gated-block-row .blk-key{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
+    ".arb-gated-block-row .blk-html{width:100%;box-sizing:border-box;min-height:70px;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;resize:vertical;}" +
+    ".blk-auds{display:flex;flex-wrap:wrap;gap:10px;}" +
+    ".blk-aud-opt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);}" +
+    ".arb-gated-rm{position:absolute;top:10px;right:10px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:var(--faint);cursor:pointer;flex:none;}" +
+    ".arb-gated-aud-row .arb-gated-rm{position:static;}" +
+    ".arb-gated-rm:hover{color:var(--danger);}" +
+    ".arb-gated-rm svg{width:13px;height:13px;}" +
+    ".arb-gated-add{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--accent-ink);background:none;border:1px dashed var(--line-2);border-radius:8px;padding:7px 12px;cursor:pointer;}" +
+    ".arb-gated-msg{font-size:12.5px;color:var(--danger);min-height:1em;margin:10px 0;}" +
+    ".arb-gated-actions{display:flex;justify-content:flex-end;gap:10px;}" +
+    ".arb-gated-cancel{font-family:var(--sans);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line-2);border-radius:9px;padding:8px 16px;cursor:pointer;}" +
+    ".arb-gated-save{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--paper);background:var(--ink);border:none;border-radius:9px;padding:8px 16px;cursor:pointer;}" +
     "@media(max-width:700px){.arb-edit-bar{left:12px;right:12px;transform:none;flex-wrap:wrap;bottom:12px;}}";
   var styleEl = document.createElement("style");
   styleEl.textContent = css;
@@ -97,6 +124,7 @@
   var ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
   var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
   var ICON_IMG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>';
+  var ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
   // ---------- login popover ----------
   function mountLoginButton() {
@@ -107,7 +135,7 @@
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "arb-admin-btn";
-    btn.setAttribute("aria-label", "Admin sign in");
+    btn.setAttribute("aria-label", "Sign in");
     btn.innerHTML = ls(TOK) ? ICON_USER : ICON_LOCK;
     wrap.appendChild(btn);
     tools.insertBefore(wrap, tools.firstChild);
@@ -116,12 +144,16 @@
     function closePop() { if (pop) { pop.remove(); pop = null; } }
 
     function renderLoggedIn() {
+      var isAdminRole = ls(ROLE) === "admin";
       pop = document.createElement("div");
       pop.className = "arb-admin-pop";
       pop.innerHTML =
         '<div class="arb-admin-who">' + ICON_USER.replace("currentColor", "var(--accent-ink)") +
         '<span>Signed in as <b>' + esc(ls(NAME)) + '</b> (' + esc(ls(ROLE)) + ')<br><a id="arbSignOut">Sign out</a></span></div>' +
-        '<button type="button" id="arbToggleEdit" style="margin-top:14px">' + (editMode ? "Exit edit mode" : "Edit this page") + "</button>";
+        (isAdminRole
+          ? '<button type="button" id="arbToggleEdit" style="margin-top:14px">' + (editMode ? "Exit edit mode" : "Edit this page") + "</button>" +
+            '<button type="button" id="arbManageGated" style="margin-top:8px;background:var(--card);color:var(--ink);border:1px solid var(--line-2);">Manage gated content</button>'
+          : "");
       wrap.appendChild(pop);
       pop.querySelector("#arbSignOut").addEventListener("click", function () {
         setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, "");
@@ -129,17 +161,23 @@
         btn.innerHTML = ICON_LOCK;
         closePop();
       });
-      pop.querySelector("#arbToggleEdit").addEventListener("click", function () {
-        setEditMode(!editMode);
-        closePop();
-      });
+      if (isAdminRole) {
+        pop.querySelector("#arbToggleEdit").addEventListener("click", function () {
+          setEditMode(!editMode);
+          closePop();
+        });
+        pop.querySelector("#arbManageGated").addEventListener("click", function () {
+          closePop();
+          openGatedManager();
+        });
+      }
     }
 
     function renderLoginForm() {
       pop = document.createElement("div");
       pop.className = "arb-admin-pop";
       pop.innerHTML =
-        '<h4>Admin sign in</h4>' +
+        '<h4>Sign in</h4>' +
         '<input type="text" id="arbUser" placeholder="Username (leave blank for the admin password)" autocomplete="username">' +
         '<input type="password" id="arbPass" placeholder="Password" autocomplete="current-password">' +
         '<button type="button" id="arbLoginBtn">Sign in</button>' +
@@ -160,6 +198,7 @@
             setLs(TOK, d.token); setLs(NAME, d.name); setLs(ROLE, d.role);
             btn.innerHTML = ICON_USER;
             closePop();
+            applyGatedContent();
           })
           .catch(function (err) { msg.textContent = err.message || "Sign in failed."; });
       };
@@ -504,6 +543,174 @@
     });
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountLoginButton);
-  else mountLoginButton();
+  // ---------- audience-gated content ----------
+  // Any signed-in account (any role) can be authorized for gated blocks —
+  // see admin-api/worker.js's GET /gated-content for the server-side
+  // filtering logic. Swaps authorized blocks' HTML into matching
+  // [data-arb-gated="<key>"] elements; unauthorized/unmentioned keys just
+  // keep whatever public teaser is already in the page's static HTML.
+  function applyGatedContent() {
+    if (!ls(TOK)) return;
+    api("/gated-content").then(function (d) {
+      var blocks = d.blocks || {};
+      Object.keys(blocks).forEach(function (key) {
+        var el = document.querySelector('[data-arb-gated="' + key + '"]');
+        if (el) el.innerHTML = blocks[key];
+      });
+    }).catch(function (err) {
+      // A 401 means the stored token is no longer valid (expired/revoked) —
+      // drop it so the nav button reflects "signed out" on next interaction.
+      if (err.status === 401) { setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, ""); }
+    });
+  }
+
+  // ---------- gated-content manager (admin only) ----------
+  function uniqueId(base, existingIds) {
+    var id = base, n = 1;
+    while (existingIds.indexOf(id) >= 0) { n += 1; id = base + "-" + n; }
+    return id;
+  }
+
+  // Reads the manager panel's current DOM state back into a working document
+  // — called before every add/remove so in-progress edits survive a
+  // re-render, and again on Save. blocksArr (not the final {key: {...}}
+  // object) so rows can be added/removed/reordered by array index while a
+  // block's key is still being typed/edited.
+  function collectGatedWorking(panel) {
+    var audiences = [].map.call(panel.querySelectorAll(".arb-gated-aud-row"), function (row) {
+      return {
+        id: row.getAttribute("data-id"),
+        label: row.querySelector(".aud-label").value.trim(),
+        usernames: row.querySelector(".aud-users").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      };
+    });
+    var blocksArr = [].map.call(panel.querySelectorAll(".arb-gated-block-row"), function (row) {
+      return {
+        key: row.querySelector(".blk-key").value.trim(),
+        html: row.querySelector(".blk-html").value,
+        audiences: [].map.call(row.querySelectorAll(".blk-aud:checked"), function (cb) { return cb.value; }),
+      };
+    });
+    return { audiences: audiences, blocksArr: blocksArr };
+  }
+
+  function blocksArrToObj(blocksArr) {
+    var out = {};
+    blocksArr.forEach(function (b) { if (b.key) out[b.key] = { html: b.html, audiences: b.audiences }; });
+    return out;
+  }
+
+  var gatedModal = null;
+  function closeGatedModal() { if (gatedModal) { gatedModal.remove(); gatedModal = null; } }
+
+  function renderGatedManager(working) {
+    var panel = document.createElement("div");
+    panel.className = "arb-gated-panel";
+    gatedModal.innerHTML = "";
+    gatedModal.appendChild(panel);
+
+    var audRows = working.audiences.map(function (a) {
+      return '<div class="arb-gated-aud-row" data-id="' + esc(a.id) + '">' +
+        '<input class="aud-label" type="text" placeholder="Label (e.g. Investors)" value="' + esc(a.label) + '">' +
+        '<input class="aud-users" type="text" placeholder="usernames, comma-separated" value="' + esc(a.usernames.join(", ")) + '">' +
+        '<button type="button" class="arb-gated-rm" title="Remove audience">' + ICON_X + "</button></div>";
+    }).join("") || '<p class="arb-gated-note">No audiences yet.</p>';
+
+    var blockRows = working.blocksArr.map(function (b) {
+      var checks = working.audiences.map(function (a) {
+        var checked = b.audiences.indexOf(a.id) >= 0 ? "checked" : "";
+        return '<label class="blk-aud-opt"><input type="checkbox" class="blk-aud" value="' + esc(a.id) + '" ' + checked + ">" + esc(a.label || a.id) + "</label>";
+      }).join("");
+      return '<div class="arb-gated-block-row">' +
+        '<input class="blk-key" type="text" placeholder="key (e.g. ai.investorNote)" value="' + esc(b.key) + '">' +
+        '<textarea class="blk-html" placeholder="HTML shown to authorized viewers">' + esc(b.html) + "</textarea>" +
+        '<div class="blk-auds">' + (checks || '<span class="arb-gated-note">Add an audience first.</span>') + "</div>" +
+        '<button type="button" class="arb-gated-rm" title="Remove block">' + ICON_X + "</button></div>";
+    }).join("") || '<p class="arb-gated-note">No blocks yet.</p>';
+
+    panel.innerHTML =
+      "<h4>Manage gated content</h4>" +
+      '<p class="arb-gated-note">Tag existing demo-account usernames into audiences, then tag content blocks with those audiences. On the page, an element with <code>data-arb-gated="key"</code> reveals a block once one exists with that key — this panel manages what’s shown and to whom, not where it appears. It doesn’t create accounts; usernames must already exist.</p>' +
+      '<div class="arb-gated-section"><h5>Audiences</h5><div class="arb-gated-aud-list">' + audRows + "</div>" +
+      '<button type="button" class="arb-gated-add" id="arbAddAud">+ Add audience</button></div>' +
+      '<div class="arb-gated-section"><h5>Blocks</h5><div class="arb-gated-block-list">' + blockRows + "</div>" +
+      '<button type="button" class="arb-gated-add" id="arbAddBlock">+ Add block</button></div>' +
+      '<div class="arb-gated-msg" id="arbGatedMsg"></div>' +
+      '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbGatedCancel">Cancel</button>' +
+      '<button type="button" class="arb-gated-save" id="arbGatedSave">Save</button></div>';
+
+    [].forEach.call(panel.querySelectorAll(".arb-gated-aud-row .arb-gated-rm"), function (btn, i) {
+      btn.addEventListener("click", function () {
+        var w = collectGatedWorking(panel);
+        var removedId = w.audiences[i].id;
+        w.audiences.splice(i, 1);
+        w.blocksArr.forEach(function (b) { b.audiences = b.audiences.filter(function (a) { return a !== removedId; }); });
+        renderGatedManager(w);
+      });
+    });
+    [].forEach.call(panel.querySelectorAll(".arb-gated-block-row .arb-gated-rm"), function (btn, i) {
+      btn.addEventListener("click", function () {
+        var w = collectGatedWorking(panel);
+        w.blocksArr.splice(i, 1);
+        renderGatedManager(w);
+      });
+    });
+
+    panel.querySelector("#arbAddAud").addEventListener("click", function () {
+      var w = collectGatedWorking(panel);
+      var id = uniqueId("audience", w.audiences.map(function (a) { return a.id; }));
+      w.audiences.push({ id: id, label: "", usernames: [] });
+      renderGatedManager(w);
+    });
+    panel.querySelector("#arbAddBlock").addEventListener("click", function () {
+      var w = collectGatedWorking(panel);
+      w.blocksArr.push({ key: "", html: "", audiences: [] });
+      renderGatedManager(w);
+    });
+
+    panel.querySelector("#arbGatedCancel").addEventListener("click", closeGatedModal);
+    panel.querySelector("#arbGatedSave").addEventListener("click", function () {
+      var w = collectGatedWorking(panel);
+      var msg = panel.querySelector("#arbGatedMsg");
+      msg.style.color = "var(--danger)";
+      msg.textContent = "Saving…";
+      api("/gated-admin", { method: "PUT", body: { doc: { audiences: w.audiences, blocks: blocksArrToObj(w.blocksArr) } } })
+        .then(function () {
+          msg.style.color = "var(--muted)";
+          msg.textContent = "Saved.";
+          applyGatedContent();
+          setTimeout(closeGatedModal, 700);
+        })
+        .catch(function (err) { msg.textContent = "Save failed: " + (err.message || "unknown error"); });
+    });
+  }
+
+  function openGatedManager() {
+    if (gatedModal) return;
+    gatedModal = document.createElement("div");
+    gatedModal.className = "arb-gated-modal";
+    gatedModal.innerHTML = '<div class="arb-gated-panel"><h4>Manage gated content</h4><p class="arb-gated-note">Loading…</p></div>';
+    document.body.appendChild(gatedModal);
+    gatedModal.addEventListener("click", function (e) { if (e.target === gatedModal) closeGatedModal(); });
+    api("/gated-admin").then(function (d) {
+      var doc = d.doc || { audiences: [], blocks: {} };
+      renderGatedManager({
+        audiences: doc.audiences || [],
+        blocksArr: Object.keys(doc.blocks || {}).map(function (k) {
+          var b = doc.blocks[k] || {};
+          return { key: k, html: b.html || "", audiences: b.audiences || [] };
+        }),
+      });
+    }).catch(function (err) {
+      gatedModal.querySelector(".arb-gated-panel").innerHTML =
+        "<h4>Manage gated content</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>";
+    });
+  }
+
+  function boot() {
+    mountLoginButton();
+    applyGatedContent();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
