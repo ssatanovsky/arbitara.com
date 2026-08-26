@@ -563,6 +563,8 @@
     var eb = hero.querySelector(".eyebrow"); if (eb && h.eyebrow) eb.textContent = h.eyebrow;
     var h1 = hero.querySelector("h1"); if (h1 && h.headline) h1.innerHTML = h.headline;
     var lede = hero.querySelector(".lede"); if (lede && h.lede) lede.innerHTML = h.lede;
+    var thesis = hero.querySelector(".hero-thesis"); if (thesis && h.thesis) thesis.innerHTML = h.thesis;
+    var etym = hero.querySelector(".hero-etym"); if (etym && h.etym) etym.innerHTML = h.etym;
     var ctas = hero.querySelectorAll(".hero-cta .cta-label");
     if (ctas[0] && h.ctaPrimary) ctas[0].textContent = h.ctaPrimary;
     if (ctas[1] && h.ctaSecondary) ctas[1].textContent = h.ctaSecondary;

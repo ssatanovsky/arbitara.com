@@ -75,6 +75,17 @@
     ".arb-editing main > section{position:relative;}" +
     ".arb-editing main > section.arb-sec-off{opacity:.4;}" +
     ".arb-editing main > section.arb-sec-drag-over{box-shadow:inset 0 3px 0 var(--accent);}" +
+    /* reorder + image-upload buttons in the section toolbar */
+    ".arb-sec-toolbar .reorder{display:flex;flex-direction:column;}" +
+    ".arb-sec-toolbar .reorder button{display:flex;align-items:center;justify-content:center;width:16px;height:13px;padding:0;border:none;background:none;color:var(--faint);cursor:pointer;}" +
+    ".arb-sec-toolbar .reorder button svg{width:11px;height:11px;}" +
+    ".arb-sec-toolbar .reorder button:hover:not(:disabled){color:var(--ink);}" +
+    ".arb-sec-toolbar .reorder button:disabled{opacity:.25;cursor:default;}" +
+    ".arb-img-btn{position:relative;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--faint);cursor:pointer;}" +
+    ".arb-img-btn:hover{color:var(--ink);background:var(--paper-2);}" +
+    ".arb-img-btn svg{width:15px;height:15px;}" +
+    ".arb-img-btn.arb-img-busy{opacity:.4;pointer-events:none;}" +
+    ".arb-img-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}" +
     "@media(max-width:700px){.arb-edit-bar{left:12px;right:12px;transform:none;flex-wrap:wrap;bottom:12px;}}";
   var styleEl = document.createElement("style");
   styleEl.textContent = css;
@@ -83,6 +94,9 @@
   var ICON_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   var ICON_USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/></svg>';
   var ICON_DRAG = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
+  var ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
+  var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  var ICON_IMG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>';
 
   // ---------- login popover ----------
   function mountLoginButton() {
@@ -181,6 +195,49 @@
     el.addEventListener("input", onChange);
   }
 
+  // Reusable "upload an image" control: a small button that opens a file
+  // picker, sends the file to the existing /upload endpoint (same contract
+  // the old /admin panel's image uploader used — id + contentType +
+  // contentBase64 in, {path} out), and hands the resulting path to onDone.
+  // id must match [a-zA-Z0-9_-]{1,64} server-side; "hero" and each section's
+  // own id are what the old admin panel used, so reuse those — a re-upload
+  // just overwrites the same uploads/<id>.<ext> file.
+  var MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+  var IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
+  function mountImageUpload(host, id, title, onDone) {
+    var btn = document.createElement("label");
+    btn.className = "arb-img-btn";
+    btn.title = title || "Upload image";
+    btn.innerHTML = ICON_IMG;
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = IMAGE_TYPES.join(",");
+    btn.appendChild(input);
+    host.appendChild(btn);
+    input.addEventListener("change", function () {
+      var file = input.files[0];
+      input.value = "";
+      if (!file) return;
+      if (IMAGE_TYPES.indexOf(file.type) < 0) { alert("Unsupported file type."); return; }
+      if (file.size > MAX_IMAGE_BYTES) { alert("Image is over 4MB."); return; }
+      var reader = new FileReader();
+      reader.onload = function () {
+        btn.classList.add("arb-img-busy");
+        api("/upload", { method: "POST", body: { id: id, contentType: file.type, contentBase64: reader.result } })
+          .then(function (d) {
+            btn.classList.remove("arb-img-busy");
+            onDone(d.path, reader.result);
+          })
+          .catch(function (err) {
+            btn.classList.remove("arb-img-busy");
+            alert("Upload failed: " + (err.message || "unknown error"));
+          });
+      };
+      reader.readAsDataURL(file);
+    });
+    return btn;
+  }
+
   function setupSectionText(sec, id) {
     var head = sec.querySelector(".head");
     if (!head) return;
@@ -190,23 +247,127 @@
     if (p) watchEditable(p, function () { (pending.sectionText[id] = pending.sectionText[id] || {}).intro = p.innerHTML.trim(); markDirty(); });
   }
 
+  // Shows the uploaded image immediately (from the just-read data URL, same
+  // "don't wait on GitHub" trick the old admin panel used) by creating the
+  // same .head-figure/img structure config.js's applySectionImages builds,
+  // so the change is visible without a save+reload round-trip.
+  function setSectionImagePreview(sec, head, dataUrl) {
+    var fig = sec.querySelector(".head-figure");
+    if (!dataUrl) { if (fig) fig.remove(); return; }
+    if (!fig) {
+      fig = document.createElement("figure");
+      fig.className = "head-figure reveal in";
+      head.parentNode.insertBefore(fig, head.nextSibling);
+    }
+    var img = fig.querySelector("img");
+    if (!img) { img = document.createElement("img"); img.alt = ""; fig.appendChild(img); }
+    img.setAttribute("src", dataUrl);
+  }
+
   function setupHeroText() {
     var hero = document.getElementById("hero");
     if (!hero) return;
-    var eb = hero.querySelector(".eyebrow"), h1 = hero.querySelector("h1"), lede = hero.querySelector(".lede");
+    var eb = hero.querySelector(".eyebrow"), h1 = hero.querySelector("h1");
+    // Two separate paragraphs both carry class "lede" (a shared visual
+    // style), so scope this to the FIRST one specifically — the second is
+    // .hero-thesis, wired below as its own field.
+    var lede = hero.querySelector("p.lede:not(.hero-thesis)");
     if (eb) watchEditable(eb, function () { pending.hero.eyebrow = eb.textContent.trim(); markDirty(); });
     if (h1) watchEditable(h1, function () { pending.hero.headline = h1.innerHTML.trim(); markDirty(); });
     if (lede) watchEditable(lede, function () { pending.hero.lede = lede.innerHTML.trim(); markDirty(); });
+    var thesis = hero.querySelector(".hero-thesis");
+    if (thesis) watchEditable(thesis, function () { pending.hero.thesis = thesis.innerHTML.trim(); markDirty(); });
+    var etym = hero.querySelector(".hero-etym");
+    if (etym) watchEditable(etym, function () { pending.hero.etym = etym.innerHTML.trim(); markDirty(); });
+    var ctas = hero.querySelectorAll(".hero-cta .cta-label");
+    if (ctas[0]) watchEditable(ctas[0], function () { pending.hero.ctaPrimary = ctas[0].textContent.trim(); markDirty(); });
+    if (ctas[1]) watchEditable(ctas[1], function () { pending.hero.ctaSecondary = ctas[1].textContent.trim(); markDirty(); });
+  }
+
+  // The 4 hero stats are a list, not independent fields (config.hero.stats
+  // fully replaces the array on save — see applyHeroStats in config.js), so
+  // any single number/label/source edit re-collects all 4 into pending.
+  function setupHeroStats() {
+    var stats = document.querySelectorAll(".hero .stats .stat");
+    if (!stats.length) return;
+    function collect() {
+      pending.hero.stats = [].map.call(stats, function (s) {
+        var n = s.querySelector(".n"), l = s.querySelector(".l"), src = s.querySelector(".src");
+        return { n: n ? n.textContent.trim() : "", l: l ? l.textContent.trim() : "", src: src ? src.textContent.trim() : "" };
+      });
+      markDirty();
+    }
+    [].forEach.call(stats, function (s) {
+      ["n", "l", "src"].forEach(function (cls) {
+        var el = s.querySelector("." + cls);
+        if (el) watchEditable(el, collect);
+      });
+    });
+  }
+
+  // The hero can't be hidden or reordered, so its toolbar carries just the
+  // photo uploader (config.hero.image / applyHeroImage in config.js).
+  function setupHeroToolbar() {
+    var hero = document.getElementById("hero");
+    if (!hero) return;
+    var bar = document.createElement("div");
+    bar.className = "arb-sec-toolbar";
+    hero.appendChild(bar);
+    mountImageUpload(bar, "hero", "Upload hero photo", function (path, dataUrl) {
+      pending.hero.image = path;
+      hero.classList.add("hero-photo");
+      var host = document.getElementById("heroBg");
+      if (host) {
+        var img = host.querySelector("img");
+        if (!img) { img = document.createElement("img"); img.alt = ""; host.appendChild(img); }
+        img.setAttribute("src", dataUrl);
+      }
+      markDirty();
+    });
   }
 
   var dragSrc = null;
+  var toolbars = []; // {sec, upBtn, downBtn} — for enabling/disabling reorder buttons at the ends
+  function refreshReorderButtons() {
+    toolbars.forEach(function (t, i) {
+      t.upBtn.disabled = i === 0;
+      t.downBtn.disabled = i === toolbars.length - 1;
+    });
+  }
+
+  function moveSection(sec, dir) {
+    var main = sec.parentNode;
+    var sibling = dir < 0 ? sec.previousElementSibling : sec.nextElementSibling;
+    if (!sibling) return;
+    if (dir < 0) main.insertBefore(sec, sibling); else main.insertBefore(sibling, sec);
+    pending.sectionOrder = [].slice.call(main.children).map(function (s) { return s.id; }).filter(Boolean);
+    // Keep the toolbars array's order in sync so refreshReorderButtons()
+    // disables the right ends after the swap.
+    toolbars.sort(function (a, b) {
+      return [].slice.call(main.children).indexOf(a.sec) - [].slice.call(main.children).indexOf(b.sec);
+    });
+    refreshReorderButtons();
+    markDirty();
+  }
+
   function setupToolbar(sec, id) {
     var bar = document.createElement("div");
     bar.className = "arb-sec-toolbar";
     bar.innerHTML =
       '<span class="drag" draggable="true" title="Drag to reorder">' + ICON_DRAG + "</span>" +
+      '<span class="reorder"><button type="button" class="up" title="Move up">' + ICON_UP + '</button>' +
+      '<button type="button" class="down" title="Move down">' + ICON_DOWN + "</button></span>" +
       '<label class="sw" title="Show this section on the page"><input type="checkbox" checked><span class="track"></span></label>';
     sec.appendChild(bar);
+
+    var head = sec.querySelector(".head");
+    if (head) {
+      mountImageUpload(bar, id, "Upload illustration", function (path, dataUrl) {
+        (pending.sectionText[id] = pending.sectionText[id] || {}).image = path;
+        setSectionImagePreview(sec, head, dataUrl);
+        markDirty();
+      });
+    }
 
     var checkbox = bar.querySelector("input");
     // Reflects config.json's real current on/off state (the arb-hide-<id>
@@ -219,6 +380,11 @@
       sec.classList.toggle("arb-sec-off", !checkbox.checked);
       markDirty();
     });
+
+    var upBtn = bar.querySelector(".up"), downBtn = bar.querySelector(".down");
+    upBtn.addEventListener("click", function () { moveSection(sec, -1); });
+    downBtn.addEventListener("click", function () { moveSection(sec, 1); });
+    toolbars.push({ sec: sec, upBtn: upBtn, downBtn: downBtn });
 
     var drag = bar.querySelector(".drag");
     drag.addEventListener("dragstart", function (e) {
@@ -243,18 +409,26 @@
       pending.sectionOrder = [].slice.call(main.children)
         .map(function (s) { return s.id; })
         .filter(Boolean);
+      toolbars.sort(function (a, b) {
+        return [].slice.call(main.children).indexOf(a.sec) - [].slice.call(main.children).indexOf(b.sec);
+      });
+      refreshReorderButtons();
       markDirty();
     });
   }
 
   function enterEditMode() {
     document.documentElement.classList.add("arb-editing");
+    toolbars = [];
     setupHeroText();
+    setupHeroStats();
+    setupHeroToolbar();
     [].forEach.call(document.querySelectorAll("main > section[id]"), function (sec) {
       if (sec.id === "hero") return;
       setupSectionText(sec, sec.id);
       setupToolbar(sec, sec.id);
     });
+    refreshReorderButtons();
     mountEditBar();
   }
 
