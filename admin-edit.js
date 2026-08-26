@@ -179,13 +179,17 @@
 
   // ---------- edit mode ----------
   var editMode = false;
-  var pending = { sections: {}, sectionText: {}, sectionOrder: null, hero: {} };
+  var pending = { sections: {}, sectionText: {}, sectionOrder: null, hero: {}, content: {} };
   var bar = null;
+
+  function isDirty() {
+    return !!(Object.keys(pending.sections).length || Object.keys(pending.sectionText).length ||
+      pending.sectionOrder || Object.keys(pending.hero).length || Object.keys(pending.content).length);
+  }
 
   function markDirty() {
     if (!bar) return;
-    var dirty = Object.keys(pending.sections).length || Object.keys(pending.sectionText).length ||
-      pending.sectionOrder || Object.keys(pending.hero).length;
+    var dirty = isDirty();
     bar.querySelector(".save-btn").disabled = !dirty;
     bar.querySelector(".status").textContent = dirty ? "Unsaved changes" : "No changes";
   }
@@ -417,6 +421,16 @@
     });
   }
 
+  // Any element anywhere on the page can opt into inline editing by adding
+  // data-arb-edit="<unique key>" — no per-field wiring code needed here.
+  // Saved into config.content[key] (see applyContentOverrides in config.js).
+  function setupGenericEditable() {
+    [].forEach.call(document.querySelectorAll("[data-arb-edit]"), function (el) {
+      var key = el.getAttribute("data-arb-edit");
+      watchEditable(el, function () { pending.content[key] = el.innerHTML.trim(); markDirty(); });
+    });
+  }
+
   function enterEditMode() {
     document.documentElement.classList.add("arb-editing");
     toolbars = [];
@@ -428,6 +442,7 @@
       setupSectionText(sec, sec.id);
       setupToolbar(sec, sec.id);
     });
+    setupGenericEditable();
     refreshReorderButtons();
     mountEditBar();
   }
@@ -438,7 +453,7 @@
     // A full reload is the simplest way to cleanly drop all the
     // contenteditable/toolbar DOM surgery above rather than trying to
     // surgically undo it.
-    if (Object.keys(pending.sections).length || Object.keys(pending.sectionText).length || pending.sectionOrder || Object.keys(pending.hero).length) {
+    if (isDirty()) {
       if (confirm("Discard unsaved changes?")) location.reload();
       else { document.documentElement.classList.add("arb-editing"); editMode = true; return; }
     } else {
@@ -477,9 +492,10 @@
       });
       if (pending.sectionOrder) cfg.sectionOrder = pending.sectionOrder;
       if (Object.keys(pending.hero).length) cfg.hero = Object.assign({}, cfg.hero, pending.hero);
+      if (Object.keys(pending.content).length) cfg.content = Object.assign({}, cfg.content, pending.content);
       return api("/config", { method: "PUT", body: { config: cfg, sha: d.sha } });
     }).then(function () {
-      pending = { sections: {}, sectionText: {}, sectionOrder: null, hero: {} };
+      pending = { sections: {}, sectionText: {}, sectionOrder: null, hero: {}, content: {} };
       status.textContent = "Saved ✓";
       setTimeout(function () { markDirty(); }, 1800);
     }).catch(function (err) {

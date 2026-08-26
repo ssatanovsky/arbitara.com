@@ -588,6 +588,22 @@
     }).join("");
   }
 
+  // Generic override for content outside the structured sectionText/hero
+  // schema — anything else the inline editor exposes (bespoke illustration
+  // captions, hand-built card lists, etc.) via a `data-arb-edit="<key>"`
+  // marker in the HTML. config.content is a flat {key: html} map; this
+  // just innerHTML's each match, so any element can opt in by adding the
+  // attribute — no per-field code needed here or in admin-edit.js.
+  function applyContentOverrides(cfg) {
+    var c = cfg.content;
+    if (!c) return;
+    Object.keys(c).forEach(function (key) {
+      if (c[key] == null) return;
+      var el = document.querySelector('[data-arb-edit="' + key + '"]');
+      if (el) el.innerHTML = c[key];
+    });
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -625,6 +641,7 @@
       applyHeroImage(cfg);
       applyHeroText(cfg);
       applyHeroStats(cfg);
+      applyContentOverrides(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);
