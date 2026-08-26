@@ -166,7 +166,7 @@
     "image": "uploads/hero.jpg",
     "eyebrow": "Arbitara · Decide to win",
     "headline": "The power to <span class=\"em\">decide</span> is a discipline, not a talent.",
-    "lede": "Organizations map their processes, model their architectures, and instrument everything they do. Then they make their most consequential choices in a room, with no structure, no record, and no way to learn from what happens next. Arbitara is a practitioner's field guide to closing that gap.",
+    "lede": "Organizations map their processes, model their architectures, and account their invoices. Then they make their most consequential decisions in a room, with no structure, no record, and no way to learn from what happened. Arbitara is closing that gap.",
     "ctaPrimary": "Ask for a demo",
     "ctaSecondary": "Read the white paper",
     "stats": [
@@ -190,7 +190,8 @@
         "l": "in wages squandered annually: about 530,000 lost manager-days a year at a typical Fortune 500 company.",
         "src": "McKinsey, 2019"
       }
-    ]
+    ],
+    "thesis": "A decision framework, and the platform to run it. Enabled by AI, owned by you."
   },
   "toolsText": {
     "checklist": {
