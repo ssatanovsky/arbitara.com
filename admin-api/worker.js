@@ -14,15 +14,20 @@
  *     REPO            ssatanovsky/arbitara.com
  *     FILE            config.json
  *     BRANCH          main
- *     DEMO_API_URL    https://arbitara-demo.slava-satanovsky.workers.dev
+ *   Bindings (set by deploy-worker.sh, not the dashboard):
+ *     DEMO_API        service binding to the arbitara-demo Worker
  *
  * Content-editing access can also come from the ui-demo prototype's
  * account system (converged accounts, see POST /demo-login below) — this
  * Worker never sees those passwords or shares a signing secret with that
  * system; it just relays a login attempt and, for authenticating later
  * requests, calls that Worker's own GET /whoami to check the bearer token
- * server-side. All of that is Worker-to-Worker, never a browser calling
- * arbitara-demo directly, so no CORS changes are needed on its side.
+ * server-side. Reached via the DEMO_API service binding, not a plain
+ * fetch() to its public URL — Cloudflare blocks Worker-to-Worker fetches
+ * over the public network as a loop-prevention measure (error 1042), so a
+ * service binding is required, not optional. A browser on arbitara.com
+ * never calls arbitara-demo directly either way, so no CORS changes were
+ * needed on its side regardless.
  */
 
 const enc = new TextEncoder();
@@ -81,9 +86,9 @@ async function verifySession(secret, token) {
 // fetch, only reached when our own session check above didn't already
 // authenticate the request (see the `||` short-circuit at the call site).
 async function verifyDemoAdmin(token, demoApi) {
-  if (!token) return false;
+  if (!token || !demoApi) return false;
   try {
-    const r = await fetch(demoApi + "/whoami", { headers: { "Authorization": "Bearer " + token } });
+    const r = await demoApi.fetch("https://arbitara-demo/whoami", { headers: { "Authorization": "Bearer " + token } });
     if (!r.ok) return false;
     const d = await r.json();
     return !!(d && d.role === "admin");
@@ -107,7 +112,7 @@ export default {
     const repo = env.REPO || "ssatanovsky/arbitara.com";
     const file = env.FILE || "config.json";
     const branch = env.BRANCH || "main";
-    const demoApi = (env.DEMO_API_URL || "https://arbitara-demo.slava-satanovsky.workers.dev").replace(/\/+$/, "");
+    const demoApi = env.DEMO_API; // service binding — see verifyDemoAdmin() for why not a plain fetch()
     const ghApi = "https://api.github.com/repos/" + repo + "/contents/" + file;
 
     const cors = {
@@ -146,10 +151,11 @@ export default {
     // then sends as Authorization: Bearer on /config, /upload, /leads,
     // which verifyDemoAdmin() below checks against demoApi's own /whoami.
     if (url.pathname.endsWith("/demo-login") && request.method === "POST") {
+      if (!demoApi) return json({ error: "Account service is not configured (missing DEMO_API binding)." }, 500);
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
       let demoResp;
       try {
-        demoResp = await fetch(demoApi + "/login", {
+        demoResp = await demoApi.fetch("https://arbitara-demo/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: body.username, password: body.password }),
