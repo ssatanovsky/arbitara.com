@@ -70,9 +70,9 @@
       "image": ""
     },
     "ai": {
-      "eyebrow": "A governance commitment",
+      "eyebrow": "Human in the loop",
       "title": "AI advises. The human decides. Always.",
-      "intro": "Management decisions are not primarily an analytical problem. They are an <em>organizational commitment</em> problem, and the two require different instruments. AI expands the decision-maker's field of view; it does not carry the moral accountability the choice demands. That accountability requires someone who can be questioned, explain their reasoning, and bear the consequences of being wrong.",
+      "intro": "Management decisions are not primarily an analytical optimization problem. They require commitment and management judgment. With no clear best option, but trade-offs that need to be balanced. This requires&nbsp;different instruments. AI expands the decision-maker's field of view. It does not carry the moral accountability the choice demands, but can make probabilistic suggestions.",
       "navLabel": "AI & Human Collab",
       "image": ""
     },
@@ -105,7 +105,7 @@
       "image": ""
     },
     "governance": {
-      "eyebrow": "Decision Governance",
+      "eyebrow": "Decision Governance gap",
       "title": "",
       "intro": "",
       "navLabel": "Decision Governance",
@@ -145,7 +145,7 @@
     "platform": {
       "eyebrow": "What Arbitara is",
       "title": "A decision framework, and the platform to run it.",
-      "intro": "Arbitara combines a practitioner's decision framework with the technology to operate it — capturing, governing, and learning from every decision, so accountability and speed stop trading against each other."
+      "intro": "Arbitara combines a practitioner's decision framework with the technology to operate it. Capturing, governing, and learning from every decision, so accountability and speed stop trading against each other."
     }
   },
   "sectionOrder": [
