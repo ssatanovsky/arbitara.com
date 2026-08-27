@@ -26,27 +26,68 @@
     });
   }
 
-  /* ---------- Nav: scrolled state + mobile toggle ---------- */
+  /* ---------- Nav: scrolled state, scroll-spy, mobile menu ---------- */
   var nav = document.getElementById("nav");
-  var onScroll = function () {
-    if (window.scrollY > 12) nav.classList.add("scrolled");
-    else nav.classList.remove("scrolled");
-  };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
-  var navToggle = document.getElementById("navToggle");
   var navLinks = document.getElementById("navLinks");
-  if (navToggle && navLinks) {
-    navToggle.addEventListener("click", function () {
-      var open = navLinks.classList.toggle("open");
-      navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  var navToggle = document.getElementById("navToggle");
+
+  // Scroll-spy: highlight whichever same-page section is currently in view,
+  // the way in-page nav works on Stripe's docs / Linear's marketing pages.
+  // Cross-page links (white-paper.html, self-check.html, index.html#contact,
+  // ...) are naturally excluded by the [href^="#"] selector — only real
+  // same-page anchors ever get marked active. Queried fresh on every call
+  // rather than cached at setup — config.js can still be adding/reordering
+  // nav links (e.g. the "Decision Governance" section it builds async)
+  // after this script runs, and re-querying a handful of <a> tags is cheap.
+  function onScrollTick() {
+    if (window.scrollY > 12) nav.classList.add("scrolled"); else nav.classList.remove("scrolled");
+    if (!navLinks) return;
+    var navLinkEls = [].slice.call(navLinks.querySelectorAll('a[href^="#"]'));
+    var spySections = navLinkEls
+      .map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); })
+      .filter(Boolean);
+    if (!spySections.length) return;
+    var navH = nav.offsetHeight || 66;
+    var y = window.scrollY + navH + 24;
+    // Near the very bottom of the page, force the last section active even
+    // if its own content is shorter than the threshold above — otherwise a
+    // short final section (e.g. Contact) never "wins" scroll-spy.
+    var atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+    var current = atBottom ? spySections[spySections.length - 1] : spySections[0];
+    if (!atBottom) spySections.forEach(function (sec) { if (sec.offsetTop <= y) current = sec; });
+    navLinkEls.forEach(function (a) {
+      a.classList.toggle("active", document.getElementById(a.getAttribute("href").slice(1)) === current);
     });
+  }
+  window.addEventListener("scroll", onScrollTick, { passive: true });
+  onScrollTick();
+
+  // Mobile menu: click-outside backdrop, body-scroll lock while open,
+  // Escape to close, hamburger<->X icon — the menu itself (position,
+  // animation) is styled in style.css under the mobile breakpoint.
+  var ICON_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+  var ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  if (navToggle && navLinks) {
+    var navBackdrop = document.createElement("div");
+    navBackdrop.className = "nav-backdrop";
+    document.body.appendChild(navBackdrop);
+
+    var setNavOpen = function (open) {
+      navLinks.classList.toggle("open", open);
+      navBackdrop.classList.toggle("open", open);
+      navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      navToggle.innerHTML = open ? ICON_CLOSE : ICON_MENU;
+      root.classList.toggle("nav-open-lock", open);
+    };
+    navToggle.addEventListener("click", function () {
+      setNavOpen(!navLinks.classList.contains("open"));
+    });
+    navBackdrop.addEventListener("click", function () { setNavOpen(false); });
     navLinks.addEventListener("click", function (e) {
-      if (e.target.tagName === "A") {
-        navLinks.classList.remove("open");
-        navToggle.setAttribute("aria-expanded", "false");
-      }
+      if (e.target.tagName === "A") setNavOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && navLinks.classList.contains("open")) setNavOpen(false);
     });
   }
 
