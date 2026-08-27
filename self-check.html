@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Self-Check — Arbitara</title>
-<meta name="description" content="A five-question self-check on how decisions get made in your organization, plus a practitioner's toolkit: a pre-decision checklist and a printable one-page decision record.">
+<meta name="description" content="A five-question self-check on how decisions get made in your organization, plus a practitioner's toolkit: a three-question diagnostic, a pre-decision checklist, and a printable one-page decision record.">
 <meta property="og:title" content="Self-Check — Arbitara">
-<meta property="og:description" content="A five-question self-check, a pre-decision checklist, and a printable one-page decision record.">
+<meta property="og:description" content="A five-question self-check, a decision-tier diagnostic, a pre-decision checklist, and a printable one-page decision record.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#FAF7F1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14130F" media="(prefers-color-scheme: dark)">
@@ -57,7 +57,7 @@
     <div class="reveal">
       <p class="eyebrow">Arbitara · Self-Check</p>
       <h1>Where you stand, and what to do next.</h1>
-      <p class="lede">A five-question self-check on how decisions actually get made in your organization today, and a practitioner's toolkit — a pre-decision checklist and a printable one-page decision record — to put to work immediately. Nothing to install.</p>
+      <p class="lede">A five-question self-check on how decisions actually get made in your organization today, and a practitioner's toolkit — a decision-tier diagnostic, a pre-decision checklist, and a printable one-page decision record — to put to work immediately. Nothing to install.</p>
     </div>
   </div>
 </section>
@@ -127,7 +127,49 @@
     <div class="head reveal">
       <p class="eyebrow">For practitioners</p>
       <h2>Put it to work on your next decision.</h2>
-      <p>A pre-decision checklist you can run in five minutes, and a one-page decision record you can print and fill in by hand. Nothing to install.</p>
+      <p>A three-question diagnostic, a pre-decision checklist you can run in five minutes, and a one-page decision record you can print and fill in by hand. Nothing to install.</p>
+    </div>
+
+    <!-- Diagnostic -->
+    <div class="diag reveal">
+      <div class="diag-head">
+        <h3>Three tests to place a decision, before you deliberate</h3>
+        <p>Answer for the decision on your desk right now. All three are observable before the choice is made.</p>
+        <div class="tool-doc" data-tool-doc="diagnostic"></div>
+      </div>
+      <div class="diag-body">
+        <div class="diag-tests">
+          <div class="diag-q">
+            <div class="qh">1 · The reversibility test</div>
+            <p>To undo this, would you need another decision of comparable authority and process weight, or just a routine adjustment within the original authority?</p>
+            <div class="seg" data-q="rev">
+              <button data-v="1">Another major decision</button>
+              <button data-v="0">Routine adjustment</button>
+            </div>
+          </div>
+          <div class="diag-q">
+            <div class="qh">2 · The constraint test</div>
+            <p>Does this create binding constraints for every decision that follows, or does it operate within constraints that already exist?</p>
+            <div class="seg" data-q="con">
+              <button data-v="1">Creates new constraints</button>
+              <button data-v="0">Works within existing</button>
+            </div>
+          </div>
+          <div class="diag-q">
+            <div class="qh">3 · The asymmetry test</div>
+            <p>If this goes wrong, does the damage compound, consuming capital, attention, and trust for years, or is it contained and quickly corrected?</p>
+            <div class="seg" data-q="asy">
+              <button data-v="1">Compounds</button>
+              <button data-v="0">Contained</button>
+            </div>
+          </div>
+        </div>
+        <div class="diag-result" id="diagResult">
+          <div class="rlabel">This decision looks</div>
+          <div class="rtier none" id="rTier">Answer the three tests</div>
+          <p id="rNote">Where the compounding structure is present, the decision is strategic, regardless of the level at which it is being made.</p>
+        </div>
+      </div>
     </div>
 
     <div class="toolkit">
@@ -199,7 +241,7 @@
         <h5>This Page</h5>
         <ul>
           <li><a href="#assessment">Five-question self-check</a></li>
-          <li><a href="#toolkit">Pre-decision checklist</a></li>
+          <li><a href="#toolkit">Diagnostic, checklist &amp; record</a></li>
         </ul>
       </div>
       <div>
