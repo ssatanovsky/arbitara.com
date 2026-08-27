@@ -561,9 +561,11 @@
           el.innerHTML = blocks[key];
         });
       });
-      // Lets page-specific scripts (e.g. investor.js's deck carousel) know
-      // it's worth (re)trying their own gated fetches now.
-      document.dispatchEvent(new CustomEvent("arb:gated-applied"));
+      // Lets page-specific scripts (e.g. investor.js's deck carousel and
+      // whole-page content gate) know it's worth (re)trying their own
+      // gated logic now — carries the raw blocks so a listener can check
+      // "was I actually authorized for anything" without a second fetch.
+      document.dispatchEvent(new CustomEvent("arb:gated-applied", { detail: { blocks: blocks } }));
     }).catch(function (err) {
       // A 401 means the stored token is no longer valid (expired/revoked) —
       // drop it so the nav button reflects "signed out" on next interaction.

@@ -1,19 +1,29 @@
 /* ==========================================================================
-   Arbitara — investor deck carousel (investor.html only).
+   Arbitara — investor page gate + deck carousel (investor.html only).
 
-   Fetches the confidential deck from admin-api/worker.js's GET
-   /gated-deck using the same bearer token admin-edit.js already stores
-   (localStorage "arb.admin.token") — no separate login here. On success,
-   renders it as a slide-by-slide carousel with pdf.js (vendored,
-   assets/pdf.min.js + pdf.worker.min.js). On any failure (no token, not
-   authorized, nothing uploaded yet), the static "sign in" / "no deck"
-   teaser already in the page's HTML is simply left alone — this script
-   never announces *why* it didn't load, so there's nothing for an
-   unauthorized visitor to learn from the failure mode.
+   Two jobs:
+   1. Whole-page content gate: every real section (#investorGated) starts
+      hidden, with only a single "sign in for investor access" notice
+      (#investorLocked) visible — reveals the real sections once
+      GET /gated-content (run by admin-edit.js) actually returns at least
+      one "investor.*" block for the signed-in account. Deliberately
+      coarser than the existing data-arb-gated teaser-per-block pattern:
+      a page that shows seven consecutive "sign in to view" boxes reads as
+      broken, not confidential — one clear notice reads as intentional.
+   2. Deck carousel: fetches the confidential deck from admin-api/worker.js's
+      GET /gated-deck using the same bearer token admin-edit.js already
+      stores (localStorage "arb.admin.token") — no separate login here. On
+      success, renders it as a slide-by-slide carousel with pdf.js
+      (vendored, assets/pdf.min.js + pdf.worker.min.js). On any failure (no
+      token, not authorized, nothing uploaded yet), the static "sign in" /
+      "no deck" teaser already in the page's HTML is simply left alone —
+      this script never announces *why* it didn't load, so there's nothing
+      for an unauthorized visitor to learn from the failure mode.
 
-   Retries after a sign-in: admin-edit.js dispatches "arb:gated-applied"
-   once GET /gated-content resolves post-login, which is this script's
-   cue to also (re)try the deck fetch.
+   Both retry after a sign-in via the same hook: admin-edit.js dispatches
+   "arb:gated-applied" (with the fetched blocks in event.detail.blocks)
+   once GET /gated-content resolves, whether that's on page load with an
+   already-stored token or right after a fresh login.
    ========================================================================== */
 (function () {
   "use strict";
@@ -23,6 +33,20 @@
 
   function ls(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
 
+  // ---------- whole-page content gate ----------
+  var lockedEl = document.getElementById("investorLocked");
+  var gatedEl = document.getElementById("investorGated");
+  function applyContentGate(blocks) {
+    if (!lockedEl || !gatedEl) return;
+    var authorized = Object.keys(blocks || {}).some(function (k) { return k.indexOf("investor.") === 0; });
+    lockedEl.style.display = authorized ? "none" : "";
+    gatedEl.style.display = authorized ? "" : "none";
+  }
+  document.addEventListener("arb:gated-applied", function (e) {
+    applyContentGate(e.detail && e.detail.blocks);
+  });
+
+  // ---------- deck carousel ----------
   var host = document.getElementById("deckCarousel");
   if (!host) return;
 
