@@ -743,11 +743,15 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .stealth .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); animation: pip 2.4s infinite; }
 @keyframes pip { 0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent);} 70%{box-shadow:0 0 0 8px transparent;} 100%{box-shadow:0 0 0 0 transparent;} }
 
-/* ---------- Audience-gated content (nav/footer link, section teasers) ---------- */
+/* ---------- Role-gated content (section teasers, investor.html) ---------- */
 /* A [data-arb-gated] element with nothing in it yet (unauthorized visitor,
-   or admin-edit.js hasn't run) takes zero space — no stray gap in the nav
-   row or an empty <li> in the footer. Populated, it's a normal element
-   again since :empty no longer matches. */
+   admin-edit.js hasn't run yet, or the block was never created) takes zero
+   space rather than leaving a visible gap. Populated, it's a normal
+   element again since :empty no longer matches. Currently unused for nav/
+   footer links specifically (those are plain, always-visible links now —
+   see the investor.html section in CLAUDE.md for why), but kept as
+   general-purpose infrastructure for any future gated placeholder that
+   starts out empty. */
 [data-arb-gated]:empty { display: none; }
 .investor-teaser { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding: 56px 24px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
 .investor-teaser .teaser-lock { font-size: 26px; }
