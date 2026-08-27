@@ -97,15 +97,15 @@
     ".arb-gated-note{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 14px;}" +
     ".arb-gated-note code{background:var(--paper-2);padding:1px 5px;border-radius:4px;}" +
     ".arb-gated-section{margin-bottom:18px;}" +
-    ".arb-gated-aud-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}" +
-    ".arb-gated-aud-row input{flex:1;min-width:0;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;}" +
+    ".arb-gated-page-group{margin-bottom:16px;}" +
+    ".arb-gated-page-group h6{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);}" +
     ".arb-gated-block-row{border:1px solid var(--line-2);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}" +
+    ".blk-friendly{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px;}" +
     ".arb-gated-block-row .blk-key{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
     ".arb-gated-block-row .blk-html{width:100%;box-sizing:border-box;min-height:70px;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;resize:vertical;}" +
     ".blk-auds{display:flex;flex-wrap:wrap;gap:10px;}" +
     ".blk-aud-opt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);}" +
     ".arb-gated-rm{position:absolute;top:10px;right:10px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:var(--faint);cursor:pointer;flex:none;}" +
-    ".arb-gated-aud-row .arb-gated-rm{position:static;}" +
     ".arb-gated-rm:hover{color:var(--danger);}" +
     ".arb-gated-rm svg{width:13px;height:13px;}" +
     ".arb-gated-add{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--accent-ink);background:none;border:1px dashed var(--line-2);border-radius:8px;padding:7px 12px;cursor:pointer;}" +
@@ -572,41 +572,62 @@
   }
 
   // ---------- gated-content manager (admin only) ----------
-  function uniqueId(base, existingIds) {
-    var id = base, n = 1;
-    while (existingIds.indexOf(id) >= 0) { n += 1; id = base + "-" + n; }
-    return id;
+  // Access is granted by the caller's arbitara-demo role, not an admin-
+  // curated username list — keep this list in sync with ROLES in
+  // demo-api/worker.js if that list ever changes. "admin" isn't offered
+  // as a checkbox since an admin session already sees every block
+  // unconditionally (see resolveGatedAccess() server-side).
+  var GATED_ROLES = [
+    { id: "investor", label: "Investor" },
+    { id: "governance", label: "Governance" },
+    { id: "developer", label: "Developer" },
+    { id: "user", label: "User" },
+  ];
+  // Purely cosmetic groupings/labels for the manager UI — block keys are
+  // still freeform text underneath. A key's text before its first "."
+  // becomes its group heading (falls back to a capitalized version of
+  // that prefix for anything not listed here); a full-key match here
+  // gets a friendly label shown above its (still-editable) key field.
+  var GATED_PAGE_LABELS = { investor: "Investor page" };
+  var GATED_SECTION_LABELS = {
+    "investor.opportunity": "Opportunity", "investor.competitive": "Competitive landscape",
+    "investor.businessModel": "Business model", "investor.pathTo100m": "Path to $100M",
+    "investor.goToMarket": "Go-to-market", "investor.ask": "The ask",
+    "investor.deck": "Deck access — controls who can open the PDF carousel; the HTML field below is unused for this one",
+    "investor.navlink": "Nav & footer link visibility",
+  };
+  function gatedPageLabel(prefix) {
+    if (GATED_PAGE_LABELS[prefix]) return GATED_PAGE_LABELS[prefix];
+    if (!prefix) return "Uncategorized";
+    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
   }
 
-  // Reads the manager panel's current DOM state back into a working document
+  var blockUidSeq = 0;
+  function nextBlockUid() { return "b" + (++blockUidSeq) + Date.now().toString(36); }
+
+  // Reads the manager panel's current DOM state back into a working array
   // — called before every add/remove so in-progress edits survive a
-  // re-render, and again on Save. blocksArr (not the final {key: {...}}
-  // object) so rows can be added/removed/reordered by array index while a
-  // block's key is still being typed/edited.
+  // re-render, and again on Save. Each block carries a client-only `uid`
+  // (independent of its position in the array) so removal is unambiguous
+  // even though rows render grouped by page, not in raw array order.
   function collectGatedWorking(panel, deckMeta) {
-    var audiences = [].map.call(panel.querySelectorAll(".arb-gated-aud-row"), function (row) {
-      return {
-        id: row.getAttribute("data-id"),
-        label: row.querySelector(".aud-label").value.trim(),
-        usernames: row.querySelector(".aud-users").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean),
-      };
-    });
     var blocksArr = [].map.call(panel.querySelectorAll(".arb-gated-block-row"), function (row) {
       return {
+        uid: row.getAttribute("data-uid"),
         key: row.querySelector(".blk-key").value.trim(),
         html: row.querySelector(".blk-html").value,
-        audiences: [].map.call(row.querySelectorAll(".blk-aud:checked"), function (cb) { return cb.value; }),
+        roles: [].map.call(row.querySelectorAll(".blk-aud:checked"), function (cb) { return cb.value; }),
       };
     });
     // deckMeta doesn't live in the DOM (the upload button has no form
     // field for it) — threaded through explicitly so add/remove re-renders
     // don't lose track of "a deck is already uploaded".
-    return { audiences: audiences, blocksArr: blocksArr, deckMeta: deckMeta };
+    return { blocksArr: blocksArr, deckMeta: deckMeta };
   }
 
   function blocksArrToObj(blocksArr) {
     var out = {};
-    blocksArr.forEach(function (b) { if (b.key) out[b.key] = { html: b.html, audiences: b.audiences }; });
+    blocksArr.forEach(function (b) { if (b.key) out[b.key] = { html: b.html, roles: b.roles }; });
     return out;
   }
 
@@ -632,36 +653,42 @@
     gatedModal.appendChild(panel);
     var deckMeta = working.deckMeta;
 
-    var audRows = working.audiences.map(function (a) {
-      return '<div class="arb-gated-aud-row" data-id="' + esc(a.id) + '">' +
-        '<input class="aud-label" type="text" placeholder="Label (e.g. Investors)" value="' + esc(a.label) + '">' +
-        '<input class="aud-users" type="text" placeholder="usernames, comma-separated" value="' + esc(a.usernames.join(", ")) + '">' +
-        '<button type="button" class="arb-gated-rm" title="Remove audience">' + ICON_X + "</button></div>";
-    }).join("") || '<p class="arb-gated-note">No audiences yet.</p>';
-
-    var blockRows = working.blocksArr.map(function (b) {
-      var checks = working.audiences.map(function (a) {
-        var checked = b.audiences.indexOf(a.id) >= 0 ? "checked" : "";
-        return '<label class="blk-aud-opt"><input type="checkbox" class="blk-aud" value="' + esc(a.id) + '" ' + checked + ">" + esc(a.label || a.id) + "</label>";
+    // Render each block, then bucket the resulting row HTML by the text
+    // before its key's first "." — grouped display, but a block's
+    // position in working.blocksArr (and hence in blocksArrToObj) never
+    // has to match render order, since removal keys off each row's
+    // stable data-uid rather than array index.
+    var groups = {}, groupOrder = [];
+    working.blocksArr.forEach(function (b) {
+      var dot = b.key.indexOf(".");
+      var prefix = dot > 0 ? b.key.slice(0, dot) : "";
+      var checks = GATED_ROLES.map(function (r) {
+        var checked = b.roles.indexOf(r.id) >= 0 ? "checked" : "";
+        return '<label class="blk-aud-opt"><input type="checkbox" class="blk-aud" value="' + esc(r.id) + '" ' + checked + ">" + esc(r.label) + "</label>";
       }).join("");
-      return '<div class="arb-gated-block-row">' +
-        '<input class="blk-key" type="text" placeholder="key (e.g. ai.investorNote)" value="' + esc(b.key) + '">' +
+      var friendly = GATED_SECTION_LABELS[b.key];
+      var rowHtml = '<div class="arb-gated-block-row" data-uid="' + esc(b.uid) + '">' +
+        (friendly ? '<div class="blk-friendly">' + esc(friendly) + "</div>" : "") +
+        '<input class="blk-key" type="text" placeholder="key (e.g. investor.section)" value="' + esc(b.key) + '">' +
         '<textarea class="blk-html" placeholder="HTML shown to authorized viewers">' + esc(b.html) + "</textarea>" +
-        '<div class="blk-auds">' + (checks || '<span class="arb-gated-note">Add an audience first.</span>') + "</div>" +
+        '<div class="blk-auds">' + checks + "</div>" +
         '<button type="button" class="arb-gated-rm" title="Remove block">' + ICON_X + "</button></div>";
+      if (!groups[prefix]) { groups[prefix] = []; groupOrder.push(prefix); }
+      groups[prefix].push(rowHtml);
+    });
+    var blockGroupsHtml = groupOrder.map(function (prefix) {
+      return '<div class="arb-gated-page-group"><h6>' + esc(gatedPageLabel(prefix)) + "</h6>" + groups[prefix].join("") + "</div>";
     }).join("") || '<p class="arb-gated-note">No blocks yet.</p>';
 
     panel.innerHTML =
       "<h4>Manage gated content</h4>" +
-      '<p class="arb-gated-note">Tag existing demo-account usernames into audiences, then tag content blocks with those audiences. On the page, an element with <code>data-arb-gated="key"</code> reveals a block once one exists with that key — this panel manages what’s shown and to whom, not where it appears. It doesn’t create accounts; usernames must already exist.</p>' +
+      '<p class="arb-gated-note">Content blocks are grouped by page below. Each is visible to whichever arbitara-demo roles you check — an admin account always sees everything. On the page itself, an element with <code>data-arb-gated="key"</code> reveals a block once one exists with that key; this panel manages what’s shown and to whom, not where it appears.</p>' +
       '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
       '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
-      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below with the key <code>investor.deck</code> and check the audiences that should see it (its HTML field is unused).</p>' +
+      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below with the key <code>investor.deck</code> and check the roles that should see it (its HTML field is unused).</p>' +
       '<label class="arb-gated-add" style="display:inline-block;cursor:pointer;">Upload / replace deck (PDF, max 20MB)' +
       '<input type="file" accept="application/pdf" id="arbDeckFile" style="display:none"></label></div>' +
-      '<div class="arb-gated-section"><h5>Audiences</h5><div class="arb-gated-aud-list">' + audRows + "</div>" +
-      '<button type="button" class="arb-gated-add" id="arbAddAud">+ Add audience</button></div>' +
-      '<div class="arb-gated-section"><h5>Blocks</h5><div class="arb-gated-block-list">' + blockRows + "</div>" +
+      '<div class="arb-gated-section"><h5>Content blocks</h5><div class="arb-gated-block-list">' + blockGroupsHtml + "</div>" +
       '<button type="button" class="arb-gated-add" id="arbAddBlock">+ Add block</button></div>' +
       '<div class="arb-gated-msg" id="arbGatedMsg"></div>' +
       '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbGatedCancel">Cancel</button>' +
@@ -684,32 +711,18 @@
       reader.readAsDataURL(file);
     });
 
-    [].forEach.call(panel.querySelectorAll(".arb-gated-aud-row .arb-gated-rm"), function (btn, i) {
+    [].forEach.call(panel.querySelectorAll(".arb-gated-block-row .arb-gated-rm"), function (btn) {
       btn.addEventListener("click", function () {
+        var uid = btn.closest(".arb-gated-block-row").getAttribute("data-uid");
         var w = collectGatedWorking(panel, deckMeta);
-        var removedId = w.audiences[i].id;
-        w.audiences.splice(i, 1);
-        w.blocksArr.forEach(function (b) { b.audiences = b.audiences.filter(function (a) { return a !== removedId; }); });
-        renderGatedManager(w);
-      });
-    });
-    [].forEach.call(panel.querySelectorAll(".arb-gated-block-row .arb-gated-rm"), function (btn, i) {
-      btn.addEventListener("click", function () {
-        var w = collectGatedWorking(panel, deckMeta);
-        w.blocksArr.splice(i, 1);
+        w.blocksArr = w.blocksArr.filter(function (b) { return b.uid !== uid; });
         renderGatedManager(w);
       });
     });
 
-    panel.querySelector("#arbAddAud").addEventListener("click", function () {
-      var w = collectGatedWorking(panel, deckMeta);
-      var id = uniqueId("audience", w.audiences.map(function (a) { return a.id; }));
-      w.audiences.push({ id: id, label: "", usernames: [] });
-      renderGatedManager(w);
-    });
     panel.querySelector("#arbAddBlock").addEventListener("click", function () {
       var w = collectGatedWorking(panel, deckMeta);
-      w.blocksArr.push({ key: "", html: "", audiences: [] });
+      w.blocksArr.push({ uid: nextBlockUid(), key: "", html: "", roles: [] });
       renderGatedManager(w);
     });
 
@@ -719,7 +732,7 @@
       var msg = panel.querySelector("#arbGatedMsg");
       msg.style.color = "var(--danger)";
       msg.textContent = "Saving…";
-      api("/gated-admin", { method: "PUT", body: { doc: { audiences: w.audiences, blocks: blocksArrToObj(w.blocksArr) } } })
+      api("/gated-admin", { method: "PUT", body: { doc: { blocks: blocksArrToObj(w.blocksArr) } } })
         .then(function () {
           msg.style.color = "var(--muted)";
           msg.textContent = "Saved.";
@@ -738,12 +751,11 @@
     document.body.appendChild(gatedModal);
     gatedModal.addEventListener("click", function (e) { if (e.target === gatedModal) closeGatedModal(); });
     api("/gated-admin").then(function (d) {
-      var doc = d.doc || { audiences: [], blocks: {} };
+      var doc = d.doc || { blocks: {} };
       renderGatedManager({
-        audiences: doc.audiences || [],
         blocksArr: Object.keys(doc.blocks || {}).map(function (k) {
           var b = doc.blocks[k] || {};
-          return { key: k, html: b.html || "", audiences: b.audiences || [] };
+          return { uid: nextBlockUid(), key: k, html: b.html || "", roles: b.roles || [] };
         }),
         deckMeta: d.deckMeta || null,
       });

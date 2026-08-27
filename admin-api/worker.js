@@ -33,9 +33,9 @@
  * POST /demo-login — non-admin roles just don't pass verifyDemoAdmin(), so
  * /config, /upload, /leads, /gated-admin, POST /gated-deck stay admin-only
  * regardless. What a non-admin login IS good for: GET /gated-content and
- * GET /gated-deck, which return audience-gated content/files (see the
- * "gated content" section below) filtered to whatever that specific
- * account is authorized to see.
+ * GET /gated-deck, which return content/files gated by the account's
+ * arbitara-demo role (see the "gated content" section below) — role IS
+ * the access-control unit here, not a separate admin-curated list.
  *
  *   POST /login        { password }            -> { token }  (own password, admin)
  *   POST /demo-login    { username, password }  -> { token, name, role, username }
@@ -43,7 +43,7 @@
  *   PUT  /config          (Bearer) { config, sha } -> { sha }
  *   GET  /gated-content   (Bearer, any identity) -> { blocks: {"<key>": html} }
  *   GET  /gated-deck      (Bearer, any identity, gated on the "investor.deck"
- *                          block's audiences)     -> raw PDF bytes
+ *                          block's roles)          -> raw PDF bytes
  *   POST /gated-deck      (Bearer, admin) { contentBase64 } -> { size, uploadedAt }
  *   GET  /gated-admin     (Bearer, admin)        -> { doc, deckMeta }
  *   PUT  /gated-admin     (Bearer, admin) { doc } -> { ok }
@@ -181,8 +181,8 @@ export default {
     // back. What that token then unlocks depends on the account's role,
     // checked separately per endpoint: verifyDemoAdmin() (role === "admin")
     // gates /config, /upload, /leads, /gated-admin; any valid identity
-    // (getDemoIdentity()) is enough for /gated-content, which filters by the
-    // account's assigned audiences instead of by role.
+    // (getDemoIdentity()) is enough for /gated-content, which filters by
+    // the account's own role.
     if (url.pathname.endsWith("/demo-login") && request.method === "POST") {
       if (!demoApi) return json({ error: "Account service is not configured (missing DEMO_API binding)." }, 500);
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
@@ -234,35 +234,38 @@ export default {
     // fetched unauthenticated by every visitor, so anything confidential put
     // there (even if hidden client-side) would just be readable via view-
     // source. See CLAUDE.md's "Audience-gated content" section for the full
-    // rationale. Shape: { audiences: [{id, label, usernames}], blocks:
-    // {"<key>": {html, audiences: [id,...]}} }.
+    // rationale. Shape: { blocks: {"<key>": {html, roles: [role,...]}} } —
+    // gated purely by the caller's arbitara-demo role (user/governance/
+    // developer/investor — see ROLES in demo-api/worker.js; keep this in
+    // sync if that list changes), not by an admin-curated username list.
+    // Simpler than the username-based "audiences" design this replaced:
+    // role already IS the meaningful unit of "who should see this" here,
+    // so a separate audience-tagging layer was just indirection with no
+    // payoff — one less thing for admin to keep in sync with reality.
     const GATED_KEY = "gated:doc";
     async function getGatedDoc(env) {
       let doc; try { doc = JSON.parse((await env.LEADS.get(GATED_KEY)) || "null"); } catch (e) { doc = null; }
-      return doc || { audiences: [], blocks: {} };
+      return doc || { blocks: {} };
     }
 
     // Resolves a bearer token to gated-content access — shared by
     // /gated-content and /gated-deck so both use one authorization path.
     // `full: true` = every block (own-password admin session, or a demo
     // account with role "admin" — same reach as their edit powers
-    // elsewhere). Otherwise `audiences` = the audience ids the caller's
-    // demo username belongs to, per doc.audiences. Returns null if the
+    // elsewhere). Otherwise `role` = the caller's arbitara-demo role,
+    // checked against each block's `roles` list. Returns null if the
     // token isn't a valid identity at all.
-    async function resolveGatedAccess(bearer, doc) {
+    async function resolveGatedAccess(bearer) {
       const ownSession = await verifySession(env.SESSION_SECRET, bearer);
       if (ownSession) return { full: true };
       const identity = await getDemoIdentity(bearer, demoApi);
       if (!identity) return null;
       if (identity.role === "admin") return { full: true };
-      const myAudiences = (doc.audiences || [])
-        .filter(function (a) { return (a.usernames || []).indexOf(identity.username) >= 0; })
-        .map(function (a) { return a.id; });
-      return { full: false, audiences: myAudiences };
+      return { full: false, role: identity.role };
     }
     function blockAllowed(block, access) {
       if (access.full) return true;
-      return (block.audiences || []).some(function (a) { return access.audiences.indexOf(a) >= 0; });
+      return (block.roles || []).indexOf(access.role) >= 0;
     }
 
     // ---- GET /gated-content -> { blocks: {"<key>": "<html>", ...} } ----
@@ -272,7 +275,7 @@ export default {
     // caller to discover.
     if (url.pathname.endsWith("/gated-content") && request.method === "GET") {
       const doc = await getGatedDoc(env);
-      const access = await resolveGatedAccess(bearer, doc);
+      const access = await resolveGatedAccess(bearer);
       if (!access) return json({ error: "unauthorized" }, 401);
       const blocks = {};
       Object.keys(doc.blocks || {}).forEach(function (key) {
@@ -297,13 +300,13 @@ export default {
     // ---- GET /gated-deck -> raw PDF bytes ----
     // Access is tied to the reserved block key "investor.deck" — admin
     // controls who can see the deck the same way as any other block, by
-    // checking audiences on a block with that key in the manager UI (its
+    // checking roles on a block with that key in the manager UI (its
     // html field is unused). Deliberately a separate check from "does
     // this caller have access to ANY block" — the deck can be scoped
     // narrower than the surrounding page text if needed.
     if (url.pathname.endsWith("/gated-deck") && request.method === "GET") {
       const doc = await getGatedDoc(env);
-      const access = await resolveGatedAccess(bearer, doc);
+      const access = await resolveGatedAccess(bearer);
       if (!access) return json({ error: "unauthorized" }, 401);
       const deckBlock = (doc.blocks || {})["investor.deck"];
       if (!access.full && !(deckBlock && blockAllowed(deckBlock, access))) return json({ error: "unauthorized" }, 403);
@@ -335,7 +338,7 @@ export default {
 
     // ---- GET /gated-admin -> { doc, deckMeta } / PUT /gated-admin { doc } -> { ok } ----
     // Admin-only (same `authed` check as /config) — manages the whole
-    // audiences+blocks document as one unit, same read-modify-write-whole-
+    // blocks document as one unit, same read-modify-write-whole-
     // document pattern /config uses against GitHub, just against KV instead.
     // No sha/optimistic-concurrency here unlike /config — an accepted
     // simplification since this is single-admin-at-a-time in practice.
@@ -350,10 +353,13 @@ export default {
     if (url.pathname.endsWith("/gated-admin") && request.method === "PUT") {
       if (!authed) return json({ error: "unauthorized" }, 401);
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
-      const doc = {
-        audiences: Array.isArray(body.doc && body.doc.audiences) ? body.doc.audiences : [],
-        blocks: (body.doc && body.doc.blocks && typeof body.doc.blocks === "object") ? body.doc.blocks : {},
-      };
+      const rawBlocks = (body.doc && body.doc.blocks && typeof body.doc.blocks === "object") ? body.doc.blocks : {};
+      const blocks = {};
+      Object.keys(rawBlocks).forEach(function (key) {
+        const b = rawBlocks[key] || {};
+        blocks[key] = { html: String(b.html || ""), roles: Array.isArray(b.roles) ? b.roles.map(String) : [] };
+      });
+      const doc = { blocks: blocks };
       await env.LEADS.put(GATED_KEY, JSON.stringify(doc));
       return json({ ok: true });
     }
