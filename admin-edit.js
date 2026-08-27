@@ -546,17 +546,24 @@
   // ---------- audience-gated content ----------
   // Any signed-in account (any role) can be authorized for gated blocks —
   // see admin-api/worker.js's GET /gated-content for the server-side
-  // filtering logic. Swaps authorized blocks' HTML into matching
-  // [data-arb-gated="<key>"] elements; unauthorized/unmentioned keys just
-  // keep whatever public teaser is already in the page's static HTML.
+  // filtering logic. Swaps authorized blocks' HTML into every matching
+  // [data-arb-gated="<key>"] element (querySelectorAll, not just the
+  // first — the same block can populate more than one spot on a page,
+  // e.g. a nav link that also needs to show in the footer); unauthorized/
+  // unmentioned keys just keep whatever public teaser is already in the
+  // page's static HTML.
   function applyGatedContent() {
     if (!ls(TOK)) return;
     api("/gated-content").then(function (d) {
       var blocks = d.blocks || {};
       Object.keys(blocks).forEach(function (key) {
-        var el = document.querySelector('[data-arb-gated="' + key + '"]');
-        if (el) el.innerHTML = blocks[key];
+        [].forEach.call(document.querySelectorAll('[data-arb-gated="' + key + '"]'), function (el) {
+          el.innerHTML = blocks[key];
+        });
       });
+      // Lets page-specific scripts (e.g. investor.js's deck carousel) know
+      // it's worth (re)trying their own gated fetches now.
+      document.dispatchEvent(new CustomEvent("arb:gated-applied"));
     }).catch(function (err) {
       // A 401 means the stored token is no longer valid (expired/revoked) —
       // drop it so the nav button reflects "signed out" on next interaction.
@@ -576,7 +583,7 @@
   // re-render, and again on Save. blocksArr (not the final {key: {...}}
   // object) so rows can be added/removed/reordered by array index while a
   // block's key is still being typed/edited.
-  function collectGatedWorking(panel) {
+  function collectGatedWorking(panel, deckMeta) {
     var audiences = [].map.call(panel.querySelectorAll(".arb-gated-aud-row"), function (row) {
       return {
         id: row.getAttribute("data-id"),
@@ -591,13 +598,28 @@
         audiences: [].map.call(row.querySelectorAll(".blk-aud:checked"), function (cb) { return cb.value; }),
       };
     });
-    return { audiences: audiences, blocksArr: blocksArr };
+    // deckMeta doesn't live in the DOM (the upload button has no form
+    // field for it) — threaded through explicitly so add/remove re-renders
+    // don't lose track of "a deck is already uploaded".
+    return { audiences: audiences, blocksArr: blocksArr, deckMeta: deckMeta };
   }
 
   function blocksArrToObj(blocksArr) {
     var out = {};
     blocksArr.forEach(function (b) { if (b.key) out[b.key] = { html: b.html, audiences: b.audiences }; });
     return out;
+  }
+
+  function formatBytes(n) {
+    if (!n) return "0 B";
+    var units = ["B", "KB", "MB", "GB"], i = 0;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return n.toFixed(i ? 1 : 0) + " " + units[i];
+  }
+  function deckStatusText(meta) {
+    if (!meta || !meta.size) return "No deck uploaded yet.";
+    var when = meta.uploadedAt ? new Date(meta.uploadedAt).toLocaleDateString() : "";
+    return "Current deck: " + formatBytes(meta.size) + (when ? " · uploaded " + when : "");
   }
 
   var gatedModal = null;
@@ -608,6 +630,7 @@
     panel.className = "arb-gated-panel";
     gatedModal.innerHTML = "";
     gatedModal.appendChild(panel);
+    var deckMeta = working.deckMeta;
 
     var audRows = working.audiences.map(function (a) {
       return '<div class="arb-gated-aud-row" data-id="' + esc(a.id) + '">' +
@@ -631,6 +654,11 @@
     panel.innerHTML =
       "<h4>Manage gated content</h4>" +
       '<p class="arb-gated-note">Tag existing demo-account usernames into audiences, then tag content blocks with those audiences. On the page, an element with <code>data-arb-gated="key"</code> reveals a block once one exists with that key — this panel manages what’s shown and to whom, not where it appears. It doesn’t create accounts; usernames must already exist.</p>' +
+      '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
+      '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
+      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below with the key <code>investor.deck</code> and check the audiences that should see it (its HTML field is unused).</p>' +
+      '<label class="arb-gated-add" style="display:inline-block;cursor:pointer;">Upload / replace deck (PDF, max 20MB)' +
+      '<input type="file" accept="application/pdf" id="arbDeckFile" style="display:none"></label></div>' +
       '<div class="arb-gated-section"><h5>Audiences</h5><div class="arb-gated-aud-list">' + audRows + "</div>" +
       '<button type="button" class="arb-gated-add" id="arbAddAud">+ Add audience</button></div>' +
       '<div class="arb-gated-section"><h5>Blocks</h5><div class="arb-gated-block-list">' + blockRows + "</div>" +
@@ -639,9 +667,26 @@
       '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbGatedCancel">Cancel</button>' +
       '<button type="button" class="arb-gated-save" id="arbGatedSave">Save</button></div>';
 
+    panel.querySelector("#arbDeckFile").addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      if (file.type !== "application/pdf") { alert("Please upload a PDF file."); return; }
+      if (file.size > 20 * 1024 * 1024) { alert("PDF is over 20MB."); return; }
+      var statusEl = panel.querySelector("#arbDeckStatus");
+      statusEl.textContent = "Uploading…";
+      var reader = new FileReader();
+      reader.onload = function () {
+        api("/gated-deck", { method: "POST", body: { contentBase64: reader.result } })
+          .then(function (d) { deckMeta = d; statusEl.textContent = deckStatusText(d); })
+          .catch(function (err) { statusEl.textContent = "Upload failed: " + (err.message || "unknown error"); });
+      };
+      reader.readAsDataURL(file);
+    });
+
     [].forEach.call(panel.querySelectorAll(".arb-gated-aud-row .arb-gated-rm"), function (btn, i) {
       btn.addEventListener("click", function () {
-        var w = collectGatedWorking(panel);
+        var w = collectGatedWorking(panel, deckMeta);
         var removedId = w.audiences[i].id;
         w.audiences.splice(i, 1);
         w.blocksArr.forEach(function (b) { b.audiences = b.audiences.filter(function (a) { return a !== removedId; }); });
@@ -650,27 +695,27 @@
     });
     [].forEach.call(panel.querySelectorAll(".arb-gated-block-row .arb-gated-rm"), function (btn, i) {
       btn.addEventListener("click", function () {
-        var w = collectGatedWorking(panel);
+        var w = collectGatedWorking(panel, deckMeta);
         w.blocksArr.splice(i, 1);
         renderGatedManager(w);
       });
     });
 
     panel.querySelector("#arbAddAud").addEventListener("click", function () {
-      var w = collectGatedWorking(panel);
+      var w = collectGatedWorking(panel, deckMeta);
       var id = uniqueId("audience", w.audiences.map(function (a) { return a.id; }));
       w.audiences.push({ id: id, label: "", usernames: [] });
       renderGatedManager(w);
     });
     panel.querySelector("#arbAddBlock").addEventListener("click", function () {
-      var w = collectGatedWorking(panel);
+      var w = collectGatedWorking(panel, deckMeta);
       w.blocksArr.push({ key: "", html: "", audiences: [] });
       renderGatedManager(w);
     });
 
     panel.querySelector("#arbGatedCancel").addEventListener("click", closeGatedModal);
     panel.querySelector("#arbGatedSave").addEventListener("click", function () {
-      var w = collectGatedWorking(panel);
+      var w = collectGatedWorking(panel, deckMeta);
       var msg = panel.querySelector("#arbGatedMsg");
       msg.style.color = "var(--danger)";
       msg.textContent = "Saving…";
@@ -700,6 +745,7 @@
           var b = doc.blocks[k] || {};
           return { key: k, html: b.html || "", audiences: b.audiences || [] };
         }),
+        deckMeta: d.deckMeta || null,
       });
     }).catch(function (err) {
       gatedModal.querySelector(".arb-gated-panel").innerHTML =
