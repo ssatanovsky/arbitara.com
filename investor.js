@@ -34,11 +34,20 @@
   function ls(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
 
   // ---------- whole-page content gate ----------
+  var ROLE = "arb.admin.role";
   var lockedEl = document.getElementById("investorLocked");
   var gatedEl = document.getElementById("investorGated");
   function applyContentGate(blocks) {
     if (!lockedEl || !gatedEl) return;
-    var authorized = Object.keys(blocks || {}).some(function (k) { return k.indexOf("investor.") === 0; });
+    // Admin always sees the real page, independent of whether any
+    // investor.* block has actually been created yet — admin needs to see
+    // the section shells to know what to fill in. Checking for "at least
+    // one investor.* key in the response" alone would wrongly stay locked
+    // for admin too the moment gated:doc has no investor content yet,
+    // since a full-access response with nothing in it looks identical to
+    // an unauthorized one.
+    var isAdmin = ls(ROLE) === "admin";
+    var authorized = isAdmin || Object.keys(blocks || {}).some(function (k) { return k.indexOf("investor.") === 0; });
     lockedEl.style.display = authorized ? "none" : "";
     gatedEl.style.display = authorized ? "" : "none";
   }

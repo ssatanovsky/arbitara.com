@@ -101,6 +101,7 @@
     ".arb-gated-page-group h6{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);}" +
     ".arb-gated-block-row{border:1px solid var(--line-2);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}" +
     ".blk-friendly{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px;}" +
+    ".arb-gated-block-row .blk-key-select{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
     ".arb-gated-block-row .blk-key{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
     ".arb-gated-block-row .blk-html{width:100%;box-sizing:border-box;min-height:70px;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;resize:vertical;}" +
     ".blk-auds{display:flex;flex-wrap:wrap;gap:10px;}" +
@@ -585,21 +586,28 @@
     { id: "developer", label: "Developer" },
     { id: "user", label: "User" },
   ];
-  // Purely cosmetic groupings/labels for the manager UI — block keys are
-  // still freeform text underneath. A key's text before its first "."
-  // becomes its group heading (falls back to a capitalized version of
-  // that prefix for anything not listed here); a full-key match here
-  // gets a friendly label shown above its (still-editable) key field.
-  var GATED_PAGE_LABELS = { investor: "Investor page" };
-  var GATED_SECTION_LABELS = {
-    "investor.opportunity": "Opportunity", "investor.competitive": "Competitive landscape",
-    "investor.businessModel": "Business model", "investor.pathTo100m": "Path to $100M",
-    "investor.goToMarket": "Go-to-market", "investor.ask": "The ask",
-    "investor.deck": "Deck access — controls who can open the PDF carousel; the HTML field below is unused for this one",
-    "investor.navlink": "Nav & footer link visibility",
-  };
-  function gatedPageLabel(prefix) {
-    if (GATED_PAGE_LABELS[prefix]) return GATED_PAGE_LABELS[prefix];
+  // Every known data-arb-gated placeholder on the site, so admin picks a
+  // block's key from a list instead of typing it blind — a typo'd key
+  // just silently never matches any placeholder, with nothing to signal
+  // the mismatch. "Other (custom key)" in the dropdown still allows
+  // anything not listed here, for a one-off or before this catalog is
+  // updated for a newly added page. Add a page's real HTML file/section
+  // alongside its entries here when you add new gated content elsewhere.
+  var GATED_CATALOG = [
+    { group: "Investor page", key: "investor.opportunity", label: "Opportunity" },
+    { group: "Investor page", key: "investor.competitive", label: "Competitive landscape" },
+    { group: "Investor page", key: "investor.businessModel", label: "Business model" },
+    { group: "Investor page", key: "investor.pathTo100m", label: "Path to $100M" },
+    { group: "Investor page", key: "investor.goToMarket", label: "Go-to-market" },
+    { group: "Investor page", key: "investor.ask", label: "The ask" },
+    { group: "Investor page", key: "investor.deck", label: "Deck access (controls the PDF carousel — the HTML field below is unused for this one)" },
+  ];
+  function gatedCatalogEntry(key) {
+    return GATED_CATALOG.filter(function (c) { return c.key === key; })[0] || null;
+  }
+  // Purely cosmetic group heading for keys outside the catalog — the text
+  // before a key's first "." (falls back to "Uncategorized" for a bare key).
+  function gatedFallbackGroup(prefix) {
     if (!prefix) return "Uncategorized";
     return prefix.charAt(0).toUpperCase() + prefix.slice(1);
   }
@@ -655,39 +663,55 @@
     gatedModal.appendChild(panel);
     var deckMeta = working.deckMeta;
 
-    // Render each block, then bucket the resulting row HTML by the text
-    // before its key's first "." — grouped display, but a block's
-    // position in working.blocksArr (and hence in blocksArrToObj) never
-    // has to match render order, since removal keys off each row's
-    // stable data-uid rather than array index.
+    // Render each block, then bucket the resulting row HTML by its catalog
+    // group (falling back to the text before the key's first "." for a
+    // custom key) — grouped display, but a block's position in
+    // working.blocksArr (and hence in blocksArrToObj) never has to match
+    // render order, since removal keys off each row's stable data-uid
+    // rather than array index.
     var groups = {}, groupOrder = [];
     working.blocksArr.forEach(function (b) {
-      var dot = b.key.indexOf(".");
-      var prefix = dot > 0 ? b.key.slice(0, dot) : "";
+      var entry = gatedCatalogEntry(b.key);
+      var group = entry ? entry.group : gatedFallbackGroup(b.key.indexOf(".") > 0 ? b.key.slice(0, b.key.indexOf(".")) : "");
       var checks = GATED_ROLES.map(function (r) {
         var checked = b.roles.indexOf(r.id) >= 0 ? "checked" : "";
         return '<label class="blk-aud-opt"><input type="checkbox" class="blk-aud" value="' + esc(r.id) + '" ' + checked + ">" + esc(r.label) + "</label>";
       }).join("");
-      var friendly = GATED_SECTION_LABELS[b.key];
+      // A <select> of every catalog entry (grouped by page via <optgroup>)
+      // plus "Other (custom key)…" — picking a catalog entry sets the
+      // hidden text input below it; picking "Other" reveals that input for
+      // free typing, which is also how an existing non-catalog key (like a
+      // one-off added before this dropdown existed) still displays and
+      // stays editable.
+      var byGroup = {};
+      GATED_CATALOG.forEach(function (c) { (byGroup[c.group] = byGroup[c.group] || []).push(c); });
+      var optgroups = Object.keys(byGroup).map(function (g) {
+        return '<optgroup label="' + esc(g) + '">' + byGroup[g].map(function (c) {
+          return '<option value="' + esc(c.key) + '"' + (c.key === b.key ? " selected" : "") + ">" + esc(c.label) + "</option>";
+        }).join("") + "</optgroup>";
+      }).join("");
+      var isCustom = !entry;
       var rowHtml = '<div class="arb-gated-block-row" data-uid="' + esc(b.uid) + '">' +
-        (friendly ? '<div class="blk-friendly">' + esc(friendly) + "</div>" : "") +
-        '<input class="blk-key" type="text" placeholder="key (e.g. investor.section)" value="' + esc(b.key) + '">' +
+        '<select class="blk-key-select">' + optgroups +
+        '<option value="__custom__"' + (isCustom ? " selected" : "") + ">Other (custom key)…</option></select>" +
+        '<input class="blk-key" type="text" placeholder="custom key, e.g. somepage.section" value="' + esc(b.key) + '"' +
+        (isCustom ? "" : ' style="display:none"') + ">" +
         '<textarea class="blk-html" placeholder="HTML shown to authorized viewers">' + esc(b.html) + "</textarea>" +
         '<div class="blk-auds">' + checks + "</div>" +
         '<button type="button" class="arb-gated-rm" title="Remove block">' + ICON_X + "</button></div>";
-      if (!groups[prefix]) { groups[prefix] = []; groupOrder.push(prefix); }
-      groups[prefix].push(rowHtml);
+      if (!groups[group]) { groups[group] = []; groupOrder.push(group); }
+      groups[group].push(rowHtml);
     });
-    var blockGroupsHtml = groupOrder.map(function (prefix) {
-      return '<div class="arb-gated-page-group"><h6>' + esc(gatedPageLabel(prefix)) + "</h6>" + groups[prefix].join("") + "</div>";
+    var blockGroupsHtml = groupOrder.map(function (group) {
+      return '<div class="arb-gated-page-group"><h6>' + esc(group) + "</h6>" + groups[group].join("") + "</div>";
     }).join("") || '<p class="arb-gated-note">No blocks yet.</p>';
 
     panel.innerHTML =
       "<h4>Manage gated content</h4>" +
-      '<p class="arb-gated-note">Content blocks are grouped by page below. Each is visible to whichever arbitara-demo roles you check — an admin account always sees everything. On the page itself, an element with <code>data-arb-gated="key"</code> reveals a block once one exists with that key; this panel manages what’s shown and to whom, not where it appears.</p>' +
+      '<p class="arb-gated-note">Pick the page/section from the dropdown, write the content, and check whichever arbitara-demo roles should see it — an admin account always sees everything, regardless of these checkboxes. "Other (custom key)…" is only for a one-off spot not listed yet.</p>' +
       '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
       '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
-      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below with the key <code>investor.deck</code> and check the roles that should see it (its HTML field is unused).</p>' +
+      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below, pick "Deck access" from the dropdown, and check the roles that should see it (its HTML field is unused).</p>' +
       '<label class="arb-gated-add" style="display:inline-block;cursor:pointer;">Upload / replace deck (PDF, max 20MB)' +
       '<input type="file" accept="application/pdf" id="arbDeckFile" style="display:none"></label></div>' +
       '<div class="arb-gated-section"><h5>Content blocks</h5><div class="arb-gated-block-list">' + blockGroupsHtml + "</div>" +
@@ -722,9 +746,26 @@
       });
     });
 
+    [].forEach.call(panel.querySelectorAll(".blk-key-select"), function (sel) {
+      var row = sel.closest(".arb-gated-block-row");
+      var keyInput = row.querySelector(".blk-key");
+      sel.addEventListener("change", function () {
+        if (sel.value === "__custom__") {
+          keyInput.style.display = "";
+          keyInput.value = "";
+          keyInput.focus();
+        } else {
+          keyInput.style.display = "none";
+          keyInput.value = sel.value;
+        }
+      });
+    });
+
     panel.querySelector("#arbAddBlock").addEventListener("click", function () {
       var w = collectGatedWorking(panel, deckMeta);
-      w.blocksArr.push({ uid: nextBlockUid(), key: "", html: "", roles: [] });
+      var usedKeys = w.blocksArr.map(function (b) { return b.key; });
+      var next = GATED_CATALOG.filter(function (c) { return usedKeys.indexOf(c.key) < 0; })[0];
+      w.blocksArr.push({ uid: nextBlockUid(), key: next ? next.key : "", html: "", roles: [] });
       renderGatedManager(w);
     });
 
