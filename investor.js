@@ -5,8 +5,10 @@
    1. Whole-page content gate: every real section (#investorGated) starts
       hidden, with only a single "sign in for investor access" notice
       (#investorLocked) visible — reveals the real sections once
-      GET /gated-content (run by admin-edit.js) actually returns at least
-      one "investor.*" block for the signed-in account. Deliberately
+      GET /gated-content (run by admin-edit.js) says the signed-in account
+      is authorized for the "investor" page (an explicit rule in
+      gated:doc.pages, editable in "Manage gated content" as a Page +
+      "All" section + roles row — see admin-api/worker.js). Deliberately
       coarser than the existing data-arb-gated teaser-per-block pattern:
       a page that shows seven consecutive "sign in to view" boxes reads as
       broken, not confidential — one clear notice reads as intentional.
@@ -21,7 +23,7 @@
       for an unauthorized visitor to learn from the failure mode.
 
    Both retry after a sign-in via the same hook: admin-edit.js dispatches
-   "arb:gated-applied" (with the fetched blocks in event.detail.blocks)
+   "arb:gated-applied" (with the fetched blocks/pages in event.detail)
    once GET /gated-content resolves, whether that's on page load with an
    already-stored token or right after a fresh login.
    ========================================================================== */
@@ -34,25 +36,20 @@
   function ls(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
 
   // ---------- whole-page content gate ----------
-  var ROLE = "arb.admin.role";
   var lockedEl = document.getElementById("investorLocked");
   var gatedEl = document.getElementById("investorGated");
-  function applyContentGate(blocks) {
+  function applyContentGate(pages) {
     if (!lockedEl || !gatedEl) return;
-    // Admin always sees the real page, independent of whether any
-    // investor.* block has actually been created yet — admin needs to see
-    // the section shells to know what to fill in. Checking for "at least
-    // one investor.* key in the response" alone would wrongly stay locked
-    // for admin too the moment gated:doc has no investor content yet,
-    // since a full-access response with nothing in it looks identical to
-    // an unauthorized one.
-    var isAdmin = ls(ROLE) === "admin";
-    var authorized = isAdmin || Object.keys(blocks || {}).some(function (k) { return k.indexOf("investor.") === 0; });
+    // Server-resolved: GET /gated-content already applies the "admin sees
+    // everything" rule (resolveGatedAccess() there), so this is just
+    // "did the server say I can see the investor page" — no client-side
+    // role special-casing needed here.
+    var authorized = !!(pages && pages.investor);
     lockedEl.style.display = authorized ? "none" : "";
     gatedEl.style.display = authorized ? "" : "none";
   }
   document.addEventListener("arb:gated-applied", function (e) {
-    applyContentGate(e.detail && e.detail.blocks);
+    applyContentGate(e.detail && e.detail.pages);
   });
 
   // ---------- deck carousel ----------

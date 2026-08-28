@@ -97,15 +97,13 @@
     ".arb-gated-note{font-size:12.5px;line-height:1.5;color:var(--muted);margin:0 0 14px;}" +
     ".arb-gated-note code{background:var(--paper-2);padding:1px 5px;border-radius:4px;}" +
     ".arb-gated-section{margin-bottom:18px;}" +
-    ".arb-gated-page-group{margin-bottom:16px;}" +
-    ".arb-gated-page-group h6{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);}" +
-    ".arb-gated-block-row{border:1px solid var(--line-2);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}" +
-    ".blk-friendly{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px;}" +
-    ".arb-gated-block-row .blk-key-select{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
-    ".arb-gated-block-row .blk-key{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;margin-bottom:8px;}" +
-    ".arb-gated-block-row .blk-html{width:100%;box-sizing:border-box;min-height:70px;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;resize:vertical;}" +
-    ".blk-auds{display:flex;flex-wrap:wrap;gap:10px;}" +
+    ".arb-gated-row{border:1px solid var(--line-2);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}" +
+    ".arb-gated-row .row-selects{display:flex;gap:8px;margin-bottom:8px;}" +
+    ".arb-gated-row .row-selects>*{flex:1;min-width:0;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;}" +
+    ".arb-gated-row .row-html{width:100%;box-sizing:border-box;min-height:70px;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;resize:vertical;}" +
+    ".blk-auds{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}" +
     ".blk-aud-opt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);}" +
+    ".row-role-all-label{font-weight:700;color:var(--ink);padding-right:10px;border-right:1px solid var(--line-2);}" +
     ".arb-gated-rm{position:absolute;top:10px;right:10px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:none;color:var(--faint);cursor:pointer;flex:none;}" +
     ".arb-gated-rm:hover{color:var(--danger);}" +
     ".arb-gated-rm svg{width:13px;height:13px;}" +
@@ -557,6 +555,7 @@
     if (!ls(TOK)) return;
     api("/gated-content").then(function (d) {
       var blocks = d.blocks || {};
+      var pages = d.pages || {};
       Object.keys(blocks).forEach(function (key) {
         [].forEach.call(document.querySelectorAll('[data-arb-gated="' + key + '"]'), function (el) {
           el.innerHTML = blocks[key];
@@ -564,9 +563,9 @@
       });
       // Lets page-specific scripts (e.g. investor.js's deck carousel and
       // whole-page content gate) know it's worth (re)trying their own
-      // gated logic now — carries the raw blocks so a listener can check
-      // "was I actually authorized for anything" without a second fetch.
-      document.dispatchEvent(new CustomEvent("arb:gated-applied", { detail: { blocks: blocks } }));
+      // gated logic now — carries the raw blocks/pages so a listener can
+      // check what it's authorized for without a second fetch.
+      document.dispatchEvent(new CustomEvent("arb:gated-applied", { detail: { blocks: blocks, pages: pages } }));
     }).catch(function (err) {
       // A 401 means the stored token is no longer valid (expired/revoked) —
       // drop it so the nav button reflects "signed out" on next interaction.
@@ -578,7 +577,7 @@
   // Access is granted by the caller's arbitara-demo role, not an admin-
   // curated username list — keep this list in sync with ROLES in
   // demo-api/worker.js if that list ever changes. "admin" isn't offered
-  // as a checkbox since an admin session already sees every block
+  // as a checkbox since an admin session already sees everything
   // unconditionally (see resolveGatedAccess() server-side).
   var GATED_ROLES = [
     { id: "investor", label: "Investor" },
@@ -586,59 +585,77 @@
     { id: "developer", label: "Developer" },
     { id: "user", label: "User" },
   ];
-  // Every known data-arb-gated placeholder on the site, so admin picks a
-  // block's key from a list instead of typing it blind — a typo'd key
-  // just silently never matches any placeholder, with nothing to signal
-  // the mismatch. "Other (custom key)" in the dropdown still allows
-  // anything not listed here, for a one-off or before this catalog is
-  // updated for a newly added page. Add a page's real HTML file/section
-  // alongside its entries here when you add new gated content elsewhere.
-  var GATED_CATALOG = [
-    { group: "Investor page", key: "investor.opportunity", label: "Opportunity" },
-    { group: "Investor page", key: "investor.competitive", label: "Competitive landscape" },
-    { group: "Investor page", key: "investor.businessModel", label: "Business model" },
-    { group: "Investor page", key: "investor.pathTo100m", label: "Path to $100M" },
-    { group: "Investor page", key: "investor.goToMarket", label: "Go-to-market" },
-    { group: "Investor page", key: "investor.ask", label: "The ask" },
-    { group: "Investor page", key: "investor.deck", label: "Deck access (controls the PDF carousel — the HTML field below is unused for this one)" },
+  // Every page that can carry a gated rule, and every known section within
+  // it — so admin builds a rule as Page → Section (or "All", the whole
+  // page) → Roles, three dropdowns, instead of typing a key blind. Keep
+  // this in sync with KNOWN_PAGES in admin-api/worker.js and the real
+  // .html files. A page with no `sections` entries yet still works — its
+  // Section dropdown just only offers "All (whole page)". "other" is the
+  // escape hatch for a one-off spot not listed here, or a key created
+  // before this dropdown existed (e.g. from testing) — its own key is
+  // freeform text.
+  var GATED_PAGES = [
+    { id: "index", label: "Main", sections: [] },
+    { id: "white-paper", label: "White paper", sections: [] },
+    { id: "self-check", label: "Self-check", sections: [] },
+    { id: "investor", label: "Investors", sections: [
+      { key: "investor.opportunity", label: "Opportunity" },
+      { key: "investor.competitive", label: "Competitive landscape" },
+      { key: "investor.businessModel", label: "Business model" },
+      { key: "investor.pathTo100m", label: "Path to $100M" },
+      { key: "investor.goToMarket", label: "Go-to-market" },
+      { key: "investor.ask", label: "The ask" },
+      { key: "investor.deck", label: "Deck access (controls the PDF carousel — the content field below is unused for this one)" },
+    ] },
+    { id: "other", label: "Other (custom)", sections: null },
   ];
-  function gatedCatalogEntry(key) {
-    return GATED_CATALOG.filter(function (c) { return c.key === key; })[0] || null;
-  }
-  // Purely cosmetic group heading for keys outside the catalog — the text
-  // before a key's first "." (falls back to "Uncategorized" for a bare key).
-  function gatedFallbackGroup(prefix) {
-    if (!prefix) return "Uncategorized";
-    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  function gatedPage(id) { return GATED_PAGES.filter(function (p) { return p.id === id; })[0] || GATED_PAGES[GATED_PAGES.length - 1]; }
+  // Where a known block key lives, for loading existing data back into the
+  // Page/Section shape — {pageId, sectionKey}, or null if it's not in the
+  // catalog (falls back to the "Other (custom)" page with this as its key).
+  function gatedLocate(key) {
+    var found = null;
+    GATED_PAGES.forEach(function (p) {
+      (p.sections || []).forEach(function (s) { if (s.key === key) found = { pageId: p.id, sectionKey: key }; });
+    });
+    return found;
   }
 
   var blockUidSeq = 0;
   function nextBlockUid() { return "b" + (++blockUidSeq) + Date.now().toString(36); }
 
   // Reads the manager panel's current DOM state back into a working array
-  // — called before every add/remove so in-progress edits survive a
-  // re-render, and again on Save. Each block carries a client-only `uid`
-  // (independent of its position in the array) so removal is unambiguous
-  // even though rows render grouped by page, not in raw array order.
+  // of rows — called before every add/remove so in-progress edits survive
+  // a re-render, and again on Save. Each row carries a client-only `uid`
+  // so removal/lookup is unambiguous regardless of render order. A row
+  // with sectionKey === "" is a whole-page rule (saves to doc.pages); any
+  // other row saves to doc.blocks under its key (either the chosen
+  // section, or customKey when pageId is "other").
   function collectGatedWorking(panel, deckMeta) {
-    var blocksArr = [].map.call(panel.querySelectorAll(".arb-gated-block-row"), function (row) {
+    var rowsArr = [].map.call(panel.querySelectorAll(".arb-gated-row"), function (row) {
       return {
         uid: row.getAttribute("data-uid"),
-        key: row.querySelector(".blk-key").value.trim(),
-        html: row.querySelector(".blk-html").value,
-        roles: [].map.call(row.querySelectorAll(".blk-aud:checked"), function (cb) { return cb.value; }),
+        pageId: row.querySelector(".row-page").value,
+        sectionKey: row.querySelector(".row-section") ? row.querySelector(".row-section").value : "",
+        customKey: row.querySelector(".row-custom-key") ? row.querySelector(".row-custom-key").value.trim() : "",
+        html: row.querySelector(".row-html").value,
+        roles: [].map.call(row.querySelectorAll(".row-role:checked"), function (cb) { return cb.value; }),
       };
     });
     // deckMeta doesn't live in the DOM (the upload button has no form
     // field for it) — threaded through explicitly so add/remove re-renders
     // don't lose track of "a deck is already uploaded".
-    return { blocksArr: blocksArr, deckMeta: deckMeta };
+    return { rowsArr: rowsArr, deckMeta: deckMeta };
   }
 
-  function blocksArrToObj(blocksArr) {
-    var out = {};
-    blocksArr.forEach(function (b) { if (b.key) out[b.key] = { html: b.html, roles: b.roles }; });
-    return out;
+  function rowsArrToDoc(rowsArr) {
+    var pages = {}, blocks = {};
+    rowsArr.forEach(function (r) {
+      var key = r.pageId === "other" ? r.customKey : r.sectionKey;
+      if (!key) { if (r.pageId !== "other") pages[r.pageId] = { roles: r.roles }; return; }
+      blocks[key] = { html: r.html, roles: r.roles };
+    });
+    return { pages: pages, blocks: blocks };
   }
 
   function formatBytes(n) {
@@ -656,6 +673,35 @@
   var gatedModal = null;
   function closeGatedModal() { if (gatedModal) { gatedModal.remove(); gatedModal = null; } }
 
+  function gatedRowHtml(r) {
+    var page = gatedPage(r.pageId);
+    var pageOptions = GATED_PAGES.map(function (p) {
+      return '<option value="' + esc(p.id) + '"' + (p.id === r.pageId ? " selected" : "") + ">" + esc(p.label) + "</option>";
+    }).join("");
+    var sectionControl;
+    if (page.sections === null) {
+      sectionControl = '<input class="row-custom-key" type="text" placeholder="custom key, e.g. somepage.section" value="' + esc(r.customKey) + '">';
+    } else {
+      var sectionOptions = '<option value=""' + (r.sectionKey ? "" : " selected") + '>All (whole page)</option>' +
+        page.sections.map(function (s) {
+          return '<option value="' + esc(s.key) + '"' + (s.key === r.sectionKey ? " selected" : "") + ">" + esc(s.label) + "</option>";
+        }).join("");
+      sectionControl = '<select class="row-section">' + sectionOptions + "</select>";
+    }
+    var allChecked = GATED_ROLES.every(function (role) { return r.roles.indexOf(role.id) >= 0; });
+    var roleChecks = '<label class="blk-aud-opt row-role-all-label"><input type="checkbox" class="row-role-all"' + (allChecked ? " checked" : "") + ">All</label>" +
+      GATED_ROLES.map(function (role) {
+        var checked = r.roles.indexOf(role.id) >= 0 ? "checked" : "";
+        return '<label class="blk-aud-opt"><input type="checkbox" class="row-role" value="' + esc(role.id) + '" ' + checked + ">" + esc(role.label) + "</label>";
+      }).join("");
+    var isWholePage = page.sections !== null && !r.sectionKey;
+    return '<div class="arb-gated-row" data-uid="' + esc(r.uid) + '">' +
+      '<div class="row-selects"><select class="row-page">' + pageOptions + "</select>" + sectionControl + "</div>" +
+      '<textarea class="row-html" placeholder="HTML shown to authorized viewers"' + (isWholePage ? ' style="display:none"' : "") + ">" + esc(r.html) + "</textarea>" +
+      '<div class="blk-auds row-roles">' + roleChecks + "</div>" +
+      '<button type="button" class="arb-gated-rm" title="Remove rule">' + ICON_X + "</button></div>";
+  }
+
   function renderGatedManager(working) {
     var panel = document.createElement("div");
     panel.className = "arb-gated-panel";
@@ -663,59 +709,18 @@
     gatedModal.appendChild(panel);
     var deckMeta = working.deckMeta;
 
-    // Render each block, then bucket the resulting row HTML by its catalog
-    // group (falling back to the text before the key's first "." for a
-    // custom key) — grouped display, but a block's position in
-    // working.blocksArr (and hence in blocksArrToObj) never has to match
-    // render order, since removal keys off each row's stable data-uid
-    // rather than array index.
-    var groups = {}, groupOrder = [];
-    working.blocksArr.forEach(function (b) {
-      var entry = gatedCatalogEntry(b.key);
-      var group = entry ? entry.group : gatedFallbackGroup(b.key.indexOf(".") > 0 ? b.key.slice(0, b.key.indexOf(".")) : "");
-      var checks = GATED_ROLES.map(function (r) {
-        var checked = b.roles.indexOf(r.id) >= 0 ? "checked" : "";
-        return '<label class="blk-aud-opt"><input type="checkbox" class="blk-aud" value="' + esc(r.id) + '" ' + checked + ">" + esc(r.label) + "</label>";
-      }).join("");
-      // A <select> of every catalog entry (grouped by page via <optgroup>)
-      // plus "Other (custom key)…" — picking a catalog entry sets the
-      // hidden text input below it; picking "Other" reveals that input for
-      // free typing, which is also how an existing non-catalog key (like a
-      // one-off added before this dropdown existed) still displays and
-      // stays editable.
-      var byGroup = {};
-      GATED_CATALOG.forEach(function (c) { (byGroup[c.group] = byGroup[c.group] || []).push(c); });
-      var optgroups = Object.keys(byGroup).map(function (g) {
-        return '<optgroup label="' + esc(g) + '">' + byGroup[g].map(function (c) {
-          return '<option value="' + esc(c.key) + '"' + (c.key === b.key ? " selected" : "") + ">" + esc(c.label) + "</option>";
-        }).join("") + "</optgroup>";
-      }).join("");
-      var isCustom = !entry;
-      var rowHtml = '<div class="arb-gated-block-row" data-uid="' + esc(b.uid) + '">' +
-        '<select class="blk-key-select">' + optgroups +
-        '<option value="__custom__"' + (isCustom ? " selected" : "") + ">Other (custom key)…</option></select>" +
-        '<input class="blk-key" type="text" placeholder="custom key, e.g. somepage.section" value="' + esc(b.key) + '"' +
-        (isCustom ? "" : ' style="display:none"') + ">" +
-        '<textarea class="blk-html" placeholder="HTML shown to authorized viewers">' + esc(b.html) + "</textarea>" +
-        '<div class="blk-auds">' + checks + "</div>" +
-        '<button type="button" class="arb-gated-rm" title="Remove block">' + ICON_X + "</button></div>";
-      if (!groups[group]) { groups[group] = []; groupOrder.push(group); }
-      groups[group].push(rowHtml);
-    });
-    var blockGroupsHtml = groupOrder.map(function (group) {
-      return '<div class="arb-gated-page-group"><h6>' + esc(group) + "</h6>" + groups[group].join("") + "</div>";
-    }).join("") || '<p class="arb-gated-note">No blocks yet.</p>';
+    var rowsHtml = working.rowsArr.map(gatedRowHtml).join("") || '<p class="arb-gated-note">No rules yet.</p>';
 
     panel.innerHTML =
       "<h4>Manage gated content</h4>" +
-      '<p class="arb-gated-note">Pick the page/section from the dropdown, write the content, and check whichever arbitara-demo roles should see it — an admin account always sees everything, regardless of these checkboxes. "Other (custom key)…" is only for a one-off spot not listed yet.</p>' +
+      '<p class="arb-gated-note">Each row is a rule: pick a page, then either "All" (the whole page, no content — just who can open it) or one of its sections (with the content shown there), then which roles can see it. An admin account always sees everything, regardless of these checkboxes. "Other (custom)" is only for a one-off spot not listed here.</p>' +
       '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
       '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
-      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any block: add one below, pick "Deck access" from the dropdown, and check the roles that should see it (its HTML field is unused).</p>' +
+      '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any rule below: pick page "Investors" → section "Deck access" → the roles that should see it.</p>' +
       '<label class="arb-gated-add" style="display:inline-block;cursor:pointer;">Upload / replace deck (PDF, max 20MB)' +
       '<input type="file" accept="application/pdf" id="arbDeckFile" style="display:none"></label></div>' +
-      '<div class="arb-gated-section"><h5>Content blocks</h5><div class="arb-gated-block-list">' + blockGroupsHtml + "</div>" +
-      '<button type="button" class="arb-gated-add" id="arbAddBlock">+ Add block</button></div>' +
+      '<div class="arb-gated-section"><h5>Access rules</h5><div class="arb-gated-block-list">' + rowsHtml + "</div>" +
+      '<button type="button" class="arb-gated-add" id="arbAddBlock">+ Add rule</button></div>' +
       '<div class="arb-gated-msg" id="arbGatedMsg"></div>' +
       '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbGatedCancel">Cancel</button>' +
       '<button type="button" class="arb-gated-save" id="arbGatedSave">Save</button></div>';
@@ -737,35 +742,62 @@
       reader.readAsDataURL(file);
     });
 
-    [].forEach.call(panel.querySelectorAll(".arb-gated-block-row .arb-gated-rm"), function (btn) {
+    [].forEach.call(panel.querySelectorAll(".arb-gated-row .arb-gated-rm"), function (btn) {
       btn.addEventListener("click", function () {
-        var uid = btn.closest(".arb-gated-block-row").getAttribute("data-uid");
+        var uid = btn.closest(".arb-gated-row").getAttribute("data-uid");
         var w = collectGatedWorking(panel, deckMeta);
-        w.blocksArr = w.blocksArr.filter(function (b) { return b.uid !== uid; });
+        w.rowsArr = w.rowsArr.filter(function (r) { return r.uid !== uid; });
         renderGatedManager(w);
       });
     });
 
-    [].forEach.call(panel.querySelectorAll(".blk-key-select"), function (sel) {
-      var row = sel.closest(".arb-gated-block-row");
-      var keyInput = row.querySelector(".blk-key");
+    // Page dropdown changed: the section control's shape depends on the
+    // page (a real <select> of that page's sections, or a free-text key
+    // for "Other"), so re-collect + swap that one row's pageId + re-render
+    // — simplest way to rebuild the right control without duplicating
+    // gatedRowHtml's branching here too.
+    [].forEach.call(panel.querySelectorAll(".row-page"), function (sel) {
+      var row = sel.closest(".arb-gated-row");
       sel.addEventListener("change", function () {
-        if (sel.value === "__custom__") {
-          keyInput.style.display = "";
-          keyInput.value = "";
-          keyInput.focus();
-        } else {
-          keyInput.style.display = "none";
-          keyInput.value = sel.value;
-        }
+        var w = collectGatedWorking(panel, deckMeta);
+        var uid = row.getAttribute("data-uid");
+        w.rowsArr = w.rowsArr.map(function (r) {
+          if (r.uid !== uid) return r;
+          return Object.assign({}, r, { pageId: sel.value, sectionKey: "", customKey: "" });
+        });
+        renderGatedManager(w);
+      });
+    });
+
+    // Section dropdown changed: just toggle the content textarea for this
+    // one row (hidden for "All (whole page)" rows, since those are pure
+    // access rules with no content) — no full re-render needed.
+    [].forEach.call(panel.querySelectorAll(".row-section"), function (sel) {
+      var row = sel.closest(".arb-gated-row");
+      var textarea = row.querySelector(".row-html");
+      sel.addEventListener("change", function () {
+        textarea.style.display = sel.value ? "" : "none";
+      });
+    });
+
+    // "All" role checkbox is sugar for checking every individual role, and
+    // reflects (on render) whether they already all happen to be checked.
+    [].forEach.call(panel.querySelectorAll(".row-role-all"), function (allBox) {
+      var row = allBox.closest(".arb-gated-row");
+      var roleBoxes = [].slice.call(row.querySelectorAll(".row-role"));
+      allBox.addEventListener("change", function () {
+        roleBoxes.forEach(function (cb) { cb.checked = allBox.checked; });
+      });
+      roleBoxes.forEach(function (cb) {
+        cb.addEventListener("change", function () {
+          allBox.checked = roleBoxes.every(function (b) { return b.checked; });
+        });
       });
     });
 
     panel.querySelector("#arbAddBlock").addEventListener("click", function () {
       var w = collectGatedWorking(panel, deckMeta);
-      var usedKeys = w.blocksArr.map(function (b) { return b.key; });
-      var next = GATED_CATALOG.filter(function (c) { return usedKeys.indexOf(c.key) < 0; })[0];
-      w.blocksArr.push({ uid: nextBlockUid(), key: next ? next.key : "", html: "", roles: [] });
+      w.rowsArr.push({ uid: nextBlockUid(), pageId: GATED_PAGES[0].id, sectionKey: "", customKey: "", html: "", roles: [] });
       renderGatedManager(w);
     });
 
@@ -775,7 +807,7 @@
       var msg = panel.querySelector("#arbGatedMsg");
       msg.style.color = "var(--danger)";
       msg.textContent = "Saving…";
-      api("/gated-admin", { method: "PUT", body: { doc: { blocks: blocksArrToObj(w.blocksArr) } } })
+      api("/gated-admin", { method: "PUT", body: { doc: rowsArrToDoc(w.rowsArr) } })
         .then(function () {
           msg.style.color = "var(--muted)";
           msg.textContent = "Saved.";
@@ -794,14 +826,19 @@
     document.body.appendChild(gatedModal);
     gatedModal.addEventListener("click", function (e) { if (e.target === gatedModal) closeGatedModal(); });
     api("/gated-admin").then(function (d) {
-      var doc = d.doc || { blocks: {} };
-      renderGatedManager({
-        blocksArr: Object.keys(doc.blocks || {}).map(function (k) {
-          var b = doc.blocks[k] || {};
-          return { uid: nextBlockUid(), key: k, html: b.html || "", roles: b.roles || [] };
-        }),
-        deckMeta: d.deckMeta || null,
+      var doc = d.doc || { pages: {}, blocks: {} };
+      var rowsArr = [];
+      Object.keys(doc.pages || {}).forEach(function (pageId) {
+        rowsArr.push({ uid: nextBlockUid(), pageId: pageId, sectionKey: "", customKey: "", html: "", roles: (doc.pages[pageId] || {}).roles || [] });
       });
+      Object.keys(doc.blocks || {}).forEach(function (key) {
+        var b = doc.blocks[key] || {};
+        var loc = gatedLocate(key);
+        rowsArr.push(loc
+          ? { uid: nextBlockUid(), pageId: loc.pageId, sectionKey: loc.sectionKey, customKey: "", html: b.html || "", roles: b.roles || [] }
+          : { uid: nextBlockUid(), pageId: "other", sectionKey: "", customKey: key, html: b.html || "", roles: b.roles || [] });
+      });
+      renderGatedManager({ rowsArr: rowsArr, deckMeta: d.deckMeta || null });
     }).catch(function (err) {
       gatedModal.querySelector(".arb-gated-panel").innerHTML =
         "<h4>Manage gated content</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>";

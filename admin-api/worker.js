@@ -41,7 +41,7 @@
  *   POST /demo-login    { username, password }  -> { token, name, role, username }
  *   GET  /config         (Bearer)               -> { config, sha }
  *   PUT  /config          (Bearer) { config, sha } -> { sha }
- *   GET  /gated-content   (Bearer, any identity) -> { blocks: {"<key>": html} }
+ *   GET  /gated-content   (Bearer, any identity) -> { blocks: {"<key>": html}, pages: {"<id>": true} }
  *   GET  /gated-deck      (Bearer, any identity, gated on the "investor.deck"
  *                          block's roles)          -> raw PDF bytes
  *   POST /gated-deck      (Bearer, admin) { contentBase64 } -> { size, uploadedAt }
@@ -234,27 +234,35 @@ export default {
     // fetched unauthenticated by every visitor, so anything confidential put
     // there (even if hidden client-side) would just be readable via view-
     // source. See CLAUDE.md's "Audience-gated content" section for the full
-    // rationale. Shape: { blocks: {"<key>": {html, roles: [role,...]}} } —
-    // gated purely by the caller's arbitara-demo role (user/governance/
-    // developer/investor — see ROLES in demo-api/worker.js; keep this in
-    // sync if that list changes), not by an admin-curated username list.
-    // Simpler than the username-based "audiences" design this replaced:
-    // role already IS the meaningful unit of "who should see this" here,
-    // so a separate audience-tagging layer was just indirection with no
-    // payoff — one less thing for admin to keep in sync with reality.
+    // rationale. Shape: { pages: {"<pageId>": {roles: [role,...]}},
+    // blocks: {"<key>": {html, roles: [role,...]}} } — two parallel rule
+    // sets, both gated purely by the caller's arbitara-demo role (user/
+    // governance/developer/investor — see ROLES in demo-api/worker.js;
+    // keep this in sync if that list changes), not an admin-curated
+    // username list. `pages` controls whether a whole page is reachable at
+    // all (investor.html's lock/reveal); `blocks` controls individual
+    // content pieces within a page. Role already IS the meaningful unit of
+    // "who should see this," so a separate audience-tagging layer would
+    // just be indirection with no payoff.
     const GATED_KEY = "gated:doc";
+    // Every page that can carry a gated:doc rule — kept in sync manually
+    // with GATED_PAGES in admin-edit.js and the real .html files. Only
+    // "investor" has any client-side code actually reading its page-level
+    // rule today (investor.js); the others exist so the schema/API don't
+    // need to change again the next time a page needs the same treatment.
+    const KNOWN_PAGES = ["index", "white-paper", "self-check", "investor"];
     async function getGatedDoc(env) {
       let doc; try { doc = JSON.parse((await env.LEADS.get(GATED_KEY)) || "null"); } catch (e) { doc = null; }
-      return doc || { blocks: {} };
+      return Object.assign({ pages: {}, blocks: {} }, doc || {});
     }
 
     // Resolves a bearer token to gated-content access — shared by
     // /gated-content and /gated-deck so both use one authorization path.
-    // `full: true` = every block (own-password admin session, or a demo
-    // account with role "admin" — same reach as their edit powers
+    // `full: true` = every page/block (own-password admin session, or a
+    // demo account with role "admin" — same reach as their edit powers
     // elsewhere). Otherwise `role` = the caller's arbitara-demo role,
-    // checked against each block's `roles` list. Returns null if the
-    // token isn't a valid identity at all.
+    // checked against each page's/block's `roles` list. Returns null if
+    // the token isn't a valid identity at all.
     async function resolveGatedAccess(bearer) {
       const ownSession = await verifySession(env.SESSION_SECRET, bearer);
       if (ownSession) return { full: true };
@@ -263,25 +271,29 @@ export default {
       if (identity.role === "admin") return { full: true };
       return { full: false, role: identity.role };
     }
-    function blockAllowed(block, access) {
+    function ruleAllowed(rule, access) {
       if (access.full) return true;
-      return (block.roles || []).indexOf(access.role) >= 0;
+      return !!(rule && (rule.roles || []).indexOf(access.role) >= 0);
     }
 
-    // ---- GET /gated-content -> { blocks: {"<key>": "<html>", ...} } ----
-    // Any authenticated identity, not just admin. A key an account isn't
-    // authorized for is never mentioned in the response — not filtered
-    // client-side, never sent, so there's nothing for an unauthorized
-    // caller to discover.
+    // ---- GET /gated-content -> { blocks: {"<key>": "<html>", ...}, pages: {"<id>": true, ...} } ----
+    // Any authenticated identity, not just admin. A key/page an account
+    // isn't authorized for is never mentioned in the response — not
+    // filtered client-side, never sent, so there's nothing for an
+    // unauthorized caller to discover.
     if (url.pathname.endsWith("/gated-content") && request.method === "GET") {
       const doc = await getGatedDoc(env);
       const access = await resolveGatedAccess(bearer);
       if (!access) return json({ error: "unauthorized" }, 401);
       const blocks = {};
       Object.keys(doc.blocks || {}).forEach(function (key) {
-        if (blockAllowed(doc.blocks[key], access)) blocks[key] = doc.blocks[key].html;
+        if (ruleAllowed(doc.blocks[key], access)) blocks[key] = doc.blocks[key].html;
       });
-      return json({ blocks: blocks });
+      const pages = {};
+      KNOWN_PAGES.forEach(function (pageId) {
+        if (ruleAllowed((doc.pages || {})[pageId], access)) pages[pageId] = true;
+      });
+      return json({ blocks: blocks, pages: pages });
     }
 
     // Gated binary files (currently just the investor deck) live in KV
@@ -309,7 +321,7 @@ export default {
       const access = await resolveGatedAccess(bearer);
       if (!access) return json({ error: "unauthorized" }, 401);
       const deckBlock = (doc.blocks || {})["investor.deck"];
-      if (!access.full && !(deckBlock && blockAllowed(deckBlock, access))) return json({ error: "unauthorized" }, 403);
+      if (!access.full && !(deckBlock && ruleAllowed(deckBlock, access))) return json({ error: "unauthorized" }, 403);
       const bytes = await env.LEADS.get(GATED_DECK_KEY, "arrayBuffer");
       if (!bytes) return json({ error: "no deck uploaded yet" }, 404);
       return new Response(bytes, { status: 200, headers: Object.assign({ "Content-Type": "application/pdf" }, cors) });
@@ -359,7 +371,13 @@ export default {
         const b = rawBlocks[key] || {};
         blocks[key] = { html: String(b.html || ""), roles: Array.isArray(b.roles) ? b.roles.map(String) : [] };
       });
-      const doc = { blocks: blocks };
+      const rawPages = (body.doc && body.doc.pages && typeof body.doc.pages === "object") ? body.doc.pages : {};
+      const pages = {};
+      Object.keys(rawPages).forEach(function (pageId) {
+        const p = rawPages[pageId] || {};
+        pages[pageId] = { roles: Array.isArray(p.roles) ? p.roles.map(String) : [] };
+      });
+      const doc = { blocks: blocks, pages: pages };
       await env.LEADS.put(GATED_KEY, JSON.stringify(doc));
       return json({ ok: true });
     }
