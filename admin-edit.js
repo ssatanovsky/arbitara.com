@@ -51,6 +51,8 @@
     ".arb-admin-pop h4{margin:0 0 12px;font-size:13px;font-weight:700;color:var(--ink);}" +
     ".arb-admin-pop input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:9px;padding:9px 11px;margin-bottom:8px;}" +
     ".arb-admin-pop button{width:100%;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--paper);background:var(--ink);border:none;border-radius:9px;padding:9px;cursor:pointer;}" +
+    ".arb-admin-pop button.arb-pop-2nd{margin-top:8px;background:var(--card);color:var(--ink);border:1px solid var(--line-2);}" +
+    ".arb-admin-pop button.arb-pop-2nd:hover{border-color:var(--accent);}" +
     ".arb-admin-pop .arb-admin-msg{font-size:12.5px;color:var(--danger);margin-top:8px;min-height:1em;}" +
     ".arb-admin-who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}" +
     ".arb-admin-who b{color:var(--ink);}" +
@@ -84,6 +86,9 @@
     ".arb-sec-toolbar .reorder button svg{width:11px;height:11px;}" +
     ".arb-sec-toolbar .reorder button:hover:not(:disabled){color:var(--ink);}" +
     ".arb-sec-toolbar .reorder button:disabled{opacity:.25;cursor:default;}" +
+    ".arb-sec-toolbar .arb-sec-roles{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;border:none;background:none;color:var(--faint);cursor:pointer;}" +
+    ".arb-sec-toolbar .arb-sec-roles:hover{color:var(--ink);background:var(--paper-2);}" +
+    ".arb-sec-toolbar .arb-sec-roles svg{width:15px;height:15px;}" +
     ".arb-img-btn{position:relative;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;color:var(--faint);cursor:pointer;}" +
     ".arb-img-btn:hover{color:var(--ink);background:var(--paper-2);}" +
     ".arb-img-btn svg{width:15px;height:15px;}" +
@@ -112,6 +117,28 @@
     ".arb-gated-actions{display:flex;justify-content:flex-end;gap:10px;}" +
     ".arb-gated-cancel{font-family:var(--sans);font-size:13px;color:var(--muted);background:none;border:1px solid var(--line-2);border-radius:9px;padding:8px 16px;cursor:pointer;}" +
     ".arb-gated-save{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--paper);background:var(--ink);border:none;border-radius:9px;padding:8px 16px;cursor:pointer;}" +
+    /* shared form controls for the Site settings + Contacts modals (reuse .arb-gated-modal/.arb-gated-panel shells) */
+    ".arb-set-group{border:1px solid var(--line-2);border-radius:10px;padding:14px 16px;margin-bottom:14px;}" +
+    ".arb-set-group h5{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--ink);}" +
+    ".arb-set-group .arb-set-desc{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5;}" +
+    ".arb-set-fld{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px;}" +
+    ".arb-set-input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--paper-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;}" +
+    "textarea.arb-set-input{min-height:52px;resize:vertical;}" +
+    ".arb-set-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;}" +
+    ".arb-set-toggle .arb-set-toggle-lab{font-size:13.5px;color:var(--ink);}" +
+    ".arb-set-toggle .arb-set-toggle-lab small{display:block;color:var(--faint);font-size:12px;}" +
+    ".arb-set-sw{position:relative;width:44px;height:24px;flex:none;}" +
+    ".arb-set-sw input{opacity:0;width:0;height:0;position:absolute;}" +
+    ".arb-set-sw span{position:absolute;inset:0;background:var(--line-2);border-radius:999px;transition:background .15s;cursor:pointer;}" +
+    ".arb-set-sw span::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.3);}" +
+    ".arb-set-sw input:checked + span{background:var(--accent);}" +
+    ".arb-set-sw input:checked + span::before{transform:translateX(20px);}" +
+    ".arb-leads-wrap{overflow-x:auto;border:1px solid var(--line-2);border-radius:10px;}" +
+    "table.arb-leads{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap;}" +
+    "table.arb-leads th{text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--faint);padding:8px 12px;border-bottom:1px solid var(--line-2);}" +
+    "table.arb-leads td{padding:8px 12px;border-bottom:1px solid var(--line-2);color:var(--ink);}" +
+    "table.arb-leads tr:last-child td{border-bottom:none;}" +
+    "table.arb-leads td.arb-lead-msg{white-space:normal;max-width:240px;color:var(--muted);}" +
     "@media(max-width:700px){.arb-edit-bar{left:12px;right:12px;transform:none;flex-wrap:wrap;bottom:12px;}}";
   var styleEl = document.createElement("style");
   styleEl.textContent = css;
@@ -124,6 +151,7 @@
   var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
   var ICON_IMG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>';
   var ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  var ICON_ROLES = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.2-2.9 7.4-7 8.5-4.1-1.1-7-4.3-7-8.5V6l7-3Z"/></svg>';
 
   // ---------- login popover ----------
   function mountLoginButton() {
@@ -151,7 +179,9 @@
         '<span>Signed in as <b>' + esc(ls(NAME)) + '</b> (' + esc(ls(ROLE)) + ')<br><a id="arbSignOut">Sign out</a></span></div>' +
         (isAdminRole
           ? '<button type="button" id="arbToggleEdit" style="margin-top:14px">' + (editMode ? "Exit edit mode" : "Edit this page") + "</button>" +
-            '<button type="button" id="arbManageGated" style="margin-top:8px;background:var(--card);color:var(--ink);border:1px solid var(--line-2);">Manage gated content</button>'
+            '<button type="button" class="arb-pop-2nd" id="arbManageGated">Manage gated content</button>' +
+            '<button type="button" class="arb-pop-2nd" id="arbSiteSettings">Site settings</button>' +
+            '<button type="button" class="arb-pop-2nd" id="arbContacts">Contacts</button>'
           : "");
       wrap.appendChild(pop);
       pop.querySelector("#arbSignOut").addEventListener("click", function () {
@@ -168,6 +198,14 @@
         pop.querySelector("#arbManageGated").addEventListener("click", function () {
           closePop();
           openGatedManager();
+        });
+        pop.querySelector("#arbSiteSettings").addEventListener("click", function () {
+          closePop();
+          openSiteSettings();
+        });
+        pop.querySelector("#arbContacts").addEventListener("click", function () {
+          closePop();
+          openContacts();
         });
       }
     }
@@ -399,8 +437,11 @@
       '<span class="drag" draggable="true" title="Drag to reorder">' + ICON_DRAG + "</span>" +
       '<span class="reorder"><button type="button" class="up" title="Move up">' + ICON_UP + '</button>' +
       '<button type="button" class="down" title="Move down">' + ICON_DOWN + "</button></span>" +
+      '<button type="button" class="arb-sec-roles" title="Who can see this — open gated content">' + ICON_ROLES + "</button>" +
       '<label class="sw" title="Show this section on the page"><input type="checkbox" checked><span class="track"></span></label>';
     sec.appendChild(bar);
+
+    bar.querySelector(".arb-sec-roles").addEventListener("click", function () { openGatedManager(); });
 
     var head = sec.querySelector(".head");
     if (head) {
@@ -573,6 +614,29 @@
     });
   }
 
+  // ---------- generic whole-page gate ----------
+  // Any page can lock its whole body behind a role by adding, in its HTML:
+  //   <main data-arb-page-gate="<pageId>"> ... </main>   (pageId ∈ KNOWN_PAGES)
+  //   a "locked" notice element   with  data-arb-page-locked   (visible by default)
+  //   a wrapper around real content with data-arb-page-gated   (display:none by default)
+  // The page's *default, no-JS* state must be locked (notice shown, content
+  // hidden) since an anonymous visitor's applyGatedContent() never runs.
+  // This reveals the content only when GET /gated-content reports the caller
+  // is authorized for that page (doc.pages[pageId], resolved server-side —
+  // admin's "see everything" is already applied there). investor.html is the
+  // first adopter; the mechanism is page-agnostic.
+  function applyPageGate(pages) {
+    var host = document.querySelector("[data-arb-page-gate]");
+    if (!host) return;
+    var pageId = host.getAttribute("data-arb-page-gate");
+    var ok = !!(pages && pages[pageId]);
+    [].forEach.call(document.querySelectorAll("[data-arb-page-locked]"), function (el) { el.style.display = ok ? "none" : ""; });
+    [].forEach.call(document.querySelectorAll("[data-arb-page-gated]"), function (el) { el.style.display = ok ? "" : "none"; });
+  }
+  document.addEventListener("arb:gated-applied", function (e) {
+    applyPageGate(e.detail && e.detail.pages);
+  });
+
   // ---------- gated-content manager (admin only) ----------
   // Access is granted by the caller's arbitara-demo role, not an admin-
   // curated username list — keep this list in sync with ROLES in
@@ -714,6 +778,7 @@
     panel.innerHTML =
       "<h4>Manage gated content</h4>" +
       '<p class="arb-gated-note">Each row is a rule: pick a page, then either "All" (the whole page, no content — just who can open it) or one of its sections (with the content shown there), then which roles can see it. An admin account always sees everything, regardless of these checkboxes. "Other (custom)" is only for a one-off spot not listed here.</p>' +
+      '<p class="arb-gated-note">This is <b>real</b> gating: role-restricted content is stored here (in KV) and served only to authorized accounts — it is never in the public page source. Existing public marketing sections stay public; to restrict one, author its content as a section rule here.</p>' +
       '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
       '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
       '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any rule below: pick page "Investors" → section "Deck access" → the roles that should see it.</p>' +
@@ -842,6 +907,214 @@
     }).catch(function (err) {
       gatedModal.querySelector(".arb-gated-panel").innerHTML =
         "<h4>Manage gated content</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>";
+    });
+  }
+
+  // ---------- site settings + contacts (admin only) ----------
+  // These fold in what used to live only on the standalone /admin page:
+  // the global config.json settings (site password, coming-soon, banner,
+  // practitioner tools, the governance carousel) and the contacts/leads
+  // list. Everything else /admin did (hero text/stats/photo, per-section
+  // text/images/reorder) is already handled by the in-page inline editor,
+  // so it isn't duplicated here.
+
+  function getPath(o, path) { return path.split(".").reduce(function (a, k) { return a && a[k]; }, o); }
+  function setPath(o, path, v) {
+    var ks = path.split("."), last = ks.pop();
+    var t = ks.reduce(function (a, k) { if (a[k] == null) a[k] = {}; return a[k]; }, o);
+    t[last] = v;
+  }
+  // Same client-side hash the old /admin used for the site (visitor) password
+  // — config.js checks this hash, the plaintext is never stored or sent.
+  function sha256Hex(str) {
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+    });
+  }
+
+  var settingsModal = null;
+  function closeSettingsModal() { if (settingsModal) { settingsModal.remove(); settingsModal = null; } }
+
+  // Simple scalar/boolean config fields, rendered generically from their
+  // dot-path. Repeatable lists (tools, carousel slides) are handled
+  // separately below since they're arrays, not single fields.
+  var TOOL_IDS = [
+    { id: "checklist", label: "Pre-decision checklist" },
+    { id: "diagnostic", label: "Decision-tier diagnostic" },
+    { id: "record", label: "One-page decision record" },
+  ];
+
+  function settingsToggle(path, lab, sub) {
+    return '<div class="arb-set-toggle"><div class="arb-set-toggle-lab">' + esc(lab) +
+      (sub ? "<small>" + esc(sub) + "</small>" : "") + "</div>" +
+      '<label class="arb-set-sw"><input type="checkbox" data-cfg="' + esc(path) + '"><span></span></label></div>';
+  }
+
+  function openSiteSettings() {
+    if (settingsModal) return;
+    settingsModal = document.createElement("div");
+    settingsModal.className = "arb-gated-modal";
+    settingsModal.innerHTML = '<div class="arb-gated-panel"><h4>Site settings</h4><p class="arb-gated-note">Loading…</p></div>';
+    document.body.appendChild(settingsModal);
+    settingsModal.addEventListener("click", function (e) { if (e.target === settingsModal) closeSettingsModal(); });
+
+    api("/config").then(function (d) {
+      var cfg = d.config || {};
+      var sha = d.sha;
+      var panel = settingsModal.querySelector(".arb-gated-panel");
+
+      var toolRows = TOOL_IDS.map(function (t) {
+        return '<div class="arb-set-group" data-tool="' + t.id + '">' +
+          settingsToggle("tools." + t.id, t.label, "Show this tool on the Self-Check page") +
+          '<label class="arb-set-fld">Name</label><input class="arb-set-input" data-cfg="toolsText.' + t.id + '.name">' +
+          '<label class="arb-set-fld">Description</label><textarea class="arb-set-input" data-cfg="toolsText.' + t.id + '.body"></textarea>' +
+          "</div>";
+      }).join("");
+
+      panel.innerHTML =
+        "<h4>Site settings</h4>" +
+        '<p class="arb-gated-note">Global settings for the whole site — the same ones the old standalone /admin page had. Hero text, section text and images are edited in place via "Edit this page" instead.</p>' +
+
+        '<div class="arb-set-group">' +
+          "<h5>Site password</h5>" +
+          '<p class="arb-set-desc">Require a password to view the whole public site (separate from your admin sign-in).</p>' +
+          settingsToggle("password.enabled", "Password required", "Visitors must enter the site password") +
+          '<label class="arb-set-fld">Change site password (leave blank to keep current)</label>' +
+          '<input class="arb-set-input" type="password" id="arbSetNewPw" autocomplete="new-password" placeholder="New site password">' +
+          '<label class="arb-set-fld">Heading</label><input class="arb-set-input" data-cfg="password.heading">' +
+          '<label class="arb-set-fld">Message</label><input class="arb-set-input" data-cfg="password.text">' +
+        "</div>" +
+
+        '<div class="arb-set-group">' +
+          "<h5>Coming-soon mode</h5>" +
+          '<p class="arb-set-desc">Hide the entire site behind a holding page.</p>' +
+          settingsToggle("comingSoon.enabled", "Coming-soon enabled") +
+          '<label class="arb-set-fld">Heading</label><input class="arb-set-input" data-cfg="comingSoon.heading">' +
+          '<label class="arb-set-fld">Message</label><textarea class="arb-set-input" data-cfg="comingSoon.text"></textarea>' +
+        "</div>" +
+
+        '<div class="arb-set-group">' +
+          "<h5>Announcement banner</h5>" +
+          settingsToggle("banner.enabled", "Banner enabled", "Bar at the top of every page") +
+          '<label class="arb-set-fld">Text (basic HTML links allowed)</label><input class="arb-set-input" data-cfg="banner.text">' +
+        "</div>" +
+
+        '<div class="arb-set-group">' +
+          "<h5>Decision Governance carousel</h5>" +
+          '<p class="arb-set-desc">The confidential quote carousel near the top of the homepage. While off, none of its text is sent to visitors — it lives only here.</p>' +
+          settingsToggle("sections.governance", "Show the carousel", "Off = completely absent from the live site") +
+          '<div id="arbSlideList" style="margin-top:12px"></div>' +
+          '<button type="button" class="arb-gated-add" id="arbSlideAdd">+ Add a slide</button>' +
+        "</div>" +
+
+        "<h5 style=\"margin:20px 0 8px;font-size:13px;\">Practitioner tools</h5>" +
+        toolRows +
+
+        '<div class="arb-gated-msg" id="arbSetMsg"></div>' +
+        '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbSetCancel">Cancel</button>' +
+        '<button type="button" class="arb-gated-save" id="arbSetSave">Save</button></div>';
+
+      // Populate scalar/boolean fields from config.
+      [].forEach.call(panel.querySelectorAll("[data-cfg]"), function (el) {
+        var v = getPath(cfg, el.getAttribute("data-cfg"));
+        if (el.type === "checkbox") el.checked = (v === true);
+        else el.value = (v == null ? "" : v);
+      });
+
+      // Governance carousel slides — a repeatable list (strings or {a,b}).
+      var slideHost = panel.querySelector("#arbSlideList");
+      function slideRow(a, b) {
+        var row = document.createElement("div");
+        row.className = "arb-gated-row arb-slide-row";
+        row.innerHTML =
+          '<label class="arb-set-fld" style="margin-top:0">Line 1</label><textarea class="arb-set-input slide-a"></textarea>' +
+          '<label class="arb-set-fld">Line 2 (gold accent, optional)</label><textarea class="arb-set-input slide-b"></textarea>' +
+          '<button type="button" class="arb-gated-rm" title="Remove slide">' + ICON_X + "</button>";
+        row.querySelector(".slide-a").value = a || "";
+        row.querySelector(".slide-b").value = b || "";
+        row.querySelector(".arb-gated-rm").addEventListener("click", function () { row.remove(); });
+        return row;
+      }
+      var slides = (getPath(cfg, "sectionText.governance.slides")) || [];
+      slides.forEach(function (s) {
+        if (s && typeof s === "object") slideHost.appendChild(slideRow(s.a, s.b));
+        else slideHost.appendChild(slideRow(s, ""));
+      });
+      panel.querySelector("#arbSlideAdd").addEventListener("click", function () { slideHost.appendChild(slideRow("", "")); });
+
+      panel.querySelector("#arbSetCancel").addEventListener("click", closeSettingsModal);
+      panel.querySelector("#arbSetSave").addEventListener("click", function () {
+        var msg = panel.querySelector("#arbSetMsg");
+        msg.style.color = "var(--danger)";
+        msg.textContent = "Saving…";
+        // Collect scalar/boolean fields back into a fresh copy of the loaded
+        // config (so we don't clobber anything we didn't render).
+        var next = cfg;
+        [].forEach.call(panel.querySelectorAll("[data-cfg]"), function (el) {
+          setPath(next, el.getAttribute("data-cfg"), el.type === "checkbox" ? el.checked : el.value);
+        });
+        // Slides: keep single-line slides as plain strings.
+        var slideRows = panel.querySelectorAll(".arb-slide-row");
+        var slideArr = [].map.call(slideRows, function (r) {
+          var a = r.querySelector(".slide-a").value, b = r.querySelector(".slide-b").value;
+          return b.trim() ? { a: a, b: b } : a;
+        }).filter(function (s) { return (s && typeof s === "object") ? (s.a || s.b) : (s && s.trim()); });
+        setPath(next, "sectionText.governance.slides", slideArr);
+
+        var newPw = panel.querySelector("#arbSetNewPw").value;
+        var hashStep = newPw
+          ? sha256Hex(newPw).then(function (h) { setPath(next, "password.hash", h); })
+          : Promise.resolve();
+
+        hashStep.then(function () {
+          return api("/config", { method: "PUT", body: { config: next, sha: sha } });
+        }).then(function () {
+          msg.style.color = "var(--muted)";
+          msg.textContent = "Saved. Reload the site to see changes.";
+          setTimeout(closeSettingsModal, 900);
+        }).catch(function (err) { msg.textContent = "Save failed: " + (err.message || "unknown error"); });
+      });
+    }).catch(function (err) {
+      settingsModal.querySelector(".arb-gated-panel").innerHTML =
+        "<h4>Site settings</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>";
+    });
+  }
+
+  var contactsModal = null;
+  function closeContactsModal() { if (contactsModal) { contactsModal.remove(); contactsModal = null; } }
+  function openContacts() {
+    if (contactsModal) return;
+    contactsModal = document.createElement("div");
+    contactsModal.className = "arb-gated-modal";
+    contactsModal.innerHTML = '<div class="arb-gated-panel"><h4>Contacts</h4><p class="arb-gated-note">Loading…</p></div>';
+    document.body.appendChild(contactsModal);
+    contactsModal.addEventListener("click", function (e) { if (e.target === contactsModal) closeContactsModal(); });
+    api("/leads").then(function (d) {
+      var leads = (d.leads || []);
+      var panel = contactsModal.querySelector(".arb-gated-panel");
+      var body;
+      if (!leads.length) {
+        body = '<p class="arb-gated-note">No contacts yet.</p>';
+      } else {
+        var rows = leads.map(function (l) {
+          var when = l.ts ? new Date(l.ts).toLocaleString() : "";
+          return "<tr><td>" + esc(when) + "</td><td>" + esc(l.name || "") + "</td><td>" + esc(l.email || "") +
+            "</td><td>" + esc(l.jobTitle || "") + "</td><td>" + esc(l.companySize || "") + "</td><td>" + esc(l.interest || "") +
+            '</td><td class="arb-lead-msg">' + esc(l.message || "") + "</td><td>" + esc(l.source || "") + "</td></tr>";
+        }).join("");
+        body = '<div class="arb-leads-wrap"><table class="arb-leads"><thead><tr>' +
+          "<th>When</th><th>Name</th><th>Email</th><th>Title</th><th>Company size</th><th>Interest</th><th>Message</th><th>Source</th>" +
+          "</tr></thead><tbody>" + rows + "</tbody></table></div>";
+      }
+      panel.innerHTML = "<h4>Contacts</h4>" +
+        '<p class="arb-gated-note">' + esc(leads.length + (leads.length === 1 ? " contact" : " contacts")) + ", newest first — everyone who submitted the contact form or a waitlist signup.</p>" +
+        body +
+        '<div class="arb-gated-actions" style="margin-top:14px"><button type="button" class="arb-gated-cancel" id="arbContactsClose">Close</button></div>';
+      panel.querySelector("#arbContactsClose").addEventListener("click", closeContactsModal);
+    }).catch(function (err) {
+      contactsModal.querySelector(".arb-gated-panel").innerHTML =
+        "<h4>Contacts</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>" +
+        '<div class="arb-gated-actions" style="margin-top:14px"><button type="button" class="arb-gated-cancel" onclick="this.closest(\'.arb-gated-modal\').remove()">Close</button></div>';
     });
   }
 

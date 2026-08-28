@@ -50,7 +50,7 @@
   </div>
 </header>
 
-<main id="top">
+<main id="top" data-arb-page-gate="investor">
 
 <!-- ============ INTRO ============ -->
 <section class="hero" id="invIntro" style="padding-bottom:40px">
@@ -63,8 +63,8 @@
   </div>
 </section>
 
-<!-- ============ ACCESS NOTICE ============ -->
-<section id="investorLocked">
+<!-- ============ ACCESS NOTICE (shown until admin-edit.js's applyPageGate reveals the content) ============ -->
+<section id="investorLocked" data-arb-page-locked>
   <div class="wrap">
     <div class="investor-teaser">
       <span class="teaser-lock">🔒</span>
@@ -73,7 +73,7 @@
   </div>
 </section>
 
-<div id="investorGated" style="display:none">
+<div id="investorGated" data-arb-page-gated style="display:none">
 
 <!-- ============ OPPORTUNITY ============ -->
 <section id="opportunity">
