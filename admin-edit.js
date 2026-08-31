@@ -616,26 +616,46 @@
 
   // ---------- generic whole-page gate ----------
   // Any page can lock its whole body behind a role by adding, in its HTML:
-  //   <main data-arb-page-gate="<pageId>"> ... </main>   (pageId ∈ KNOWN_PAGES)
+  //   <main data-arb-page-gate="<pageId>"> ... </main>
   //   a "locked" notice element   with  data-arb-page-locked   (visible by default)
   //   a wrapper around real content with data-arb-page-gated   (display:none by default)
   // The page's *default, no-JS* state must be locked (notice shown, content
   // hidden) since an anonymous visitor's applyGatedContent() never runs.
-  // This reveals the content only when GET /gated-content reports the caller
-  // is authorized for that page (doc.pages[pageId], resolved server-side —
-  // admin's "see everything" is already applied there). investor.html is the
-  // first adopter; the mechanism is page-agnostic.
+  //
+  // Two modes:
+  //  - HARD (default): reveal only when GET /gated-content reports the caller
+  //    is authorized for this page (doc.pages[pageId], resolved server-side,
+  //    admin's "see everything" already applied). Content must be KV-backed.
+  //  - SOFT: add data-arb-page-gate-roles="role1,role2" — reveal client-side
+  //    when the signed-in role (localStorage) is one of those (or admin). For
+  //    pages whose content is IN the page source anyway (so a client check is
+  //    cosmetic, not a security boundary) but that still shouldn't render for
+  //    the wrong role. No KV rule needed — works the moment the right account
+  //    signs in. investor.html uses this so its (in-page) content shows without
+  //    an admin having to author a KV access rule first.
   function applyPageGate(pages) {
     var host = document.querySelector("[data-arb-page-gate]");
     if (!host) return;
     var pageId = host.getAttribute("data-arb-page-gate");
-    var ok = !!(pages && pages[pageId]);
+    var softRoles = host.getAttribute("data-arb-page-gate-roles");
+    var ok;
+    if (softRoles != null) {
+      var role = ls(ROLE);
+      ok = role === "admin" || softRoles.split(",").map(function (s) { return s.trim(); }).indexOf(role) >= 0;
+    } else {
+      ok = !!(pages && pages[pageId]);
+    }
     [].forEach.call(document.querySelectorAll("[data-arb-page-locked]"), function (el) { el.style.display = ok ? "none" : ""; });
     [].forEach.call(document.querySelectorAll("[data-arb-page-gated]"), function (el) { el.style.display = ok ? "" : "none"; });
   }
   document.addEventListener("arb:gated-applied", function (e) {
     applyPageGate(e.detail && e.detail.pages);
   });
+  // Soft (client-role) pages must also evaluate on load, since applyGatedContent
+  // — and thus arb:gated-applied — never fires without a stored token, yet a
+  // soft page's reveal depends only on the localStorage role, not the server.
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { applyPageGate(null); });
+  else applyPageGate(null);
 
   // ---------- gated-content manager (admin only) ----------
   // Access is granted by the caller's arbitara-demo role, not an admin-
