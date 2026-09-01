@@ -26,6 +26,21 @@
   var ADMIN_API = "https://arbitara-admin.slava-satanovsky.workers.dev";
   var TOK = "arb.admin.token";
 
+  // pdf.js needs its worker file's URL, and this file lives at a different
+  // path locally (assets/investor.js) than on the deployed site
+  // (deploy.sh flattens assets/ into the root, so it's just investor.js
+  // there) — a hardcoded "assets/pdf.worker.min.js" 404s once deployed,
+  // which pdf.js fails on silently (no console error, carousel just never
+  // renders — exactly the bug this comment is here to stop someone from
+  // reintroducing). Derive it from *this script's own* URL instead, so it's
+  // correct in both places: swap "investor.js" for "pdf.worker.min.js" in
+  // the same directory. document.currentScript is only valid during this
+  // synchronous top-level run, so it's captured here, not inside a callback.
+  var WORKER_SRC = (function () {
+    var src = document.currentScript && document.currentScript.src;
+    return src ? src.replace(/investor\.js(\?.*)?$/, "pdf.worker.min.js") : "pdf.worker.min.js";
+  })();
+
   function ls(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
 
   // ---------- deck carousel ----------
@@ -44,7 +59,7 @@
       .then(function (r) { if (!r.ok) throw new Error("no access"); return r.arrayBuffer(); })
       .then(function (buf) {
         if (!window.pdfjsLib) throw new Error("pdf.js not loaded");
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/pdf.worker.min.js";
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
         return window.pdfjsLib.getDocument({ data: buf }).promise;
       })
       .then(function (pdf) { loaded = true; buildCarousel(pdf); })
