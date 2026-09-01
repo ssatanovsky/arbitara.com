@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Investors — Arbitara</title>
-<meta name="description" content="Arbitara investor materials.">
+<meta name="description" content="Arbitara investor materials — problem, product, market, model, roadmap, the round, and the team.">
 <meta property="og:title" content="Investors — Arbitara">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#FAF7F1" media="(prefers-color-scheme: light)">
@@ -32,9 +32,12 @@
       Arbitara <small>Decide to win</small>
     </a>
     <nav class="nav-links" id="navLinks" aria-label="Sections">
-      <a href="#opportunity">Opportunity</a>
-      <a href="#business-model">Business model</a>
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#market">Market</a>
+      <a href="#business-model">Model</a>
       <a href="#the-ask">The ask</a>
+      <a href="#team">Team</a>
       <a href="#deck">Deck</a>
       <a href="white-paper.html" class="nav-goto">White paper</a>
       <a href="index.html#contact" class="nav-goto">Contact</a>
@@ -57,8 +60,8 @@
   <div class="wrap hero-grid" style="grid-template-columns:1fr">
     <div class="reveal">
       <p class="eyebrow">Arbitara · Investors</p>
-      <h1>The case for decision governance as a category.</h1>
-      <p class="lede">This page is for investors only, with dedicated access authorization.</p>
+      <h1>The management decision is the last unmanaged organizational object.</h1>
+      <p class="lede">Salesforce made the customer relationship a system of record. Signavio and LeanIX did it for processes and architecture — each acquired by SAP for ~€1.2B. Arbitara does it for the highest-consequence object of all: the decision itself. This page lays out the problem, the product, the market, and the round.</p>
     </div>
   </div>
 </section>
@@ -75,12 +78,79 @@
 
 <div id="investorGated" data-arb-page-gated style="display:none">
 
-<!-- ============ OPPORTUNITY ============ -->
-<section id="opportunity">
+<!-- ============ PROBLEM ============ -->
+<section id="problem">
   <div class="wrap">
     <div class="head reveal">
-      <p class="eyebrow">Market</p>
-      <h2>Why this is a category, not a feature.</h2>
+      <p class="eyebrow">The problem</p>
+      <h2>The most consequential act in an organization is the least managed.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <p>Organizations map their processes, model their architectures, and instrument every operation with dashboards. Then they make their most consequential choices — market entries, major capital, senior appointments, reorganizations — in a room, with no structure, no record, and no way to learn from what happens next. Ask any executive three questions and the answer is the same: <b>where are the options you considered recorded? Where do the assumptions behind a three-year commitment live? Who owns the decision to revisit it when the market moves?</b> Nowhere, nowhere, and no one.</p>
+      <table class="itable">
+        <thead><tr><th>The evidence</th><th>Figure</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Executives rating their org "excellent" at decisions</td><td>&lt;20%</td><td>McKinsey global survey</td></tr>
+          <tr><td>Who say poor decisions happen about as often as good ones</td><td>&gt;60%</td><td>McKinsey global survey</td></tr>
+          <tr><td>M&amp;A deals that fail to deliver expected return</td><td>83%</td><td>KPMG M&amp;A research</td></tr>
+          <tr><td>Preventable value destroyed in M&amp;A alone, per year</td><td>~$1.6T</td><td>Applied to a ~$4T/yr market</td></tr>
+          <tr><td>Total value lost annually to bad, slow, or never-revisited decisions</td><td>$3–10T</td><td>Blueprint Ch. 1.4 (conservative)</td></tr>
+        </tbody>
+      </table>
+      <p>This is not a failure of intelligence. It is a failure of <b>infrastructure</b>. Organizations lack a system of record for management decisions the way they once lacked one for customers, processes, and architecture — until Salesforce, Signavio, and LeanIX made those objects visible and governable. The decision is the last major organizational object without a home.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOLUTION ============ -->
+<section id="solution" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">The solution</p>
+      <h2>A system of record for the management decision.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <p>Arbitara turns each consequential decision into a <b>Decision Object</b> — a structured, persistent record that captures the full lifecycle: the framing, the options evaluated (including do-nothing), the criteria applied, the assumptions recorded with review dates, the accountable owner, and the outcome tracked over time. It is not a place to write down what was decided. It is infrastructure that makes the decision visible, queryable, and permanently connected to the strategy it serves.</p>
+      <table class="itable">
+        <thead><tr><th>Not a tool</th><th>A system of record</th></tr></thead>
+        <tbody>
+          <tr><td>Helps one person decide better once</td><td>Makes the decision an organizational asset that persists after the meeting, the quarter, and the person who made it</td></tr>
+          <tr><td>Output is a document</td><td>Output is a governed object with an owner, a lifecycle, and a link to strategy</td></tr>
+          <tr><td>Forgotten when conditions change</td><td>Assumptions carry review dates; the record signals when a commitment needs revisiting</td></tr>
+        </tbody>
+      </table>
+      <p><b>AI advises. The human decides. Always.</b> Arbitara's intelligence layer structures the choice, surfaces analogous past decisions, monitors assumptions, and makes bias visible — but it never selects the criteria, recommends the option, or carries the accountability. The choice stays with the person who can be questioned and bears the consequences. That governance commitment is what makes the platform adoptable at board level, where an autonomous "decision engine" is not.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY NOW ============ -->
+<section id="why-now">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Why now</p>
+      <h2>Three forces, already operating — not forecast.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <table class="itable">
+        <thead><tr><th>Force</th><th>Why it makes the category inevitable now</th></tr></thead>
+        <tbody>
+          <tr><td>AI crossed the threshold</td><td>In the last three years, models became able to structure, connect, and query unstructured decision records — the enabling technology that did not exist when the problem was first felt.</td></tr>
+          <tr><td>Governance pressure is operating, not predicted</td><td>Boards are asking questions today they could not enforce two years ago: show me the options, the assumptions, the accountability. The demand side is already live.</td></tr>
+          <tr><td>Organizational complexity is compounding</td><td>Distributed workforces, matrix structures, and accelerated M&amp;A mean more consequential decisions than ever are made by people with no structured access to the rationale behind the last one.</td></tr>
+        </tbody>
+      </table>
+      <p>These forces don't create the market — they make it visible. The category is not about to emerge. It is about to be named.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARKET ============ -->
+<section id="market" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Market opportunity</p>
+      <h2>A category-scale gap, priced from the bottom up.</h2>
     </div>
     <div class="investor-block reveal">
       <p>The decision intelligence market does not have a budget line yet. That is not evidence of a small market — it is evidence of a fragmented one. The spend already exists, distributed across categories that each solve part of the problem without owning it.</p>
@@ -99,21 +169,19 @@
           <tr><td>TAM</td><td>$100B+</td><td>Annual enterprise spend across strategy consulting (governance work), GRC, and decision-relevant BI — the fragmented space Arbitara consolidates.</td></tr>
           <tr><td>SAM</td><td>$7.5–15B</td><td>~50,000 organizations above $100M revenue in North America and Western Europe, at $150K–$300K per organization per year.</td></tr>
           <tr><td>SOM (3–5yr)</td><td>$500M–$1.5B</td><td>Regulated industries plus companies under active board governance pressure — the beachhead segment with the clearest budget authority.</td></tr>
-          <tr><td>ARR-to-exit thesis</td><td>$150–200M</td><td>At 6× ARR — the Signavio/LeanIX multiple — implies a €1.2–1.5B exit valuation.</td></tr>
         </tbody>
       </table>
       <p><b>The structural analogue.</b> Signavio and LeanIX each identified an organizational object — business processes and enterprise architecture — that was managed informally despite carrying real consequence. Each built the infrastructure layer. Each was acquired by SAP for approximately €1.2 billion. Management decisions are the higher-consequence object of the three, and the least structured.</p>
-      <p><b>Why now.</b> Three forces are already operating, not forecast: AI crossed the threshold to make unstructured decision records queryable and connectable in the last three years; governance pressure is an operating reality, not a regulatory prediction — boards are asking questions today they couldn't enforce two years ago; and organizational complexity (distributed workforces, matrix structures, accelerated M&amp;A) means more consequential decisions than ever are made by people with no structured access to the rationale behind the last one. These forces don't create the market — they make it visible. The category is not about to emerge. It is about to be named.</p>
     </div>
   </div>
 </section>
 
-<!-- ============ COMPETITIVE LANDSCAPE ============ -->
-<section id="competitive" class="section-alt">
+<!-- ============ WHY WE WIN (competitive) ============ -->
+<section id="competitive">
   <div class="wrap">
     <div class="head reveal">
-      <p class="eyebrow">Landscape</p>
-      <h2>Who else sees it, and why they don't own it.</h2>
+      <p class="eyebrow">Why we win</p>
+      <h2>Capable neighbors, an empty center.</h2>
     </div>
     <div class="investor-block reveal">
       <p>The landscape is not empty. It's full of capable, well-capitalized platforms solving adjacent problems — none of them the one Arbitara solves. The management decision as a structured, persistent, governable object belongs to no one.</p>
@@ -127,12 +195,13 @@
           <tr><td>Operational AI decisioning</td><td>FICO · IBM · SAS · Aera · Pega · Oracle · Quantexa · ACTICO (Gartner MQ, Jan 2026)</td><td>Automate computable decisions with defined rules — not the judgment calls management makes under genuine uncertainty.</td></tr>
         </tbody>
       </table>
+      <p><b>The moat is time, not features.</b> Each of these players could add a "decisions" feature — none can retroactively own the object. Arbitara's defensibility compounds: every Decision Object an organization records deepens an institutional memory that lives nowhere else, and three years of connected decisions is not a dataset a CFO authorizes migrating to a competitor. The category-creation playbook is deliberate — name the object with precision, demonstrate the cost of its absence, and build the system of record (not a tool) that becomes professionally indefensible to operate without, exactly as CRM did.</p>
     </div>
   </div>
 </section>
 
 <!-- ============ BUSINESS MODEL ============ -->
-<section id="business-model">
+<section id="business-model" class="section-alt">
   <div class="wrap">
     <div class="head reveal">
       <p class="eyebrow">Business model</p>
@@ -164,11 +233,49 @@
   </div>
 </section>
 
-<!-- ============ PATH TO $100M ============ -->
-<section id="path-to-100m" class="section-alt">
+<!-- ============ GO-TO-MARKET ============ -->
+<section id="go-to-market">
   <div class="wrap">
     <div class="head reveal">
-      <p class="eyebrow">Trajectory</p>
+      <p class="eyebrow">Go-to-market</p>
+      <h2>A specific buyer, not an aspirational segment.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <p><b>The beachhead buyer is specific, not aspirational.</b> The target is the Chief Strategy Officer or Head of Transformation at a $500M–$5B organization that has already invested in process or enterprise-architecture governance — Signavio, LeanIX, or equivalent — and feels the gap where decision governance should be. This buyer isn't discovering the category from scratch. They're recognizing it, which eliminates the most expensive phase of enterprise sales: educating a buyer that the problem matters.</p>
+      <p>Three conditions make this buyer tractable: adjacent budget (an existing governance/transformation line, not a new one to create), organizational authority (a top-down mandate, not bottom-up adoption), and the vocabulary (structured organizational objects and governance layers are already familiar from Signavio/LeanIX implementations).</p>
+      <p><b>The sales motion is direct, high-touch, and category-creating.</b> No channel shortcut works at this stage — the sale needs someone who can articulate the problem at the governance level and close at a contract value that justifies a 12–18 month cycle. That length isn't dysfunction; it's the correct calibration for a platform requiring CEO or board-level mandate. In parallel, category-creation content is commercial infrastructure, not marketing: before a CSO can name decision governance to their board, analysts and practitioners need to have already named it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section id="roadmap" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Roadmap</p>
+      <h2>What the seed round builds, in 24 months.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <p>The raise funds a specific, falsifiable plan: get an MVP of the Decision Object lifecycle into the hands of paying design partners, prove the land-and-expand mechanics on real accounts, and reach the minimum conditions for a credible Series A. Phase 1 of the five-phase product roadmap is the deliverable — the full lifecycle from framing through outcome — not the whole platform.</p>
+      <table class="itable">
+        <thead><tr><th>Milestone</th><th>By</th><th>What it proves</th></tr></thead>
+        <tbody>
+          <tr><td>Engineering lead hired; MVP build begins</td><td>Month 0–3</td><td>Product specification becomes working software; technical architecture owned.</td></tr>
+          <tr><td>MVP live — Decision Object lifecycle, Phase 1</td><td>Month 6–9</td><td>The core object works end to end: framing, options, criteria, assumptions, owner, outcome.</td></tr>
+          <tr><td>2–3 design partners on paid agreements</td><td>Month 9–12</td><td>A specific buyer pays a specific amount for a specific capability — the only signal that matters at this stage.</td></tr>
+          <tr><td>First expansion within a design-partner account</td><td>Month 18–24</td><td>Live evidence of the land-and-expand mechanics the model depends on.</td></tr>
+          <tr><td>≥1 reference customer + repeatable close</td><td>Month 24</td><td>The minimum conditions for a credible Series A conversation.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PATH TO $100M ============ -->
+<section id="path-to-100m">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Growth</p>
       <h2>The path to $100M in annual recurring revenue.</h2>
     </div>
     <div class="investor-block reveal">
@@ -185,23 +292,30 @@
   </div>
 </section>
 
-<!-- ============ GO-TO-MARKET ============ -->
-<section id="go-to-market">
+<!-- ============ THE RETURN ============ -->
+<section id="return" class="section-alt">
   <div class="wrap">
     <div class="head reveal">
-      <p class="eyebrow">Go-to-market</p>
-      <h2>A specific buyer, not an aspirational segment.</h2>
+      <p class="eyebrow">The return</p>
+      <h2>The exit math has direct comparables.</h2>
     </div>
     <div class="investor-block reveal">
-      <p><b>The beachhead buyer is specific, not aspirational.</b> The target is the Chief Strategy Officer or Head of Transformation at a $500M–$5B organization that has already invested in process or enterprise-architecture governance — Signavio, LeanIX, or equivalent — and feels the gap where decision governance should be. This buyer isn't discovering the category from scratch. They're recognizing it, which eliminates the most expensive phase of enterprise sales: educating a buyer that the problem matters.</p>
-      <p>Three conditions make this buyer tractable: adjacent budget (an existing governance/transformation line, not a new one to create), organizational authority (a top-down mandate, not bottom-up adoption), and the vocabulary (structured organizational objects and governance layers are already familiar from Signavio/LeanIX implementations).</p>
-      <p><b>The sales motion is direct, high-touch, and category-creating.</b> No channel shortcut works at this stage — the sale needs someone who can articulate the problem at the governance level and close at a contract value that justifies a 12–18 month cycle. That length isn't dysfunction; it's the correct calibration for a platform requiring CEO or board-level mandate. In parallel, category-creation content is commercial infrastructure, not marketing: before a CSO can name decision governance to their board, analysts and practitioners need to have already named it.</p>
+      <p>This is not a category without precedent for the outcome. The two closest structural analogues — platforms that made an ungoverned organizational object visible and governable — were both acquired by the same strategic buyer, SAP, for approximately €1.2 billion each. Arbitara is building the same kind of system of record for a higher-consequence object.</p>
+      <table class="itable">
+        <thead><tr><th>Comparable</th><th>Object made governable</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td>Signavio</td><td>Business processes</td><td>Acquired by SAP, ~€1.0–1.2B (2021)</td></tr>
+          <tr><td>LeanIX</td><td>Enterprise architecture</td><td>Acquired by SAP, ~€1.2B (2023)</td></tr>
+          <tr><td>Arbitara (thesis)</td><td>The management decision</td><td>$150–200M ARR × ~6× → €1.2–1.5B</td></tr>
+        </tbody>
+      </table>
+      <p>Stated plainly as a thesis, not a promise: at the growth trajectory above, Arbitara reaches the $150–200M ARR band that, at the ~6× revenue multiple these comparables commanded, implies a €1.2–1.5B strategic exit. The natural acquirers are the same platform vendors consolidating the governance layer. The investment funds the logic of that model and the founder's understanding of it — the assumptions are stated explicitly so they can be stress-tested, not accepted.</p>
     </div>
   </div>
 </section>
 
 <!-- ============ THE ASK ============ -->
-<section id="the-ask" class="section-alt">
+<section id="the-ask">
   <div class="wrap">
     <div class="head reveal">
       <p class="eyebrow">The round</p>
@@ -228,6 +342,28 @@
         </tbody>
       </table>
       <p>Sensitive above all to two assumptions: blended ACV (€120K–€150K, consistent with the pricing architecture) and the 18-month average sales cycle — accounts initiated in Q1 of Year 1 close in Q3–Q4 of Year 2. The runway math works only if the first design-partner conversions land before Month 12.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section id="team" class="section-alt">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="eyebrow">Team</p>
+      <h2>Founder-led, with the hiring plan to build the rest.</h2>
+    </div>
+    <div class="investor-block reveal">
+      <p><b>Slava Satanovsky — Founder.</b> Over a decade working management decisions from the inside: first as an advisor, then in Strategy &amp; Business Development at Siemens GBS — service-portfolio management, operating-model design, and market intelligence. The decisions were real, consequential, and infrequent, and the absence of infrastructure around them was operational, not theoretical: every time a portfolio decision needed revisiting, the original reasoning had to be reconstructed from fragments; assumptions made eighteen months earlier had become invisible commitments. The problem Arbitara addresses is one the founder watched unfold repeatedly, across industries and functions — direct observation, not inference.</p>
+      <p><b>The solo-founder question, answered directly.</b> At concept stage the intellectual foundation is built: the category is defined with precision, the product architecture is specified in detail, the market case is made, and the go-to-market motion is designed. What the company does not yet have is engineering capacity and commercial infrastructure — solvable sequencing problems, not structural gaps.</p>
+      <table class="itable">
+        <thead><tr><th>Hire</th><th>When</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Engineering lead</td><td>At / before seed deployment</td><td>Senior full-stack engineer who turns the product specification into working software and owns early technical architecture — a co-founder in function.</td></tr>
+          <tr><td>Enterprise sales</td><td>After product validation</td><td>Head of sales / senior AE from governance or strategy software; activates once there's working software and a reference-willing design partner.</td></tr>
+          <tr><td>Advisory board</td><td>In construction</td><td>Three domains — decision-science academia (rigor), enterprise software (category-creation pattern recognition), and management consulting (GTM).</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -268,9 +404,12 @@
       <div>
         <h5>This Page</h5>
         <ul>
-          <li><a href="#opportunity">Opportunity</a></li>
+          <li><a href="#problem">Problem &amp; solution</a></li>
+          <li><a href="#market">Market &amp; why we win</a></li>
           <li><a href="#business-model">Business model</a></li>
-          <li><a href="#the-ask">The ask</a></li>
+          <li><a href="#roadmap">Roadmap &amp; growth</a></li>
+          <li><a href="#the-ask">The ask &amp; return</a></li>
+          <li><a href="#team">Team</a></li>
           <li><a href="#deck">Deck</a></li>
         </ul>
       </div>
