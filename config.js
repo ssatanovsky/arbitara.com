@@ -604,6 +604,37 @@
     });
   }
 
+  // Further-reading page (reading.html) — a flat, admin-managed list of
+  // external links with a short description each: config.readingList =
+  // [{url, title, description}, ...]. Reuses the .reads/.read/.rspine/
+  // .auth/.why markup self-check.html's own hardcoded "Where the ideas
+  // come from" book list already uses, so there's one visual language for
+  // "recommended reading" across the site rather than a second one. No-ops
+  // on every other page (no #readingList element there).
+  function renderReadingList(cfg) {
+    var host = document.getElementById("readingList");
+    if (!host) return;
+    var items = Array.isArray(cfg.readingList) ? cfg.readingList : [];
+    var empty = document.getElementById("readingEmpty");
+    if (!items.length) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+    host.innerHTML = items.map(function (r) {
+      var url = r.url || "#";
+      var domain = "";
+      try { domain = new URL(url, location.href).hostname.replace(/^www\./, ""); } catch (e) {}
+      return '<div class="read">' +
+        '<div class="rspine"></div>' +
+        '<div>' +
+          '<h4><a href="' + url + '" target="_blank" rel="noopener">' + (r.title || url) + " ↗</a></h4>" +
+          (domain ? '<div class="auth">' + domain + "</div>" : "") +
+          (r.description ? '<div class="why">' + r.description + "</div>" : "") +
+        "</div></div>";
+    }).join("");
+  }
+
   var applied = false;
   function apply(cfg) {
     if (applied) return;
@@ -642,6 +673,7 @@
       applyHeroText(cfg);
       applyHeroStats(cfg);
       applyContentOverrides(cfg);
+      renderReadingList(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);

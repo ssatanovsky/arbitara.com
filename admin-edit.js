@@ -180,6 +180,7 @@
         (isAdminRole
           ? '<button type="button" id="arbToggleEdit" style="margin-top:14px">' + (editMode ? "Exit edit mode" : "Edit this page") + "</button>" +
             '<button type="button" class="arb-pop-2nd" id="arbManageGated">Manage gated content</button>' +
+            '<button type="button" class="arb-pop-2nd" id="arbReadingBtn">Further reading</button>' +
             '<button type="button" class="arb-pop-2nd" id="arbSiteSettings">Site settings</button>' +
             '<button type="button" class="arb-pop-2nd" id="arbContacts">Contacts</button>'
           : "");
@@ -198,6 +199,10 @@
         pop.querySelector("#arbManageGated").addEventListener("click", function () {
           closePop();
           openGatedManager();
+        });
+        pop.querySelector("#arbReadingBtn").addEventListener("click", function () {
+          closePop();
+          openReadingList();
         });
         pop.querySelector("#arbSiteSettings").addEventListener("click", function () {
           closePop();
@@ -1135,6 +1140,87 @@
       contactsModal.querySelector(".arb-gated-panel").innerHTML =
         "<h4>Contacts</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>" +
         '<div class="arb-gated-actions" style="margin-top:14px"><button type="button" class="arb-gated-cancel" onclick="this.closest(\'.arb-gated-modal\').remove()">Close</button></div>';
+    });
+  }
+
+  // ---------- Further reading (reading.html) ----------
+  // A flat, repeatable list of {url, title, description} — same GET-fresh
+  // -> edit locally -> PUT-with-sha round trip as Site settings, just its
+  // own modal (rather than folded into that one) since it's the whole
+  // reason an admin would open this: add or remove a link.
+  function readingRow(url, title, description) {
+    var row = document.createElement("div");
+    row.className = "arb-gated-row arb-reading-row";
+    row.innerHTML =
+      '<label class="arb-set-fld" style="margin-top:0">URL</label><input class="arb-set-input reading-url" type="url" placeholder="https://example.com/article">' +
+      '<label class="arb-set-fld">Title</label><input class="arb-set-input reading-title" placeholder="Article title">' +
+      '<label class="arb-set-fld">Description</label><textarea class="arb-set-input reading-desc" placeholder="One or two sentences on why this is relevant — write it yourself or paste an AI-written summary."></textarea>' +
+      '<button type="button" class="arb-gated-rm" title="Remove link">' + ICON_X + "</button>";
+    row.querySelector(".reading-url").value = url || "";
+    row.querySelector(".reading-title").value = title || "";
+    row.querySelector(".reading-desc").value = description || "";
+    row.querySelector(".arb-gated-rm").addEventListener("click", function () { row.remove(); });
+    return row;
+  }
+
+  var readingModal = null;
+  function closeReadingModal() { if (readingModal) { readingModal.remove(); readingModal = null; } }
+  function openReadingList() {
+    if (readingModal) return;
+    readingModal = document.createElement("div");
+    readingModal.className = "arb-gated-modal";
+    readingModal.innerHTML = '<div class="arb-gated-panel"><h4>Further reading</h4><p class="arb-gated-note">Loading…</p></div>';
+    document.body.appendChild(readingModal);
+    readingModal.addEventListener("click", function (e) { if (e.target === readingModal) closeReadingModal(); });
+
+    api("/config").then(function (d) {
+      var cfg = d.config || {};
+      var sha = d.sha;
+      var panel = readingModal.querySelector(".arb-gated-panel");
+      panel.innerHTML =
+        "<h4>Further reading</h4>" +
+        '<p class="arb-gated-note">Links shown on the <a href="reading.html" target="_blank" rel="noopener">Further Reading</a> page, in the order listed below. Removing a link here removes it from the live page on save.</p>' +
+        '<div id="arbReadingList"></div>' +
+        '<button type="button" class="arb-gated-add" id="arbReadingAdd">+ Add a link</button>' +
+        '<div class="arb-gated-msg" id="arbReadingMsg"></div>' +
+        '<div class="arb-gated-actions"><button type="button" class="arb-gated-cancel" id="arbReadingCancel">Cancel</button>' +
+        '<button type="button" class="arb-gated-save" id="arbReadingSave">Save</button></div>';
+
+      var listHost = panel.querySelector("#arbReadingList");
+      var items = Array.isArray(cfg.readingList) ? cfg.readingList : [];
+      items.forEach(function (r) { listHost.appendChild(readingRow(r.url, r.title, r.description)); });
+      panel.querySelector("#arbReadingAdd").addEventListener("click", function () {
+        listHost.appendChild(readingRow("", "", ""));
+      });
+
+      panel.querySelector("#arbReadingCancel").addEventListener("click", closeReadingModal);
+      panel.querySelector("#arbReadingSave").addEventListener("click", function () {
+        var msg = panel.querySelector("#arbReadingMsg");
+        var rows = [].slice.call(listHost.querySelectorAll(".arb-reading-row"));
+        var next = [];
+        var bad = false;
+        rows.forEach(function (row) {
+          var url = row.querySelector(".reading-url").value.trim();
+          var title = row.querySelector(".reading-title").value.trim();
+          var description = row.querySelector(".reading-desc").value.trim();
+          if (!url && !title && !description) return; // fully empty row — skip silently
+          if (!/^https?:\/\//i.test(url)) { bad = true; return; }
+          next.push({ url: url, title: title, description: description });
+        });
+        if (bad) { msg.style.color = "var(--danger)"; msg.textContent = "Every link needs a valid http(s) URL."; return; }
+        msg.style.color = "var(--danger)";
+        msg.textContent = "Saving…";
+        var nextCfg = cfg;
+        nextCfg.readingList = next;
+        api("/config", { method: "PUT", body: { config: nextCfg, sha: sha } }).then(function () {
+          msg.style.color = "var(--muted)";
+          msg.textContent = "Saved. Reload the site to see changes.";
+          setTimeout(closeReadingModal, 900);
+        }).catch(function (err) { msg.style.color = "var(--danger)"; msg.textContent = "Save failed: " + (err.message || "unknown error"); });
+      });
+    }).catch(function (err) {
+      readingModal.querySelector(".arb-gated-panel").innerHTML =
+        "<h4>Further reading</h4><p class=\"arb-gated-note\">Failed to load: " + esc(err.message || "error") + "</p>";
     });
   }
 

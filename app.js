@@ -83,6 +83,17 @@
       navToggle.setAttribute("aria-expanded", open ? "true" : "false");
       navToggle.innerHTML = open ? ICON_CLOSE : ICON_MENU;
       root.classList.toggle("nav-open-lock", open);
+      // Position the dropdown/backdrop right below the real header instead
+      // of a hardcoded pixel guess — the header's total height varies by
+      // page (a sub-nav row adds ~44px, and not every page has one), so a
+      // fixed value drifts out of sync the moment a page's header shape
+      // changes. style.css still ships a same-value fallback for the brief
+      // instant before this runs.
+      if (open) {
+        var navH = nav.offsetHeight + "px";
+        navLinks.style.top = navH;
+        navBackdrop.style.top = navH;
+      }
     };
     navToggle.addEventListener("click", function () {
       setNavOpen(!navLinks.classList.contains("open"));
