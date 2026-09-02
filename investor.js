@@ -49,6 +49,19 @@
 
   var ICON_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
   var ICON_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  var ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4M15 20h4a1 1 0 0 0 1-1v-4"/></svg>';
+  var ICON_COLLAPSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>';
+
+  // Fullscreen support varies just enough across browsers (Safari still
+  // needs the webkit-prefixed names) to be worth one small shim rather than
+  // repeating the fallback chain at each call site.
+  function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  function requestFs(el) { (el.requestFullscreen || el.webkitRequestFullscreen).call(el); }
+  function exitFs() { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+  function onFsChange(fn) {
+    document.addEventListener("fullscreenchange", fn);
+    document.addEventListener("webkitfullscreenchange", fn);
+  }
 
   var loaded = false;
   function loadDeck() {
@@ -80,6 +93,7 @@
       '<div class="deck-controls">' +
         '<div class="deck-dots"></div>' +
         '<div class="deck-counter"><span class="deck-cur">1</span> / <span class="deck-total">' + total + "</span></div>" +
+        '<button type="button" class="deck-fs" aria-label="View full screen" title="View full screen">' + ICON_EXPAND + "</button>" +
       "</div>";
 
     var canvas = host.querySelector(".deck-canvas");
@@ -88,6 +102,7 @@
     var curEl = host.querySelector(".deck-cur");
     var prevBtn = host.querySelector(".prev");
     var nextBtn = host.querySelector(".next");
+    var fsBtn = host.querySelector(".deck-fs");
 
     var dots = [];
     for (var i = 0; i < total; i++) {
@@ -105,9 +120,15 @@
     function renderPage(i) {
       var myToken = ++renderToken;
       pdf.getPage(i + 1).then(function (page) {
-        var stageWidth = host.querySelector(".deck-stage").clientWidth || 900;
+        var stageEl = host.querySelector(".deck-stage");
+        var stageWidth = stageEl.clientWidth || 900;
+        var stageHeight = stageEl.clientHeight || stageWidth * 9 / 16;
         var baseViewport = page.getViewport({ scale: 1 });
-        var scale = Math.min(stageWidth / baseViewport.width, 2.4);
+        // "Contain" fit — width alone was enough when the stage always had a
+        // fixed 16:9 box, but full screen makes it height-constrained too
+        // (a widescreen slide would otherwise render wider than the stage is
+        // tall and get clipped by its overflow:hidden).
+        var scale = Math.min(stageWidth / baseViewport.width, stageHeight / baseViewport.height, 2.4);
         var dpr = window.devicePixelRatio || 1;
         var viewport = page.getViewport({ scale: scale * dpr });
         if (myToken !== renderToken) return; // a newer slide was requested meanwhile
@@ -133,6 +154,24 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "ArrowLeft") goTo(current - 1);
       else if (e.key === "ArrowRight") goTo(current + 1);
+    });
+
+    // Full screen: the whole carousel (stage + dots + counter), not just the
+    // canvas, so navigation stays usable while enlarged. renderPage() already
+    // sizes the canvas off .deck-stage's current clientWidth, so the only
+    // extra work on entering/leaving is telling it to re-measure and re-draw
+    // — a plain "resize" doesn't reliably fire on a fullscreen transition in
+    // every browser, so fullscreenchange re-renders explicitly too.
+    fsBtn.addEventListener("click", function () {
+      if (fsElement() === host) exitFs(); else requestFs(host);
+    });
+    onFsChange(function () {
+      var isFs = fsElement() === host;
+      host.classList.toggle("deck-fullscreen", isFs);
+      fsBtn.innerHTML = isFs ? ICON_COLLAPSE : ICON_EXPAND;
+      fsBtn.setAttribute("aria-label", isFs ? "Exit full screen" : "View full screen");
+      fsBtn.title = isFs ? "Exit full screen" : "View full screen";
+      renderPage(current);
     });
 
     var touchStartX = null;

@@ -799,6 +799,25 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .deck-dot:hover { background: var(--accent-ink); }
 .deck-dot.on { background: var(--accent); }
 .deck-counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.deck-fs { flex: none; width: 34px; height: 34px; margin-left: auto; border-radius: 50%; border: 1px solid var(--line-2); background: var(--card); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: color .15s, border-color .15s; }
+.deck-fs:hover { color: var(--ink); border-color: var(--accent); }
+.deck-fs svg { width: 15px; height: 15px; }
+
+/* Full-screen deck: the whole carousel (stage + dots + counter + fs
+   button), not just the canvas, so navigation stays usable while enlarged.
+   Targets both the native :fullscreen pseudo-class and a JS-toggled
+   .deck-fullscreen class (investor.js sets the latter unconditionally as a
+   belt-and-suspenders match, since Fullscreen API support/prefixing still
+   varies slightly across browsers). Explicit background so the OS's default
+   black fullscreen backdrop never shows through — it stays on-brand. */
+.deck-carousel:fullscreen, .deck-carousel.deck-fullscreen {
+  display: flex; flex-direction: column; justify-content: center;
+  width: 100vw; height: 100vh; max-width: none; margin: 0; padding: 5vh 5vw;
+  background: var(--paper); box-sizing: border-box;
+}
+.deck-carousel:fullscreen .deck-viewer, .deck-carousel.deck-fullscreen .deck-viewer { flex: 1; min-height: 0; }
+.deck-carousel:fullscreen .deck-stage, .deck-carousel.deck-fullscreen .deck-stage { height: 100%; aspect-ratio: auto; }
+.deck-carousel:fullscreen .deck-controls, .deck-carousel.deck-fullscreen .deck-controls { flex: none; }
 @media (max-width: 700px) {
   .deck-viewer { gap: 8px; }
   .deck-nav { width: 36px; height: 36px; }
