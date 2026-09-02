@@ -134,6 +134,10 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .nav-links a.nav-goto { color: var(--accent-ink); }
 .nav-links a.nav-goto:hover { color: var(--accent); }
 .nav-links a.nav-goto::after { content: "↗"; display: inline-block; margin-left: 3px; font-size: .82em; transform: translateY(-1px); }
+/* The page you're already on — a static label (usually a <span>, not a
+   link: nowhere to navigate to), styled like the scroll-spy .active state
+   so "current" reads consistently whether it means a page or a section. */
+.nav-links .nav-current { color: var(--ink); font-weight: 600; padding-bottom: 3px; box-shadow: 0 2px 0 0 var(--accent); white-space: nowrap; flex-shrink: 0; }
 .nav-tools { display: flex; align-items: center; gap: 8px; }
 .icon-btn {
   border: 1px solid var(--line-2); background: var(--card); color: var(--muted);
@@ -146,6 +150,21 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .nav-toggle { display: none; }
 @keyframes navDrop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .nav-links.open { animation: none; } }
+
+/* ---------- Sub-nav ("on this page") ---------- */
+/* A page's own section links, separate from the primary nav's page-level
+   destinations above — keeps the header from growing a new top-level item
+   every time a page gains a section. Sits inside the same sticky .nav, so
+   both rows scroll away together; horizontally scrollable at any width
+   rather than folding into the hamburger menu, since jumping to a section
+   is a lighter action than navigating to a different page. Scroll-spied by
+   app.js exactly like the old single-row nav-links were. */
+.subnav { border-top: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.subnav::-webkit-scrollbar { display: none; }
+.subnav-inner { display: flex; align-items: center; gap: 22px; height: 42px; }
+.subnav a { color: var(--faint); font-size: 13px; font-weight: 500; white-space: nowrap; flex-shrink: 0; padding-bottom: 2px; box-shadow: 0 2px 0 0 transparent; transition: color .15s, box-shadow .15s; }
+.subnav a:hover { color: var(--ink); text-decoration: none; }
+.subnav a.active { color: var(--ink); font-weight: 600; box-shadow: 0 2px 0 0 var(--accent); }
 
 /* ---------- Hero ---------- */
 .hero { padding: clamp(72px, 12vw, 150px) 0 clamp(56px, 8vw, 96px); overflow: hidden; position: relative; }
@@ -862,7 +881,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .assess-qs { border-right: none; border-bottom: 1px solid var(--line); }
   .nav-links { display: none; }
   .nav-links.open {
-    display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column;
+    display: flex; position: absolute; top: 110px; left: 0; right: 0; flex-direction: column;
     background: var(--paper); border-bottom: 1px solid var(--line); padding: 14px 26px 22px; gap: 4px;
     box-shadow: var(--shadow); z-index: 60; animation: navDrop .2s cubic-bezier(.2,.7,.2,1);
   }
@@ -870,8 +889,10 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .nav-links.open a.active { border-bottom-color: var(--accent); }
   .nav-toggle { display: grid; }
   /* Backdrop behind the open mobile menu — dims the page and gives a
-     click-outside target to close, injected by app.js. */
-  .nav-backdrop { position: fixed; inset: 66px 0 0 0; z-index: 55; background: rgba(10, 9, 7, .38); opacity: 0; pointer-events: none; transition: opacity .2s; }
+     click-outside target to close, injected by app.js. Both this and the
+     dropdown's own top offset above are 66px (nav-inner) + 42px (subnav),
+     since every page now carries the sub-nav row too. */
+  .nav-backdrop { position: fixed; inset: 110px 0 0 0; z-index: 55; background: rgba(10, 9, 7, .38); opacity: 0; pointer-events: none; transition: opacity .2s; }
   .nav-backdrop.open { opacity: 1; pointer-events: auto; }
   html.nav-open-lock { overflow: hidden; }
   .noise-band { grid-template-columns: 1fr; text-align: center; gap: 14px; }

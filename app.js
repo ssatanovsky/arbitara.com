@@ -30,6 +30,11 @@
   var nav = document.getElementById("nav");
   var navLinks = document.getElementById("navLinks");
   var navToggle = document.getElementById("navToggle");
+  // The primary nav-links row now holds only page-level destinations
+  // (Home, White paper, ...); a page's own section links live in the
+  // separate #subnav row instead, so scroll-spy watches that — falling back
+  // to navLinks for any page that hasn't adopted a subnav.
+  var spyHost = document.getElementById("subnav") || navLinks;
 
   // Scroll-spy: highlight whichever same-page section is currently in view,
   // the way in-page nav works on Stripe's docs / Linear's marketing pages.
@@ -41,8 +46,8 @@
   // after this script runs, and re-querying a handful of <a> tags is cheap.
   function onScrollTick() {
     if (window.scrollY > 12) nav.classList.add("scrolled"); else nav.classList.remove("scrolled");
-    if (!navLinks) return;
-    var navLinkEls = [].slice.call(navLinks.querySelectorAll('a[href^="#"]'));
+    if (!spyHost) return;
+    var navLinkEls = [].slice.call(spyHost.querySelectorAll('a[href^="#"]'));
     var spySections = navLinkEls
       .map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); })
       .filter(Boolean);

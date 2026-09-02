@@ -372,7 +372,7 @@
     wrap.appendChild(car);
     main.appendChild(sec);
 
-    var navHost = document.getElementById("navLinks");
+    var navHost = document.querySelector("#subnav .subnav-inner") || document.getElementById("navLinks");
     if (navHost) {
       var a = document.createElement("a");
       a.href = "#governance";
@@ -426,7 +426,7 @@
   function syncNavAndFooter(cfg, order) {
     var rank = {}; order.forEach(function (id, i) { rank[id] = i; });
 
-    var navHost = document.getElementById("navLinks");
+    var navHost = document.querySelector("#subnav .subnav-inner") || document.getElementById("navLinks");
     if (navHost) {
       // Select every link, not just #-anchors — a static link (e.g. to
       // field-guide.html) has no matching id in `rank`, but still needs to
