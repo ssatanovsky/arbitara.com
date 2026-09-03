@@ -214,5 +214,12 @@
     "enabled": true,
     "doc": "uploads/whitepaper-doc.docx",
     "gated": true
-  }
+  },
+  "readingList": [
+    {
+      "url": "https://www.mckinsey.com/capabilities/operations/our-insights/when-can-ai-make-good-decisions-the-rise-of-ai-corporate-citizens",
+      "title": "When can AI make good decisions? The rise of AI corporate citizens",
+      "description": "As agentic AI begins to influence decisions at scale, forward-looking organizations need to reimagine governance, trust, and operating models—or risk falling behind."
+    }
+  ]
 }
