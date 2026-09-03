@@ -38,7 +38,7 @@
  * the access-control unit here, not a separate admin-curated list.
  *
  *   POST /login        { password }            -> { token }  (own password, admin)
- *   POST /demo-login    { username, password }  -> { token, name, role, username }
+ *   POST /demo-login    { username, password }  -> { token, name, role, roles, username }
  *   GET  /config         (Bearer)               -> { config, sha }
  *   PUT  /config          (Bearer) { config, sha } -> { sha }
  *   GET  /gated-content   (Bearer, any identity) -> { blocks: {"<key>": html}, pages: {"<id>": true} }
@@ -198,7 +198,13 @@ export default {
       }
       let demoData; try { demoData = await demoResp.json(); } catch (e) { demoData = {}; }
       if (!demoResp.ok) return json({ error: demoData.error || "Incorrect username or password." }, 401);
-      return json({ token: demoData.token, name: demoData.name, role: demoData.role, username: demoData.username || null });
+      // `roles` (the full array) matters, not just `role` (arbitara-demo's
+      // derived "admin" if present, else roles[0]) — an account with e.g.
+      // roles ["user","investor"] would report role:"user" and silently
+      // fail every investor-only gate downstream if only `role` were
+      // forwarded. Caught as a real bug: an admin-declared investor account
+      // that still saw the signed-out teaser on investor.html.
+      return json({ token: demoData.token, name: demoData.name, role: demoData.role, roles: demoData.roles || [], username: demoData.username || null });
     }
 
     const bearer = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/, "");
@@ -260,20 +266,30 @@ export default {
     // /gated-content and /gated-deck so both use one authorization path.
     // `full: true` = every page/block (own-password admin session, or a
     // demo account with role "admin" — same reach as their edit powers
-    // elsewhere). Otherwise `role` = the caller's arbitara-demo role,
-    // checked against each page's/block's `roles` list. Returns null if
-    // the token isn't a valid identity at all.
+    // elsewhere). Otherwise `roles` = the caller's full arbitara-demo roles
+    // array, checked against each page's/block's `roles` list. Returns null
+    // if the token isn't a valid identity at all.
+    //
+    // Uses `identity.roles` (the account's complete role set), not the
+    // single derived `identity.role` (arbitara-demo's "admin" if present,
+    // else roles[0]) — an account with roles ["user","investor"] reports
+    // role:"user", so gating on that alone would silently deny access to
+    // every investor-only page/block despite the account genuinely holding
+    // that role. Real bug, not hypothetical: an admin-declared investor
+    // account still saw investor.html's signed-out teaser until this fix.
     async function resolveGatedAccess(bearer) {
       const ownSession = await verifySession(env.SESSION_SECRET, bearer);
       if (ownSession) return { full: true };
       const identity = await getDemoIdentity(bearer, demoApi);
       if (!identity) return null;
-      if (identity.role === "admin") return { full: true };
-      return { full: false, role: identity.role };
+      const roles = Array.isArray(identity.roles) && identity.roles.length ? identity.roles : [identity.role || "user"];
+      if (roles.indexOf("admin") >= 0) return { full: true };
+      return { full: false, roles: roles };
     }
     function ruleAllowed(rule, access) {
       if (access.full) return true;
-      return !!(rule && (rule.roles || []).indexOf(access.role) >= 0);
+      if (!rule || !Array.isArray(rule.roles)) return false;
+      return access.roles.some(function (r) { return rule.roles.indexOf(r) >= 0; });
     }
 
     // ---- GET /gated-content -> { blocks: {"<key>": "<html>", ...}, pages: {"<id>": true, ...} } ----

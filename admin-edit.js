@@ -19,11 +19,30 @@
   "use strict";
 
   var ADMIN_API = "https://arbitara-admin.slava-satanovsky.workers.dev";
-  var TOK = "arb.admin.token", NAME = "arb.admin.name", ROLE = "arb.admin.role";
+  var TOK = "arb.admin.token", NAME = "arb.admin.name", ROLE = "arb.admin.role", ROLES = "arb.admin.roles";
 
   function ls(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
   function setLs(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  // The arbitara-demo account system lets one account hold several roles
+  // (ROLE stores just the single derived one — "admin" if the account has
+  // it, else the first — the same shorthand demo-api/worker.js's own
+  // primaryRole() uses). A soft page/role gate must check the FULL set: an
+  // account with roles ["user","investor"] derives ROLE:"user", and gating
+  // on that alone silently denies an investor-only page to an account that
+  // genuinely holds the investor role — a real bug, not a hypothetical (an
+  // admin-declared investor account still saw investor.html's signed-out
+  // teaser). Falls back to [ROLE] for a token issued before this field
+  // existed, so an existing session doesn't have to sign in again.
+  function lsRoles() {
+    try {
+      var raw = localStorage.getItem(ROLES);
+      if (raw) { var arr = JSON.parse(raw); if (Array.isArray(arr) && arr.length) return arr; }
+    } catch (e) {}
+    var r = ls(ROLE);
+    return r ? [r] : [];
+  }
 
   function api(path, opts) {
     opts = opts || {};
@@ -176,7 +195,11 @@
       pop.className = "arb-admin-pop";
       pop.innerHTML =
         '<div class="arb-admin-who">' + ICON_USER.replace("currentColor", "var(--accent-ink)") +
-        '<span>Signed in as <b>' + esc(ls(NAME)) + '</b> (' + esc(ls(ROLE)) + ')<br><a id="arbSignOut">Sign out</a></span></div>' +
+        // All of this account's roles, not just the derived primary one —
+        // otherwise an account with roles ["user","investor"] shows only
+        // "(user)" here, which is exactly the misleading state that made
+        // this bug hard to spot from the signed-in side.
+        '<span>Signed in as <b>' + esc(ls(NAME)) + '</b> (' + esc(lsRoles().join(", ") || ls(ROLE)) + ')<br><a id="arbSignOut">Sign out</a></span></div>' +
         (isAdminRole
           ? '<button type="button" id="arbToggleEdit" style="margin-top:14px">' + (editMode ? "Exit edit mode" : "Edit this page") + "</button>" +
             '<button type="button" class="arb-pop-2nd" id="arbManageGated">Manage gated content</button>' +
@@ -186,7 +209,7 @@
           : "");
       wrap.appendChild(pop);
       pop.querySelector("#arbSignOut").addEventListener("click", function () {
-        setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, "");
+        setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, ""); setLs(ROLES, "");
         setEditMode(false);
         btn.innerHTML = ICON_LOCK;
         closePop();
@@ -238,6 +261,7 @@
         api("/demo-login", { method: "POST", body: loginBody })
           .then(function (d) {
             setLs(TOK, d.token); setLs(NAME, d.name); setLs(ROLE, d.role);
+            setLs(ROLES, Array.isArray(d.roles) && d.roles.length ? JSON.stringify(d.roles) : "");
             btn.innerHTML = ICON_USER;
             closePop();
             applyGatedContent();
@@ -669,7 +693,7 @@
     }).catch(function (err) {
       // A 401 means the stored token is no longer valid (expired/revoked) —
       // drop it so the nav button reflects "signed out" on next interaction.
-      if (err.status === 401) { setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, ""); }
+      if (err.status === 401) { setLs(TOK, ""); setLs(NAME, ""); setLs(ROLE, ""); setLs(ROLES, ""); }
     });
   }
 
@@ -699,8 +723,9 @@
     var softRoles = host.getAttribute("data-arb-page-gate-roles");
     var ok;
     if (softRoles != null) {
-      var role = ls(ROLE);
-      ok = role === "admin" || softRoles.split(",").map(function (s) { return s.trim(); }).indexOf(role) >= 0;
+      var myRoles = lsRoles();
+      var allowed = softRoles.split(",").map(function (s) { return s.trim(); });
+      ok = myRoles.indexOf("admin") >= 0 || myRoles.some(function (r) { return allowed.indexOf(r) >= 0; });
     } else {
       ok = !!(pages && pages[pageId]);
     }
