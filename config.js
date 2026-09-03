@@ -488,20 +488,13 @@
   }
 
   // Show/hide each section's optional illustration (config.sectionText.<id>.image).
-  // For most sections, nothing renders on the public site when unset — the
-  // empty-state affordance lives only in the admin editor's toolbar icon.
-  //
-  // A section can opt into a stronger empty state instead: a static
-  // dashed-box placeholder — `<div class="head-figure-slot" data-arb-img-slot>`
-  // right after `.head` in the HTML, with its own caption saying what
-  // belongs there (e.g. "Illustration — TAM/SAM/SOM funnel"). Uploading a
-  // real image swaps it for the actual figure and hides the placeholder;
-  // removing the image (clearing sectionText[id].image) brings the
-  // placeholder back rather than leaving a gap. Reserved for the handful of
-  // spots a diagram genuinely beats another table — investor.html's
-  // Solution/Market/Competitive/Path-to-$100M/Validation sections are the
-  // current adopters; opt in elsewhere by adding the same markup, no JS
-  // change needed.
+  // Nothing renders on the public site when unset — this is not a visible
+  // "placeholder"; the empty-state affordance lives only in the admin
+  // editor's per-section toolbar icon (mountImageUpload() in admin-edit.js).
+  // A visible dashed-box placeholder was tried here (data-arb-img-slot) and
+  // deliberately removed — redundant once every section already has the
+  // upload icon, and it read as an odd empty box to any visitor without
+  // upload access.
   function applySectionImages(cfg) {
     var st = cfg.sectionText;
     if (!st) return;
@@ -512,7 +505,6 @@
       if (!head) return;
       var t = st[id] || {};
       var fig = sec.querySelector(".head-figure");
-      var slot = sec.querySelector("[data-arb-img-slot]");
       if (t.image) {
         if (!fig) {
           fig = document.createElement("figure");
@@ -522,10 +514,8 @@
         var img = fig.querySelector("img");
         if (!img) { img = document.createElement("img"); img.alt = ""; fig.appendChild(img); }
         if (img.getAttribute("src") !== t.image) img.setAttribute("src", t.image);
-        if (slot) slot.hidden = true;
-      } else {
-        if (fig) fig.remove();
-        if (slot) slot.hidden = false;
+      } else if (fig) {
+        fig.remove();
       }
     });
   }

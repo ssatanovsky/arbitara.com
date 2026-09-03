@@ -362,18 +362,7 @@
   // so the change is visible without a save+reload round-trip.
   function setSectionImagePreview(sec, head, dataUrl) {
     var fig = sec.querySelector(".head-figure");
-    // A section can opt into a visible "an illustration belongs here"
-    // placeholder (see applySectionImages() in config.js, which handles
-    // the same show/hide on a normal page load) — keep this live-preview
-    // path in sync with it, or uploading an image here would show the real
-    // figure with the empty-state placeholder still sitting right above it
-    // until the next reload.
-    var slot = sec.querySelector("[data-arb-img-slot]");
-    if (!dataUrl) {
-      if (fig) fig.remove();
-      if (slot) slot.hidden = false;
-      return;
-    }
+    if (!dataUrl) { if (fig) fig.remove(); return; }
     if (!fig) {
       fig = document.createElement("figure");
       fig.className = "head-figure reveal in";
@@ -382,7 +371,6 @@
     var img = fig.querySelector("img");
     if (!img) { img = document.createElement("img"); img.alt = ""; fig.appendChild(img); }
     img.setAttribute("src", dataUrl);
-    if (slot) slot.hidden = true;
   }
 
   function setupHeroText() {
