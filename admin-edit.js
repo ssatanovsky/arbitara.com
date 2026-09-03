@@ -825,6 +825,18 @@
     var when = meta.uploadedAt ? new Date(meta.uploadedAt).toLocaleDateString() : "";
     return "Current deck: " + formatBytes(meta.size) + (when ? " · uploaded " + when : "");
   }
+  // Uploading the deck and granting access to it are two separate actions
+  // (the upload button above vs. a "Deck access" rule below) — a real,
+  // confirmed failure mode: admin uploads, never adds the rule, and every
+  // non-admin account gets a silent 403 with nothing on the page to explain
+  // why (investor.js deliberately never announces *why* the deck didn't
+  // load, to avoid tipping off an unauthorized visitor — so admin needs
+  // this warning here instead, not on the public page).
+  function deckAccessWarning(rowsArr) {
+    var rule = rowsArr.filter(function (r) { return r.sectionKey === "investor.deck"; })[0];
+    if (rule && rule.roles && rule.roles.length) return "";
+    return '<p class="arb-gated-note" style="color:var(--danger)">⚠ No one has access to the deck yet — add a rule below: page "Investors" → section "Deck access" → the roles that should see it.</p>';
+  }
 
   var gatedModal = null;
   function closeGatedModal() { if (gatedModal) { gatedModal.remove(); gatedModal = null; } }
@@ -874,6 +886,7 @@
       '<div class="arb-gated-section"><h5>Investor deck (PDF)</h5>' +
       '<p class="arb-gated-note" id="arbDeckStatus">' + esc(deckStatusText(deckMeta)) + '</p>' +
       '<p class="arb-gated-note">Uploads immediately — no separate save. Who can view it is controlled the same way as any rule below: pick page "Investors" → section "Deck access" → the roles that should see it.</p>' +
+      '<div id="arbDeckAccessWarn">' + deckAccessWarning(working.rowsArr) + '</div>' +
       '<label class="arb-gated-add" style="display:inline-block;cursor:pointer;">Upload / replace deck (PDF, max 20MB)' +
       '<input type="file" accept="application/pdf" id="arbDeckFile" style="display:none"></label></div>' +
       '<div class="arb-gated-section"><h5>Access rules</h5><div class="arb-gated-block-list">' + rowsHtml + "</div>" +
@@ -889,11 +902,16 @@
       if (file.type !== "application/pdf") { alert("Please upload a PDF file."); return; }
       if (file.size > 20 * 1024 * 1024) { alert("PDF is over 20MB."); return; }
       var statusEl = panel.querySelector("#arbDeckStatus");
+      var warnEl = panel.querySelector("#arbDeckAccessWarn");
       statusEl.textContent = "Uploading…";
       var reader = new FileReader();
       reader.onload = function () {
         api("/gated-deck", { method: "POST", body: { contentBase64: reader.result } })
-          .then(function (d) { deckMeta = d; statusEl.textContent = deckStatusText(d); })
+          .then(function (d) {
+            deckMeta = d;
+            statusEl.textContent = deckStatusText(d);
+            warnEl.innerHTML = deckAccessWarning(collectGatedWorking(panel, deckMeta).rowsArr);
+          })
           .catch(function (err) { statusEl.textContent = "Upload failed: " + (err.message || "unknown error"); });
       };
       reader.readAsDataURL(file);
