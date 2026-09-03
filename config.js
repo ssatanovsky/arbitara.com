@@ -38,12 +38,20 @@
       ".arb-hide-platform #platform,.arb-hide-disappear #disappear,.arb-hide-anatomy #anatomy,.arb-hide-process #process," +
       ".arb-hide-tiers #tiers,.arb-hide-assessment #assessment,.arb-hide-bias #bias,.arb-hide-ai #ai," +
       ".arb-hide-principles #principles,.arb-hide-toolkit #toolkit,.arb-hide-contact #contact{display:none!important;}" +
-      ".arb-hide-platform .nav-links a[href='#platform'],.arb-hide-disappear .nav-links a[href='#disappear'],.arb-hide-anatomy .nav-links a[href='#anatomy']," +
-      ".arb-hide-process .nav-links a[href='#process'],.arb-hide-tiers .nav-links a[href='#tiers']," +
-      ".arb-hide-assessment .nav-links a[href='#assessment']," +
-      ".arb-hide-bias .nav-links a[href='#bias'],.arb-hide-ai .nav-links a[href='#ai']," +
-      ".arb-hide-principles .nav-links a[href='#principles'],.arb-hide-toolkit .nav-links a[href='#toolkit']," +
-      ".arb-hide-contact .nav-links a[href='#contact']{display:none!important;}" +
+      // :is(.nav-links,.subnav) — a hidden section's own link could be in
+      // either row depending on the page (page-level destinations like
+      // Contact stay in .nav-links; everything else moved to .subnav when
+      // the header split in two — see "Nav" in CLAUDE.md). Matching both
+      // unconditionally is harmless for whichever one a link isn't in, and
+      // avoids this list silently going stale again the next time a link
+      // moves between rows — it already did once (arb-hide-disappear
+      // stopped hiding its subnav link on index.html until this was added).
+      ".arb-hide-platform :is(.nav-links,.subnav) a[href='#platform'],.arb-hide-disappear :is(.nav-links,.subnav) a[href='#disappear'],.arb-hide-anatomy :is(.nav-links,.subnav) a[href='#anatomy']," +
+      ".arb-hide-process :is(.nav-links,.subnav) a[href='#process'],.arb-hide-tiers :is(.nav-links,.subnav) a[href='#tiers']," +
+      ".arb-hide-assessment :is(.nav-links,.subnav) a[href='#assessment']," +
+      ".arb-hide-bias :is(.nav-links,.subnav) a[href='#bias'],.arb-hide-ai :is(.nav-links,.subnav) a[href='#ai']," +
+      ".arb-hide-principles :is(.nav-links,.subnav) a[href='#principles'],.arb-hide-toolkit :is(.nav-links,.subnav) a[href='#toolkit']," +
+      ".arb-hide-contact :is(.nav-links,.subnav) a[href='#contact']{display:none!important;}" +
       ".arb-hide-platform .footer li:has(a[href='#platform'])," +
       ".arb-hide-disappear .footer li:has(a[href='#disappear'])," +
       ".arb-hide-anatomy .footer li:has(a[href='#anatomy'])," +
