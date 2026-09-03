@@ -604,13 +604,29 @@
     });
   }
 
-  // Further-reading page (reading.html) — a flat, admin-managed list of
-  // external links with a short description each: config.readingList =
-  // [{url, title, description}, ...]. Reuses the .reads/.read/.rspine/
-  // .auth/.why markup self-check.html's own hardcoded "Where the ideas
-  // come from" book list already uses, so there's one visual language for
-  // "recommended reading" across the site rather than a second one. No-ops
-  // on every other page (no #readingList element there).
+  // Further reading — a flat, admin-managed list of external links with a
+  // short description each: config.readingList = [{url, title, description},
+  // ...]. Reuses the .reads/.read/.rspine/.auth/.why markup self-check.html's
+  // own hardcoded "Where the ideas come from" book list already uses, so
+  // there's one visual language for "recommended reading" across the site
+  // rather than a second one. readingCardHtml() is shared by the full list
+  // on reading.html and the teaser on white-paper.html below, so the two
+  // never drift into two different card designs.
+  function readingCardHtml(r) {
+    var url = r.url || "#";
+    var domain = "";
+    try { domain = new URL(url, location.href).hostname.replace(/^www\./, ""); } catch (e) {}
+    return '<div class="read">' +
+      '<div class="rspine"></div>' +
+      '<div>' +
+        '<h4><a href="' + url + '" target="_blank" rel="noopener">' + (r.title || url) + " ↗</a></h4>" +
+        (domain ? '<div class="auth">' + domain + "</div>" : "") +
+        (r.description ? '<div class="why">' + r.description + "</div>" : "") +
+      "</div></div>";
+  }
+
+  // reading.html's full list — no-ops on every other page (no #readingList
+  // element there).
   function renderReadingList(cfg) {
     var host = document.getElementById("readingList");
     if (!host) return;
@@ -621,18 +637,28 @@
       return;
     }
     if (empty) empty.hidden = true;
-    host.innerHTML = items.map(function (r) {
-      var url = r.url || "#";
-      var domain = "";
-      try { domain = new URL(url, location.href).hostname.replace(/^www\./, ""); } catch (e) {}
-      return '<div class="read">' +
-        '<div class="rspine"></div>' +
-        '<div>' +
-          '<h4><a href="' + url + '" target="_blank" rel="noopener">' + (r.title || url) + " ↗</a></h4>" +
-          (domain ? '<div class="auth">' + domain + "</div>" : "") +
-          (r.description ? '<div class="why">' + r.description + "</div>" : "") +
-        "</div></div>";
-    }).join("");
+    host.innerHTML = items.map(readingCardHtml).join("");
+  }
+
+  // white-paper.html's "Further Reading" teaser — the most recently added
+  // few entries (readingList's own end, since admin's "+ Add a link" always
+  // appends), with a link through to the full page. Hides its whole section
+  // rather than showing an empty teaser + a dead-end "see all" link when
+  // nothing's been posted yet, since unlike reading.html itself this
+  // section is supporting material on a page that should otherwise always
+  // look finished.
+  var READING_TEASER_COUNT = 3;
+  function renderReadingTeaser(cfg) {
+    var host = document.getElementById("wpReadingTeaser");
+    if (!host) return;
+    var section = document.getElementById("further-reading");
+    var items = Array.isArray(cfg.readingList) ? cfg.readingList : [];
+    if (!items.length) {
+      if (section) section.style.display = "none";
+      return;
+    }
+    var recent = items.slice(-READING_TEASER_COUNT).reverse();
+    host.innerHTML = recent.map(readingCardHtml).join("");
   }
 
   var applied = false;
@@ -674,6 +700,7 @@
       applyHeroStats(cfg);
       applyContentOverrides(cfg);
       renderReadingList(cfg);
+      renderReadingTeaser(cfg);
       if (get(cfg, "comingSoon.enabled", false) === true) {
         docEl.classList.add("arb-coming-soon");
         buildComingSoon(cfg.comingSoon || DEFAULTS.comingSoon);
