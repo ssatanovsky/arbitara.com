@@ -338,7 +338,18 @@
   // so the change is visible without a save+reload round-trip.
   function setSectionImagePreview(sec, head, dataUrl) {
     var fig = sec.querySelector(".head-figure");
-    if (!dataUrl) { if (fig) fig.remove(); return; }
+    // A section can opt into a visible "an illustration belongs here"
+    // placeholder (see applySectionImages() in config.js, which handles
+    // the same show/hide on a normal page load) — keep this live-preview
+    // path in sync with it, or uploading an image here would show the real
+    // figure with the empty-state placeholder still sitting right above it
+    // until the next reload.
+    var slot = sec.querySelector("[data-arb-img-slot]");
+    if (!dataUrl) {
+      if (fig) fig.remove();
+      if (slot) slot.hidden = false;
+      return;
+    }
     if (!fig) {
       fig = document.createElement("figure");
       fig.className = "head-figure reveal in";
@@ -347,6 +358,7 @@
     var img = fig.querySelector("img");
     if (!img) { img = document.createElement("img"); img.alt = ""; fig.appendChild(img); }
     img.setAttribute("src", dataUrl);
+    if (slot) slot.hidden = true;
   }
 
   function setupHeroText() {
@@ -521,8 +533,21 @@
     setupHeroText();
     setupHeroStats();
     setupHeroToolbar();
-    [].forEach.call(document.querySelectorAll("main > section[id]"), function (sec) {
-      if (sec.id === "hero") return;
+    // Descendant selector, not just direct main children — investor.html's
+    // real content lives one level deeper, inside the #investorGated div
+    // the page-gate mechanism wraps it in (see applyPageGate() below), so a
+    // main-child-only selector silently gave every one of its 13 sections
+    // zero editing capability: no text edit, no image upload, no
+    // toggle/reorder. Confirmed via a direct DOM query before this fix —
+    // not a hypothetical.
+    [].forEach.call(document.querySelectorAll("main section[id]"), function (sec) {
+      // "hero" (most pages) / "invIntro" (investor.html) is the page's own
+      // lede banner, not reorderable/toggleable content; "investorLocked"
+      // is a system notice, not admin content — none of the three get a
+      // toolbar. (Without this exclusion, invIntro's "move down" button
+      // would swap it past investorLocked in the DOM — a real sibling once
+      // both matched the broadened selector above, not just a style nit.)
+      if (sec.id === "hero" || sec.id === "invIntro" || sec.id === "investorLocked") return;
       setupSectionText(sec, sec.id);
       setupToolbar(sec, sec.id);
     });
@@ -561,6 +586,35 @@
     bar.querySelector(".save-btn").addEventListener("click", saveChanges);
   }
 
+  // `sectionOrder` is one flat array shared by every page (see CLAUDE.md,
+  // "sectionOrder is global, not per-page") — but a drag/up-down reorder
+  // only ever knows about the CURRENT page's own sections
+  // (pending.sectionOrder = that page's ids, in their new order). Naively
+  // overwriting cfg.sectionOrder with just that would silently drop every
+  // other page's entries the next time anyone reorders anything, anywhere —
+  // a real bug this caught, not a hypothetical: it would have undone the
+  // further-reading fix in CLAUDE.md the next time an admin reordered
+  // index.html. Splice the page's new order back in at wherever its ids
+  // used to cluster (or append at the end if none were present yet, as for
+  // a page with no ordering history at all), leaving every other page's
+  // ids and order untouched.
+  function mergeSectionOrder(oldOrder, pageIds) {
+    oldOrder = oldOrder || [];
+    var pageSet = {};
+    pageIds.forEach(function (id) { pageSet[id] = true; });
+    var firstOldIdx = -1;
+    for (var i = 0; i < oldOrder.length; i++) {
+      if (pageSet[oldOrder[i]]) { firstOldIdx = i; break; }
+    }
+    var others = oldOrder.filter(function (id) { return !pageSet[id]; });
+    if (firstOldIdx === -1) return others.concat(pageIds);
+    var insertAt = 0;
+    for (var j = 0; j < firstOldIdx; j++) {
+      if (!pageSet[oldOrder[j]]) insertAt++;
+    }
+    return others.slice(0, insertAt).concat(pageIds, others.slice(insertAt));
+  }
+
   function saveChanges() {
     var saveBtn = bar.querySelector(".save-btn");
     var status = bar.querySelector(".status");
@@ -574,7 +628,7 @@
       Object.keys(pending.sectionText).forEach(function (id) {
         cfg.sectionText[id] = Object.assign({}, cfg.sectionText[id], pending.sectionText[id]);
       });
-      if (pending.sectionOrder) cfg.sectionOrder = pending.sectionOrder;
+      if (pending.sectionOrder) cfg.sectionOrder = mergeSectionOrder(cfg.sectionOrder, pending.sectionOrder);
       if (Object.keys(pending.hero).length) cfg.hero = Object.assign({}, cfg.hero, pending.hero);
       if (Object.keys(pending.content).length) cfg.content = Object.assign({}, cfg.content, pending.content);
       return api("/config", { method: "PUT", body: { config: cfg, sha: d.sha } });
