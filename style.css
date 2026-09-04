@@ -239,6 +239,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .stat .n .u { color: var(--accent-ink); }
 .stat .l { font-size: 13.5px; color: var(--muted); margin-top: 12px; line-height: 1.4; }
 .stat .src { font-size: 11.5px; color: var(--faint); margin-top: 8px; }
+.stat .src a { color: inherit; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-2); }
+.stat .src a:hover { color: var(--accent-ink); text-decoration-color: currentColor; }
 
 /* ---------- Section headers ---------- */
 .head { max-width: 720px; margin-bottom: clamp(38px, 5vw, 60px); }
