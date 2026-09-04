@@ -839,6 +839,17 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .roadmap-phases { grid-template-columns: 1fr; gap: 22px; }
 }
 
+/* ---------- Channel list (investor GTM section) ---------- */
+/* Ordered, not a grid — each channel builds toward the direct sale described
+   just above it, so the reading order (most targeted first, most passive
+   last) is part of the argument. */
+.gtm-channels { list-style: none; margin: 20px 0 6px; padding: 0; counter-reset: gc; }
+.gtm-channels li { display: flex; gap: 18px; padding: 17px 0; border-top: 1px solid var(--line); }
+.gtm-channels li:first-child { border-top: none; padding-top: 0; }
+.gc-num { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent-ink); font-family: var(--serif); font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.gtm-channels h4 { font-family: var(--serif); font-size: 16px; margin: 0 0 5px; }
+.gtm-channels p { font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+
 /* ---------- Segment grid (investor GTM section) ---------- */
 /* .focus = where the named beachhead buyer actually sits (Large Enterprises)
    plus its natural next tier (Global Corporates / Governance). The other two
