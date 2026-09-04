@@ -356,20 +356,31 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 
 /* ---------- Self-assessment ---------- */
 .assess { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; margin-top: 8px; }
-.assess-body { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; }
+.assess-body { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0; align-items: start; }
 .assess-qs { padding: 6px 30px; border-right: 1px solid var(--line); }
-.assess-q { display: flex; gap: 16px; align-items: flex-start; padding: 22px 0; border-top: 1px solid var(--line); }
+.assess-group-label { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent-ink); padding-top: 22px; }
+.assess-group-label:first-child { padding-top: 20px; }
+.assess-q { display: flex; gap: 16px; align-items: flex-start; padding: 18px 0; border-top: 1px solid var(--line); }
+.assess-group-label + .assess-q { border-top: none; padding-top: 12px; }
 .assess-q:first-child { border-top: none; }
 .aq-icon { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-ink); }
 .aq-icon svg { width: 20px; height: 20px; }
 .aq-main { flex: 1; min-width: 0; padding-top: 2px; }
 .aq-text { font-size: 15px; color: var(--ink-soft); margin: 0 0 12px; line-height: 1.45; }
-.assess-result { padding: 30px; display: flex; flex-direction: column; justify-content: center; background: var(--paper-2); }
+/* Sticky so the score stays visible while scrolling a 15-question list —
+   needed once the list grew past a couple of screens' worth of questions;
+   the old 5-question version never scrolled far enough for this to matter.
+   Desktop (2-col) only; the mobile breakpoint collapses to 1fr and drops
+   the stickiness, since a result panel pinned mid-page reads oddly there. */
+.assess-result { padding: 30px; display: flex; flex-direction: column; justify-content: center; background: var(--paper-2); position: sticky; top: 130px; }
 .ar-label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 700; margin-bottom: 14px; }
 .ar-meter { height: 10px; border-radius: 5px; background: var(--paper); border: 1px solid var(--line-2); overflow: hidden; margin-bottom: 16px; }
 .ar-fill { height: 100%; width: 0%; background: var(--line-2); transition: width .4s ease, background .4s ease; }
 .ar-score { font-family: var(--serif); font-size: 22px; color: var(--ink); margin-bottom: 10px; letter-spacing: -.005em; }
 .ar-note { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.55; }
+.ar-bench { font-size: 12.5px; color: var(--faint); margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line-2); line-height: 1.5; }
+.ar-bench a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.ar-bench a:hover { color: var(--accent-ink); }
 
 /* ---------- Contact ---------- */
 .contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 38px); max-width: 640px; transition: box-shadow .3s ease; }
@@ -889,6 +900,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .diag-tests { border-right: none; border-bottom: 1px solid var(--line); }
   .assess-body { grid-template-columns: 1fr; }
   .assess-qs { border-right: none; border-bottom: 1px solid var(--line); }
+  .assess-result { position: static; top: auto; }
   .nav-links { display: none; }
   .nav-links.open {
     display: flex; position: absolute; top: 110px; left: 0; right: 0; flex-direction: column;

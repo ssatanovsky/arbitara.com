@@ -254,10 +254,14 @@
     }
   }
 
-  /* ---------- Self-assessment (5-question decision-management check) ----------
+  /* ---------- Self-assessment (15-question decision-effectiveness score) ----------
      Deliberately scoped to .assess / .aseg so it never touches the tier
      diagnostic's .seg[data-q] wiring above, even though both reuse the same
-     .seg button styling. */
+     .seg button styling. Each question is a 0-3 frequency answer (Rarely..
+     Always); the sum normalizes to the same 0-100 scale Bain & Company uses
+     in the cited research (see .ar-bench in the HTML), so the score is
+     directly comparable to their published benchmarks — not an arbitrary
+     0-100 Arbitara made up. */
   (function () {
     var assessEl = document.querySelector(".assess");
     if (!assessEl) return;
@@ -265,18 +269,19 @@
     var scoreEl = document.getElementById("assessScore");
     var noteEl = document.getElementById("assessNote");
     var total = assessEl.querySelectorAll(".assess-q").length;
+    var PER_Q_MAX = 3;
     var answers = {};
 
     var DEFAULT_NOTE = noteEl.textContent;
     var BANDS = [
-      { max: 0, cls: "good",   score: "Zero gaps",
-        note: "That's rare. Most organizations we talk to have at least one. Whatever keeps decisions visible and documented here, it's working." },
-      { max: 2, cls: "accent", score: function (n) { return n + " of 5: a couple of gaps"; },
-        note: "Common, and still cheap to close. Most organizations don't notice until the third or fourth." },
-      { max: 4, cls: "warn",   score: function (n) { return n + " of 5: meaningful blind spots"; },
-        note: "Real gaps in how decisions get made, governed, or remembered. Not yet a crisis, but compounding." },
-      { max: 5, cls: "danger", score: "Five for five",
-        note: "There's effectively no visibility into how or why decisions get made here. That's not a judgment. It's the default for most organizations that haven't made decision management a discipline yet." }
+      { max: 30, cls: "danger", label: "Ad hoc",
+        note: "Decisions happen, but mostly invisibly — reasoning, ownership, and follow-up live in people's heads, not the organization. That's the default for most organizations that haven't made decision management a discipline yet, not a judgment." },
+      { max: 55, cls: "warn", label: "Emerging",
+        note: "Some structure exists, applied inconsistently. Real gaps remain in how decisions get made, governed, or remembered — not a crisis, but compounding." },
+      { max: 75, cls: "accent", label: "Systematic",
+        note: "Decisions are generally well-managed. The remaining gaps are the ones that are cheapest to close now and most expensive to ignore." },
+      { max: 100, cls: "good", label: "Leading",
+        note: "That's rare — most organizations we talk to score well below this. Whatever keeps decisions visible, owned, and documented here, it's working." }
     ];
 
     function render() {
@@ -288,12 +293,13 @@
         noteEl.textContent = DEFAULT_NOTE;
         return;
       }
-      var gaps = 0;
-      Object.keys(answers).forEach(function (k) { gaps += answers[k]; });
-      var band = BANDS.filter(function (b) { return gaps <= b.max; })[0];
-      fill.style.width = (gaps / total * 100) + "%";
+      var raw = 0;
+      Object.keys(answers).forEach(function (k) { raw += answers[k]; });
+      var score = Math.round((raw / (total * PER_Q_MAX)) * 100);
+      var band = BANDS.filter(function (b) { return score <= b.max; })[0];
+      fill.style.width = score + "%";
       fill.style.background = "var(--" + band.cls + ")";
-      scoreEl.textContent = typeof band.score === "function" ? band.score(gaps) : band.score;
+      scoreEl.textContent = score + " / 100 — " + band.label;
       noteEl.textContent = band.note;
     }
 
