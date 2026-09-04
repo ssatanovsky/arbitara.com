@@ -91,9 +91,9 @@
       "image": ""
     },
     "assessment": {
-      "eyebrow": "A five-question self-check",
+      "eyebrow": "A decision-effectiveness self-check",
       "title": "Where does your organization actually stand?",
-      "intro": "Five questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today, not how the org chart says they should.",
+      "intro": "15 questions, answered honestly, usually reveal more than a strategy offsite. Answer for how decisions actually get made today, not how the org chart says they should. The four scored dimensions — quality, speed, yield, and effort — come from Bain & Company's decision-effectiveness research; the fifth, documentation & memory, is Arbitara's own addition, since it's the gap this site is about.",
       "navLabel": "",
       "image": ""
     },
