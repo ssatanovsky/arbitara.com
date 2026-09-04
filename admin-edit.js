@@ -719,6 +719,15 @@
     }
     [].forEach.call(document.querySelectorAll("[data-arb-page-locked]"), function (el) { el.style.display = ok ? "none" : ""; });
     [].forEach.call(document.querySelectorAll("[data-arb-page-gated]"), function (el) { el.style.display = ok ? "" : "none"; });
+    // The sub-nav's own links point INTO the gated wrapper above — while
+    // locked, its targets are display:none, so clicking any of them just
+    // silently does nothing (no scroll, no error, no explanation). Verified
+    // live: investor.html's sub-nav rendered all 14 section links for a
+    // signed-out visitor with every single one of them non-functional. Hide
+    // it along with the rest of the gated content rather than advertising a
+    // table of contents for something the visitor can't reach.
+    var subnav = document.getElementById("subnav");
+    if (subnav) subnav.style.display = ok ? "" : "none";
   }
   document.addEventListener("arb:gated-applied", function (e) {
     applyPageGate(e.detail && e.detail.pages);

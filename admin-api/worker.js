@@ -136,6 +136,18 @@ export default {
     // "https://arbitara.com" (localhost dev preview, www.arbitara.com,
     // wherever) got a CORS mismatch and a silent "Failed to fetch" in the
     // browser. Comma-separate multiple origins in the env var.
+    //
+    // The http://localhost:8781 entry in this FALLBACK (only used if
+    // ALLOW_ORIGIN isn't set in the dashboard) is a deliberate, reviewed
+    // trade-off, not an oversight: dev-server.py serves the site locally on
+    // that exact port while still calling this real, deployed Worker (see
+    // CLAUDE.md's "Local preview"), so local testing depends on it. The
+    // realistic exposure is narrow — it only grants anything to a request
+    // whose Origin header is already http://localhost:8781, which means
+    // script already running inside the developer's own local dev server,
+    // not a remote attacker — but if ALLOW_ORIGIN is ever explicitly set in
+    // the dashboard (recommended for production), that env var wins
+    // entirely and this hardcoded fallback never applies.
     const allowedOrigins = String(env.ALLOW_ORIGIN || "https://arbitara.com,http://localhost:8781")
       .split(",").map(function (s) { return s.trim(); }).filter(Boolean);
     const requestOrigin = request.headers.get("Origin") || "";
@@ -164,10 +176,41 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
+    // A per-request sleep(400) on failure only delays that ONE request's own
+    // response — Workers handle concurrent requests independently, so it
+    // does nothing against an attacker firing guesses in parallel. This adds
+    // an actual KV-backed counter per source IP (reusing the LEADS binding,
+    // same "borrow an existing binding for a differently-prefixed key"
+    // pattern gated:doc/gated:deck already use) — after LOGIN_MAX_ATTEMPTS
+    // failures inside LOGIN_LOCKOUT_SECONDS, further attempts are rejected
+    // outright. Covers both /login (this Worker's own password) and
+    // /demo-login (proxied to arbitara-demo, which has its own independent
+    // copy of this same guard — but a service-binding call doesn't carry a
+    // real client IP the way a direct public request does, so this Worker's
+    // own IP-based check is the one that actually throttles someone hitting
+    // /demo-login through arbitara.com).
+    const LOGIN_MAX_ATTEMPTS = 8;
+    const LOGIN_LOCKOUT_SECONDS = 300;
+    const loginRlKey = "loginrl:" + (request.headers.get("CF-Connecting-IP") || "unknown");
+    async function loginRateLimited() {
+      let n = 0;
+      try { n = Number((await env.LEADS.get(loginRlKey)) || 0); } catch (e) {}
+      return n >= LOGIN_MAX_ATTEMPTS;
+    }
+    async function recordLoginFailure() {
+      let n = 0;
+      try { n = Number((await env.LEADS.get(loginRlKey)) || 0); } catch (e) {}
+      try { await env.LEADS.put(loginRlKey, String(n + 1), { expirationTtl: LOGIN_LOCKOUT_SECONDS }); } catch (e) {}
+    }
+
     // ---- POST /login  { password } -> { token } ----
     if (url.pathname.endsWith("/login") && request.method === "POST") {
+      if (await loginRateLimited()) {
+        return json({ error: "Too many attempts. Please wait a few minutes and try again." }, 429);
+      }
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
       if (!timingSafeEqual(body && body.password, env.ADMIN_PASSWORD)) {
+        await recordLoginFailure();
         await sleep(400); // slow down brute-force attempts
         return json({ error: "Incorrect password." }, 401);
       }
@@ -184,6 +227,9 @@ export default {
     // (getDemoIdentity()) is enough for /gated-content, which filters by
     // the account's own role.
     if (url.pathname.endsWith("/demo-login") && request.method === "POST") {
+      if (await loginRateLimited()) {
+        return json({ error: "Too many attempts. Please wait a few minutes and try again." }, 429);
+      }
       if (!demoApi) return json({ error: "Account service is not configured (missing DEMO_API binding)." }, 500);
       let body; try { body = await request.json(); } catch (e) { return json({ error: "bad request" }, 400); }
       let demoResp;
@@ -197,7 +243,7 @@ export default {
         return json({ error: "Could not reach the account service." }, 502);
       }
       let demoData; try { demoData = await demoResp.json(); } catch (e) { demoData = {}; }
-      if (!demoResp.ok) return json({ error: demoData.error || "Incorrect username or password." }, 401);
+      if (!demoResp.ok) { await recordLoginFailure(); return json({ error: demoData.error || "Incorrect username or password." }, 401); }
       // `roles` (the full array) matters, not just `role` (arbitara-demo's
       // derived "admin" if present, else roles[0]) — an account with e.g.
       // roles ["user","investor"] would report role:"user" and silently
