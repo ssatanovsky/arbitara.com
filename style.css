@@ -839,6 +839,20 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .roadmap-phases { grid-template-columns: 1fr; gap: 22px; }
 }
 
+/* ---------- Segment grid (investor GTM section) ---------- */
+/* .focus = where the named beachhead buyer actually sits (Large Enterprises)
+   plus its natural next tier (Global Corporates / Governance). The other two
+   are shown, not hidden — but visibly de-emphasized, not pursued this round. */
+.segments-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 22px 0 8px; }
+.seg-card { border: 1px solid var(--line); border-radius: var(--rad); padding: 18px 18px 16px; background: var(--card); }
+.seg-tag { display: inline-block; font-family: var(--sans); font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; margin-bottom: 10px; background: var(--paper-2); color: var(--faint); }
+.seg-card.focus { border-color: var(--accent); }
+.seg-card.focus .seg-tag { background: var(--accent); color: var(--paper); }
+.seg-card h4 { font-family: var(--serif); font-size: 16px; margin: 0 0 8px; }
+.seg-card p { font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+@media (max-width: 860px) { .segments-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .segments-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Founder cards (investor Team section) ---------- */
 .founders { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 4px 0 26px; }
 .founder-photo {
