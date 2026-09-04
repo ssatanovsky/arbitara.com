@@ -146,6 +146,10 @@
       "eyebrow": "What Arbitara is",
       "title": "A decision framework, and the platform to run it.",
       "intro": "Arbitara combines a practitioner's decision framework with the technology to operate it. Capturing, governing, and learning from every decision, so accountability and speed stop trading against each other."
+    },
+    "roadmap": {
+      "image": "uploads/roadmap.png",
+      "title": "What the round enables in the next 3 years"
     }
   },
   "sectionOrder": [
