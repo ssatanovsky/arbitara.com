@@ -468,9 +468,9 @@
      when clicked a second time). Static markup, so no ARB_READY needed.
      ========================================================================== */
   (function initPlatform() {
-    var sec = document.getElementById("platform");
-    if (!sec) return;
-    [].forEach.call(sec.querySelectorAll(".plat-panel"), function (panel) {
+    var panels = document.querySelectorAll(".plat-panel");
+    if (!panels.length) return;
+    [].forEach.call(panels, function (panel) {
       var detail = panel.querySelector(".plat-detail");
       if (!detail) return;
       var chips = [].slice.call(panel.querySelectorAll("[data-note]"));

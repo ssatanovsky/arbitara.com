@@ -676,6 +676,10 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 #platform .head .eyebrow::before { background: #E4C97A; }
 #platform .head h2 { color: #FBF8F1; }
 #platform .head > p { color: rgba(251,248,241,.82); }
+/* Dark card wrapper so .plat can be embedded on a light-themed page (e.g. investor.html)
+   without requiring the whole section to adopt #platform's navy background. */
+.plat-embed { background: #141B36; border: 1px solid rgba(255,255,255,.08); border-radius: var(--rad); padding: clamp(22px, 4vw, 38px); margin: 28px 0; }
+.plat-embed .plat-hint { margin-top: 0; }
 .plat-hint { text-align: center; font-family: var(--sans); font-size: 12.5px; letter-spacing: .04em; color: #8290BE; margin: clamp(20px, 3vw, 34px) 0 0; }
 .plat { margin-top: 16px; display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
 .plat-panel { border: 1px solid rgba(255,255,255,.14); border-radius: 16px; padding: clamp(20px, 3vw, 30px); background: rgba(255,255,255,.02); }
