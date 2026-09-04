@@ -786,6 +786,14 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .itable tbody tr:last-child td { border-bottom: none; }
 .itable td:first-child, .itable th:first-child { font-weight: 600; color: var(--ink); }
 
+/* Quick-fire Q&A pairs (investor Problem section) — question in ink, answer
+   as the punchline right under it in the accent color, each pair its own
+   card so they read as three separate exchanges, not one run-on sentence. */
+.qa-list { list-style: none; margin: 20px 0 30px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.qa-list li { padding: 16px 20px; border: 1px solid var(--line); border-radius: var(--rad); background: var(--card); }
+.qa-list .q { display: block; font-weight: 600; color: var(--ink); }
+.qa-list .a { display: block; margin-top: 6px; font-weight: 600; color: var(--accent-ink); }
+
 /* ---------- Founder cards (investor Team section) ---------- */
 .founders { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 4px 0 26px; }
 .founder-photo {
