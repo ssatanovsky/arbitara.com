@@ -793,10 +793,12 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .investor-teaser .teaser-lock { font-size: 26px; }
 .investor-teaser p { margin: 0; max-width: 46ch; color: var(--muted); font-size: 15px; }
 
-/* Bold lead-ins in investor-page prose, gold instead of plain ink — scoped to
-   direct-child <p> so it never touches <b> inside nested dark components
-   (.plat-detail, .rm-gate) that already set their own contrast-matched color. */
-.investor-block > p > b { color: var(--accent-ink); }
+/* Bold emphasis in investor-page prose, gold instead of plain ink. Scoped to
+   <b> that is a direct child of a <p> — this reaches nested prose (e.g. the
+   founder bios inside .founders) while still excluding <b> set directly
+   inside non-paragraph dark components (.plat-detail, .rm-gate), which
+   already use their own contrast-matched color and have no <p> ancestor. */
+.investor-block p > b { color: var(--accent-ink); }
 
 /* ---------- Investor page data tables ---------- */
 /* For the gated content itself (market sizing, pricing tiers, unit
