@@ -509,7 +509,6 @@
         var open = btn.getAttribute("aria-expanded") === "true";
         btn.setAttribute("aria-expanded", String(!open));
         detail.hidden = open;
-        btn.textContent = open ? "Scope and gap" : "Hide";
       });
     });
   })();
