@@ -494,17 +494,18 @@
   })();
 
   /* ==========================================================================
-     Competitive rings legend — each row's "Scope and gap" button reveals its
-     own detail paragraph (investor.html #competitive). Independent toggles,
-     not an accordion — no need to collapse siblings. Static markup, so no
-     ARB_READY needed.
+     Expandable rows — every ".exp-toggle" button (the competitive rings
+     legend's "Scope and gap", and every converted itable's "Details") reveals
+     its own next-sibling ".exp-detail" paragraph. Independent toggles, not an
+     accordion — no need to collapse siblings. Static markup, so no ARB_READY
+     needed.
      ========================================================================== */
-  (function initRingsLegend() {
-    var toggles = document.querySelectorAll(".rl-toggle");
+  (function initExpandables() {
+    var toggles = document.querySelectorAll(".exp-toggle");
     if (!toggles.length) return;
     [].forEach.call(toggles, function (btn) {
       var detail = btn.nextElementSibling;
-      if (!detail || !detail.classList.contains("rl-detail")) return;
+      if (!detail || !detail.classList.contains("exp-detail")) return;
       btn.addEventListener("click", function () {
         var open = btn.getAttribute("aria-expanded") === "true";
         btn.setAttribute("aria-expanded", String(!open));
