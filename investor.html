@@ -347,15 +347,21 @@
         </div>
       </div>
 
-      <table class="itable">
-        <thead><tr><th>Market layer</th><th>Scale estimate</th></tr></thead>
-        <tbody>
-          <tr><td>Total addressable market, today through 2030</td><td>$20–43 billion</td></tr>
-          <tr><td>Serviceable addressable market</td><td>$7.5–15 billion</td></tr>
-          <tr><td>Serviceable obtainable market, year 3–4</td><td>$15–30 million</td></tr>
-        </tbody>
-      </table>
-      <p class="mkt-chart-note">The obtainable-market figure matches the Year 3–4 revenue target in the Growth section below, not a separate estimate.</p>
+      <div class="funnel">
+        <div class="funnel-tier">
+          <span class="funnel-label">Total addressable market · today through 2030</span>
+          <span class="funnel-value">$20–43 billion</span>
+        </div>
+        <div class="funnel-tier">
+          <span class="funnel-label">Serviceable addressable market</span>
+          <span class="funnel-value">$7.5–15 billion</span>
+        </div>
+        <div class="funnel-tier">
+          <span class="funnel-label">Serviceable obtainable market · year 3–4</span>
+          <span class="funnel-value">$15–30 million</span>
+        </div>
+      </div>
+      <p class="mkt-chart-note">Width narrows tier over tier to show scale, not literal proportion — the three layers span three orders of magnitude. The obtainable-market figure matches the Year 3–4 revenue target in the Growth section below, not a separate estimate.</p>
 
       <table class="itable">
         <thead><tr><th>Adjacent category</th><th>Market size</th><th>Not competition, because</th></tr></thead>
@@ -381,6 +387,26 @@
     </div>
     <div class="investor-block reveal">
       <p>The landscape is not empty. It's full of capable, well-capitalized platforms solving adjacent problems — none of them the one Arbitara solves. The management decision as a structured, persistent, governable object <b>belongs to no one</b>.</p>
+      <div class="rings-wrap">
+        <svg class="rings-svg" viewBox="0 0 340 340" role="img" aria-label="Concentric rings diagram: five categories of competitors surround an empty center labeled 'the decision', ordered from adjacent infrastructure closest in, to operational AI decisioning furthest out.">
+          <style>text{font-family:var(--sans);}</style>
+          <circle cx="170" cy="170" r="155" fill="none" stroke="var(--line-2)" stroke-width="2"/>
+          <circle cx="170" cy="170" r="130" fill="none" stroke="var(--slate)" stroke-width="2"/>
+          <circle cx="170" cy="170" r="105" fill="none" stroke="var(--slate-soft)" stroke-width="2"/>
+          <circle cx="170" cy="170" r="80" fill="none" stroke="var(--accent-ink)" stroke-width="2"/>
+          <circle cx="170" cy="170" r="55" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <circle cx="170" cy="170" r="30" fill="none" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="170" y="167" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--faint)">THE</text>
+          <text x="170" y="178" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--faint)">DECISION</text>
+        </svg>
+        <div class="rings-legend">
+          <div class="rl-row"><i style="background:var(--accent)"></i><div><b>Adjacent infrastructure</b><span>Signavio · LeanIX · Celonis — closest conceptually; this page's own structural analogues.</span></div></div>
+          <div class="rl-row"><i style="background:var(--accent-ink)"></i><div><b>Strategy &amp; planning</b><span>Cascade · Quantive · Workboard</span></div></div>
+          <div class="rl-row"><i style="background:var(--slate-soft)"></i><div><b>Business intelligence &amp; analytics</b><span>Power BI · Tableau · Looker</span></div></div>
+          <div class="rl-row"><i style="background:var(--slate)"></i><div><b>AI productivity</b><span>Notion AI · Microsoft Copilot · ChatGPT Enterprise</span></div></div>
+          <div class="rl-row"><i style="background:var(--line-2)"></i><div><b>Operational AI decisioning</b><span>FICO · IBM · SAS · Aera · Pega · Oracle · Quantexa · ACTICO</span></div></div>
+        </div>
+      </div>
       <table class="itable">
         <thead><tr><th>Ring</th><th>Players</th><th>Why they don't own the decision</th></tr></thead>
         <tbody>

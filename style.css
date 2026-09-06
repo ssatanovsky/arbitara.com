@@ -909,6 +909,35 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .tier-card p { font-family: var(--sans); font-size: 13px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
 @media (max-width: 780px) { .tier-cards { grid-template-columns: 1fr; } }
 
+/* ---------- Market-sizing funnel (investor Market section) ---------- */
+/* Not literally area-proportional — TAM/SAM/SOM span three orders of
+   magnitude here, so a to-scale funnel would render SOM as a hairline.
+   Width narrows tier over tier to carry the "each layer is a subset of the
+   one above" logic instead. */
+.funnel { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 22px auto 8px; max-width: 620px; }
+.funnel-tier { width: 100%; padding: 16px 22px; border-radius: 10px; text-align: center; }
+.funnel-tier:nth-child(1) { background: var(--slate); }
+.funnel-tier:nth-child(2) { width: 70%; background: var(--slate-soft); }
+.funnel-tier:nth-child(3) { width: 40%; background: var(--accent); }
+.funnel-label { display: block; font-family: var(--sans); font-size: 12px; letter-spacing: .03em; color: rgba(255,255,255,.78); }
+.funnel-tier:nth-child(3) .funnel-label { color: rgba(25,23,18,.72); }
+.funnel-value { display: block; font-family: var(--serif); font-weight: 700; font-size: 21px; color: #fff; margin: 3px 0; }
+.funnel-tier:nth-child(3) .funnel-value { color: var(--ink); }
+.funnel-sub { display: block; font-family: var(--sans); font-size: 11px; color: rgba(255,255,255,.65); }
+.funnel-tier:nth-child(3) .funnel-sub { color: rgba(25,23,18,.62); }
+
+/* ---------- Competitive rings map (investor Competitive section) ---------- */
+/* Ring order encodes conceptual distance from the empty center: adjacent
+   infrastructure (Signavio/LeanIX, this page's own structural analogues)
+   sits closest; rules-based operational decisioning sits furthest. */
+.rings-wrap { display: flex; align-items: center; gap: 34px; margin: 22px 0 10px; flex-wrap: wrap; }
+.rings-svg { flex: 0 0 auto; width: min(320px, 100%); height: auto; }
+.rings-legend { flex: 1 1 240px; display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
+.rings-legend .rl-row { display: flex; align-items: baseline; gap: 10px; }
+.rings-legend i { flex: none; width: 11px; height: 11px; border-radius: 50%; margin-top: 3px; }
+.rings-legend b { font-family: var(--serif); font-size: 14.5px; display: block; }
+.rings-legend span { display: block; font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
 /* ---------- Founder cards (investor Team section) ---------- */
 .founders { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 4px 0 26px; }
 .founder-photo {
