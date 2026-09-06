@@ -971,6 +971,21 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .exp-row .exp-toggle svg { width: 13px; height: 13px; color: var(--faint); }
 .exp-row .exp-detail { margin: 0 0 15px; padding-top: 0; border-top: none; font-size: 13.5px; max-width: none; }
 
+/* ---------- Comparable cards (investor Return section) ---------- */
+/* A 3-way comparison, not a label+hidden-detail row — cards, like the
+   pricing tiers. The Arbitara card is marked as a thesis (dashed accent
+   border + tag), visually distinct from the two completed acquisitions. */
+.comp-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 28px; }
+.comp-card { border: 1px solid var(--line); border-radius: var(--rad); padding: 20px; background: var(--card); }
+.comp-card.thesis { border-color: var(--accent); border-style: dashed; }
+.comp-card h4 { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 17px; margin: 0 0 14px; }
+.comp-tag { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); background: var(--paper-2); border-radius: 999px; padding: 3px 9px; }
+.comp-field { padding: 10px 0; border-top: 1px solid var(--line); }
+.comp-field:first-of-type { border-top: none; padding-top: 0; }
+.comp-label { display: block; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
+.comp-value { font-family: var(--sans); font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+@media (max-width: 780px) { .comp-cards { grid-template-columns: 1fr; } }
+
 /* ---------- Founder cards (investor Team section) ---------- */
 .founders { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 4px 0 26px; }
 .founder-photo {
