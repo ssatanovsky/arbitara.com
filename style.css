@@ -945,17 +945,31 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 /* ---------- Expandable row (generic — used by the rings legend and every
    converted itable below: short summary always visible, longer explanation
    behind one consistent "Details" toggle). ---------- */
+/* Base pill-button toggle — the competitive rings legend's "Scope and gap"
+   (a button that sits BELOW its own label text, so it stays a small pill). */
 .exp-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 12px 6px 14px; cursor: pointer; transition: background .15s, border-color .15s; }
 .exp-toggle:hover { background: var(--card); border-color: var(--accent); }
 .exp-toggle svg { width: 11px; height: 11px; flex: none; transition: transform .2s ease; }
 .exp-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .exp-detail { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); max-width: 60ch; }
+
+/* Full-row variant — Why Now / Validation / Growth / The Ask / Team. The
+   entire row is the button (bigger click target, one line, no dead space
+   between the label and a separate "Details" pill underneath it). */
 .exp-list { margin: 18px 0 28px; }
-.exp-row { padding: 15px 0; border-top: 1px solid var(--line); }
-.exp-row:first-child { border-top: none; padding-top: 0; }
-.exp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px; }
-.exp-head b { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--ink); }
-.exp-val { font-family: var(--serif); font-weight: 700; font-size: 15px; color: var(--slate); white-space: nowrap; }
+.exp-row { border-top: 1px solid var(--line); }
+.exp-row:first-child { border-top: none; }
+.exp-row .exp-toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  width: 100%; margin-top: 0; padding: 15px 0; background: none; border: none;
+  border-radius: 0; text-transform: none; letter-spacing: normal; text-align: left; cursor: pointer;
+}
+.exp-row .exp-toggle:hover .exp-label { color: var(--accent-ink); }
+.exp-label { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--ink); transition: color .15s; }
+.exp-right { display: flex; align-items: center; gap: 12px; flex: none; }
+.exp-row .exp-val { font-family: var(--serif); font-weight: 700; font-size: 15px; color: var(--slate); white-space: nowrap; }
+.exp-row .exp-toggle svg { width: 13px; height: 13px; color: var(--faint); }
+.exp-row .exp-detail { margin: 0 0 15px; padding-top: 0; border-top: none; font-size: 13.5px; max-width: none; }
 
 /* ---------- Founder cards (investor Team section) ---------- */
 .founders { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 4px 0 26px; }
