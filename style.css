@@ -697,8 +697,11 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .plat-loop.active { border-style: solid; border-color: #E4C97A; color: #FBF8F1; }
 .plat-loop:focus-visible { outline: 2px solid #E4C97A; outline-offset: 2px; }
 .plat-loop svg { width: 16px; height: 16px; color: #E4C97A; }
-/* reveal-on-click detail panel */
-.plat-detail { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.14); padding-top: 16px; font-family: var(--sans); font-size: 15px; line-height: 1.55; color: rgba(251,248,241,.86); }
+.plat-loop::after { content: ""; width: 7px; height: 7px; margin-left: 1px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform .2s ease; opacity: .65; }
+.plat-loop[aria-expanded="true"]::after { transform: rotate(225deg); }
+/* reveal-on-click detail panel — a contained card, not just a ruled-off
+   text block, so an expanded chip visibly "opens into" something. */
+.plat-detail { margin-top: 18px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 16px 18px; font-family: var(--sans); font-size: 15px; line-height: 1.55; color: rgba(251,248,241,.86); }
 .plat-detail b { color: #E4C97A; font-weight: 700; }
 /* join */
 .plat-join { display: flex; align-items: center; justify-content: center; gap: 9px; color: #9FB0DF; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
@@ -708,11 +711,13 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .plat-tier:first-of-type { border-top: none; padding-top: 0; }
 .plat-tier-name { flex: 0 0 170px; font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: #9FB0DF; }
 .plat-blocks { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
-.plat-block { font-family: var(--sans); font-size: 14.5px; font-weight: 600; padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(159,176,223,.5); border-bottom-width: 3px; color: #DCE3F5; background: rgba(159,176,223,.08); cursor: pointer; transition: border-color .15s, background .15s, color .15s, transform .1s; }
+.plat-block { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 14.5px; font-weight: 600; padding: 9px 16px 9px 18px; border-radius: 8px; border: 1px solid rgba(159,176,223,.5); border-bottom-width: 3px; color: #DCE3F5; background: rgba(159,176,223,.08); cursor: pointer; transition: border-color .15s, background .15s, color .15s, transform .1s; }
 .plat-block:hover { border-color: rgba(159,176,223,.9); background: rgba(159,176,223,.16); }
 .plat-block:active { transform: translateY(1px); border-bottom-width: 1px; margin-top: 2px; }
 .plat-block.active { border-color: #DCE3F5; background: rgba(159,176,223,.22); color: #FBF8F1; }
 .plat-block:focus-visible { outline: 2px solid #9FB0DF; outline-offset: 2px; }
+.plat-block::after { content: ""; flex: none; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); transition: transform .2s ease; opacity: .6; }
+.plat-block[aria-expanded="true"]::after { transform: rotate(225deg); }
 .plat-block.gold { border-color: rgba(228,201,122,.55); color: #F1D888; background: rgba(228,201,122,.1); }
 .plat-block.gold:hover { border-color: rgba(228,201,122,.9); background: rgba(228,201,122,.18); }
 .plat-block.gold.active { border-color: #E4C97A; background: rgba(228,201,122,.24); color: #FBEFC6; }
