@@ -944,7 +944,8 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .rl-row { display: flex; align-items: flex-start; gap: 10px; padding: 13px 0; border-top: 1px solid var(--line); }
 .rl-row:first-child { border-top: none; padding-top: 0; }
 .rl-row i { flex: none; width: 11px; height: 11px; border-radius: 50%; margin-top: 6px; }
-.rl-row .exp-toggle { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: auto; margin: 0; padding: 0; background: none; border: none; text-align: left; cursor: pointer; text-transform: none; letter-spacing: normal; font-weight: 400; font-size: inherit; color: inherit; }
+.rl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rl-row .exp-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 0; background: none; border: none; text-align: left; cursor: pointer; text-transform: none; letter-spacing: normal; font-weight: 400; font-size: inherit; color: inherit; }
 .rl-row .exp-toggle:hover .rl-label b { color: var(--accent-ink); }
 .rl-row .exp-toggle svg { flex: none; width: 13px; height: 13px; color: var(--faint); }
 .rl-label b { font-family: var(--serif); font-size: 14.5px; font-weight: 600; color: var(--ink); display: block; transition: color .15s; }
