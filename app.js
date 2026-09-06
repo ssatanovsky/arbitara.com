@@ -494,6 +494,27 @@
   })();
 
   /* ==========================================================================
+     Competitive rings legend — each row's "Scope and gap" button reveals its
+     own detail paragraph (investor.html #competitive). Independent toggles,
+     not an accordion — no need to collapse siblings. Static markup, so no
+     ARB_READY needed.
+     ========================================================================== */
+  (function initRingsLegend() {
+    var toggles = document.querySelectorAll(".rl-toggle");
+    if (!toggles.length) return;
+    [].forEach.call(toggles, function (btn) {
+      var detail = btn.nextElementSibling;
+      if (!detail || !detail.classList.contains("rl-detail")) return;
+      btn.addEventListener("click", function () {
+        var open = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", String(!open));
+        detail.hidden = open;
+        btn.textContent = open ? "Scope and gap" : "Hide";
+      });
+    });
+  })();
+
+  /* ==========================================================================
      Contact form — one form for the whole spectrum of interest, from "keep
      me posted" to "ready to buy". Submits through the same sender as the
      gate/waitlist, so it's one list, not two.
