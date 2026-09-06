@@ -112,6 +112,9 @@
     ".arb-img-btn:hover{color:var(--ink);background:var(--paper-2);}" +
     ".arb-img-btn svg{width:15px;height:15px;}" +
     ".arb-img-btn.arb-img-busy{opacity:.4;pointer-events:none;}" +
+    ".arb-img-rm{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;border:none;background:none;color:var(--faint);cursor:pointer;}" +
+    ".arb-img-rm:hover{color:var(--danger);background:var(--paper-2);}" +
+    ".arb-img-rm svg{width:13px;height:13px;}" +
     ".arb-img-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;}" +
     /* gated-content manager modal */
     ".arb-gated-modal{position:fixed;inset:0;z-index:400;background:rgba(20,18,14,.55);display:flex;align-items:center;justify-content:center;padding:24px;}" +
@@ -422,6 +425,20 @@
     var bar = document.createElement("div");
     bar.className = "arb-sec-toolbar";
     hero.appendChild(bar);
+    var heroRmBtn = document.createElement("button");
+    heroRmBtn.type = "button";
+    heroRmBtn.className = "arb-img-rm";
+    heroRmBtn.title = "Remove hero photo";
+    heroRmBtn.innerHTML = ICON_X;
+    heroRmBtn.hidden = !hero.classList.contains("hero-photo");
+    heroRmBtn.addEventListener("click", function () {
+      pending.hero.image = "";
+      hero.classList.remove("hero-photo");
+      var host = document.getElementById("heroBg");
+      if (host) host.innerHTML = "";
+      heroRmBtn.hidden = true;
+      markDirty();
+    });
     mountImageUpload(bar, "hero", "Upload hero photo", function (path, dataUrl) {
       pending.hero.image = path;
       hero.classList.add("hero-photo");
@@ -431,8 +448,10 @@
         if (!img) { img = document.createElement("img"); img.alt = ""; host.appendChild(img); }
         img.setAttribute("src", dataUrl);
       }
+      heroRmBtn.hidden = false;
       markDirty();
     });
+    bar.appendChild(heroRmBtn);
   }
 
   var dragSrc = null;
@@ -474,11 +493,25 @@
 
     var head = sec.querySelector(".head");
     if (head) {
+      var imgRmBtn = document.createElement("button");
+      imgRmBtn.type = "button";
+      imgRmBtn.className = "arb-img-rm";
+      imgRmBtn.title = "Remove illustration";
+      imgRmBtn.innerHTML = ICON_X;
+      imgRmBtn.hidden = !sec.querySelector(".head-figure");
+      imgRmBtn.addEventListener("click", function () {
+        (pending.sectionText[id] = pending.sectionText[id] || {}).image = "";
+        setSectionImagePreview(sec, head, null);
+        imgRmBtn.hidden = true;
+        markDirty();
+      });
       mountImageUpload(bar, id, "Upload illustration", function (path, dataUrl) {
         (pending.sectionText[id] = pending.sectionText[id] || {}).image = path;
         setSectionImagePreview(sec, head, dataUrl);
+        imgRmBtn.hidden = false;
         markDirty();
       });
+      bar.appendChild(imgRmBtn);
     }
 
     var checkbox = bar.querySelector("input");
