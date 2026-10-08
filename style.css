@@ -386,7 +386,7 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
 .contact-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: clamp(28px, 4vw, 40px) clamp(24px, 4vw, 38px); max-width: 640px; transition: box-shadow .3s ease; }
 .contact-card.flash { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent), var(--shadow); }
 .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.cf-field { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+.cf-field { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; min-width: 0; }
 .cf-row .cf-field { margin-top: 0; }
 .contact-card > .cf-row:first-child { margin-top: 0; }
 .cf-field > label { font-family: var(--sans); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
@@ -575,10 +575,18 @@ section { padding: clamp(64px, 9vw, 118px) 0; position: relative; }
   .ai-illo-list { flex: none; width: 100%; max-width: 360px; margin-top: 0; }
   .ai-illo-list.right { text-align: left; }
   .ai-illo-list.right li:not(.head-label) { flex-direction: row; }
+  /* Stacked full-width cards can't slide in sideways — the pre-reveal
+     translateX(30px) pushes .right past the viewport and the whole page
+     scrolls horizontally until the section is reached. Rise in instead. */
+  .ai-illo-list.left, .ai-illo-list.right { transform: translateY(16px); }
   /* flex:none on .ai-illo-steps (base rule) refuses to shrink, so without an
      explicit width here it just overflows past .ai-illo-bottom instead of
      ever getting narrow enough to trigger its own wrap. */
   .ai-illo-steps { flex: none; width: 100%; flex-wrap: wrap; justify-content: center; }
+}
+@media (max-width: 359px) {
+  /* Brand + tagline + three icon buttons don't fit at 320px. */
+  .brand small { display: none; }
 }
 @media (max-width: 480px) {
   .venn-circle { width: 84px; height: 84px; }
